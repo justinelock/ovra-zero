@@ -28,10 +28,15 @@ func NewInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *InfoLogic {
 
 func (l *InfoLogic) Info(req *types.IdReq) (resp *types.NoticeBase, err error) {
 	resp = new(types.NoticeBase)
+	// 1. 按 notice_id 主键查询
 	sysNotice, err := l.svcCtx.Dal.SysNoticeDal.SelectById(l.ctx, req.Id)
 	if err != nil {
 		return nil, errx.GORMErr(err)
 	}
-	err = copier.Copy(&resp, sysNotice)
-	return
+	// 2. 映射为 API 响应（公告内容为 []byte，需转 string）
+	if err = copier.Copy(resp, sysNotice); err != nil {
+		return nil, err
+	}
+	resp.NoticeContent = string(sysNotice.NoticeContent)
+	return resp, nil
 }

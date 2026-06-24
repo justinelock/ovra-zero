@@ -56,9 +56,13 @@ func (l *SysNoticeDal) Delete(ctx context.Context, id string) (err error) {
 
 func (l *SysNoticeDal) DeleteBatch(ctx context.Context, ids []string) (err error) {
 	su := l.query.SysNotice
-	_, err = su.WithContext(ctx).Where(su.NoticeID.In(ids...)).Delete()
+	info, err := su.WithContext(ctx).Where(su.NoticeID.In(ids...)).Delete()
 	if err != nil {
 		return errx.GORMErr(err)
+	}
+	// 未命中任何行时 GORM 不报错，需显式返回「数据不存在」避免前端误报删除成功
+	if info.RowsAffected == 0 {
+		return errx.BizErr("数据不存在")
 	}
 	return
 }
