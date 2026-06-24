@@ -363,8 +363,8 @@ type ModifyTenantPackageReq struct {
 
 type ModifyTenantReq struct {
 	TenantBase
-	UserName string `json:"username"`
-	Password string `json:"password"`
+	UserName string `json:"username,optional"`
+	Password string `json:"password,optional"`
 }
 
 type NoticeBase struct {

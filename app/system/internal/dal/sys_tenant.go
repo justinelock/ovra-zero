@@ -48,7 +48,7 @@ func (l *SysTenantDal) Update(ctx context.Context, param *model.SysTenant) (err 
 
 func (l *SysTenantDal) UpdateStatus(ctx context.Context, id string, status string) (err error) {
 	su := l.query.SysTenant
-	if _, err = su.WithContext(ctx).Where(su.TenantID.Eq(id)).Update(su.Status, status); err != nil {
+	if _, err = su.WithContext(ctx).Where(su.ID.Eq(id)).Update(su.Status, status); err != nil {
 		return errx.GORMErr(err)
 	}
 	return
@@ -56,7 +56,7 @@ func (l *SysTenantDal) UpdateStatus(ctx context.Context, id string, status strin
 
 func (l *SysTenantDal) Delete(ctx context.Context, id string) (err error) {
 	su := l.query.SysTenant
-	_, err = su.WithContext(ctx).Where(su.TenantID.Eq(id)).Delete()
+	_, err = su.WithContext(ctx).Where(su.ID.Eq(id)).Delete()
 	if err != nil {
 		return errx.GORMErr(err)
 	}
@@ -65,7 +65,7 @@ func (l *SysTenantDal) Delete(ctx context.Context, id string) (err error) {
 
 func (l *SysTenantDal) DeleteBatch(ctx context.Context, ids []string) (err error) {
 	su := l.query.SysTenant
-	_, err = su.WithContext(ctx).Where(su.TenantID.In(ids...)).Delete()
+	_, err = su.WithContext(ctx).Where(su.ID.In(ids...)).Delete()
 	if err != nil {
 		return errx.GORMErr(err)
 	}
@@ -75,7 +75,7 @@ func (l *SysTenantDal) DeleteBatch(ctx context.Context, ids []string) (err error
 func (l *SysTenantDal) SelectById(ctx context.Context, id string) (info *model.SysTenant, err error) {
 	info = new(model.SysTenant)
 	su := l.query.SysTenant
-	data, err := su.WithContext(ctx).Where(su.TenantID.Eq(id)).First()
+	data, err := su.WithContext(ctx).Where(su.ID.Eq(id)).First()
 	if err != nil {
 		return nil, errx.GORMErr(err)
 	}

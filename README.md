@@ -112,6 +112,8 @@ admin/admin123
 
 ## 快速启动：本地开发
 
+详细配置与启动说明见 [docs/local-dev.md](docs/local-dev.md)。
+
 ### 1. 克隆项目
 
 ```sh
@@ -374,6 +376,8 @@ make db-system
 ```text
 etc/dev
 ```
+
+本地开发详细说明见 [docs/local-dev.md](docs/local-dev.md)。
 
 本地 k3d/Helm 配置模板：
 

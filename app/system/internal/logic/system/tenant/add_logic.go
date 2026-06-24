@@ -34,6 +34,12 @@ func NewAddLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AddLogic {
 }
 
 func (l *AddLogic) Add(req *types.ModifyTenantReq) error {
+	if req.UserName == "" {
+		return errx.BizErr("用户名不能为空")
+	}
+	if req.Password == "" {
+		return errx.BizErr("密码不能为空")
+	}
 	//获取当前最大的租户编号
 	tenantID, err := l.generateUniqueTenantID()
 	if err != nil {

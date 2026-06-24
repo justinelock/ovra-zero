@@ -9,11 +9,11 @@ import "../base.api"
 
 type (
 
-    // 创建和更新共用结构
+    // 创建和更新共用结构；username/password 仅新增租户时用于创建管理员账号
     ModifyTenantReq {
         TenantBase
-        UserName string `json:"username"`
-        Password string `json:"password"`
+        UserName string `json:"username,optional"`
+        Password string `json:"password,optional"`
     }
 
         // 请求过滤参数
