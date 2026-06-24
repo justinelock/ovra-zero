@@ -1,0 +1,63 @@
+syntax = "v1"
+
+info(
+    desc: "业务用户团队管理（占位接口，待接业务表）"
+    author: "ovra"
+)
+
+import "../base.api"
+
+type (
+    MemberTeamQuery {
+        Keyword string `form:"keyword,optional"`
+        Status  string `form:"status,optional"`
+    }
+    PageSetMemberTeamReq {
+        PageReq
+        MemberTeamQuery
+    }
+    MemberTeamStatsResp {
+        Level1Count  int64  `json:"level1Count"`
+        Level2Count  int64  `json:"level2Count"`
+        Level3Count  int64  `json:"level3Count"`
+        Level4Count  int64  `json:"level4Count"`
+        Level5Count  int64  `json:"level5Count"`
+        TotalMembers int64  `json:"totalMembers"`
+        TotalBalance string `json:"totalBalance"`
+    }
+    MemberTeamItem {
+        Id              string `json:"id"`
+        UserName        string `json:"userName"`
+        Balance         string `json:"balance"`
+        RealName        string `json:"realName"`
+        ParentAgent     string `json:"parentAgent"`
+        AgentLevel1     string `json:"agentLevel1"`
+        AgentLevel2     string `json:"agentLevel2"`
+        AgentLevel3     string `json:"agentLevel3"`
+        AgentLevel4     string `json:"agentLevel4"`
+        AgentLevel5     string `json:"agentLevel5"`
+        AgentTier       string `json:"agentTier"`
+        SubTeamCount    string `json:"subTeamCount"`
+        SubTeamBalance  string `json:"subTeamBalance"`
+        Status          string `json:"status"`
+        RegisterTime    string `json:"registerTime"`
+    }
+    PageSetMemberTeamResp {
+        Rows  []*MemberTeamItem `json:"rows"`
+        Total int64              `json:"total"`
+    }
+)
+
+@server(
+    tags: "业务用户"
+    group: member/team
+    prefix: /member/team
+    middleware: Auth, Sign
+)
+service System {
+    @handler Stats
+    get /stats (MemberTeamQuery) returns (MemberTeamStatsResp)
+
+    @handler PageSet
+    get /list (PageSetMemberTeamReq) returns (PageSetMemberTeamResp)
+}

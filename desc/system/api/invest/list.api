@@ -1,0 +1,54 @@
+syntax = "v1"
+
+info(
+    desc: "投信产品列表（占位接口，待接业务表）"
+    author: "ovra"
+)
+
+import "../base.api"
+
+type (
+    InvestListQuery {
+        Keyword string `form:"keyword,optional"`
+        Status  string `form:"status,optional"`
+        SoldOut string `form:"soldOut,optional"`
+    }
+    PageSetInvestListReq {
+        PageReq
+        InvestListQuery
+    }
+    InvestListItem {
+        Id               string `json:"id"`
+        InvestCode       string `json:"investCode"`
+        InvestName       string `json:"investName"`
+        Logo             string `json:"logo"`
+        ProductDesc      string `json:"productDesc"`
+        Status           string `json:"status"`
+        SoldOut          string `json:"soldOut"`
+        SortOrder        string `json:"sortOrder"`
+        YieldDisplay     string `json:"yieldDisplay"`
+        YieldRate        string `json:"yieldRate"`
+        InvestableAmount string `json:"investableAmount"`
+        MinAddAmount     string `json:"minAddAmount"`
+        Period           string `json:"period"`
+        YieldType        string `json:"yieldType"`
+        ExpireDate       string `json:"expireDate"`
+        CreateTime       string `json:"createTime"`
+        UpdateTime       string `json:"updateTime"`
+    }
+    PageSetInvestListResp {
+        Rows  []*InvestListItem `json:"rows"`
+        Total int64             `json:"total"`
+    }
+)
+
+@server(
+    tags: "投信管理"
+    group: invest/list
+    prefix: /invest/list
+    middleware: Auth, Sign
+)
+service System {
+    @handler PageSet
+    get /list (PageSetInvestListReq) returns (PageSetInvestListResp)
+}

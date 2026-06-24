@@ -1,0 +1,52 @@
+syntax = "v1"
+
+info(
+    desc: "账户流水列表（占位接口，待接业务表）"
+    author: "ovra"
+)
+
+import "../base.api"
+
+type (
+    FundStatementQuery {
+        Keyword     string `form:"keyword,optional"`
+        TradeType   string `form:"tradeType,optional"`
+        TradeStatus string `form:"tradeStatus,optional"`
+        Currency    string `form:"currency,optional"`
+    }
+    PageSetFundStatementReq {
+        PageReq
+        FundStatementQuery
+    }
+    FundStatementItem {
+        Id            string `json:"id"`
+        UserName      string `json:"userName"`
+        PhoneNumber   string `json:"phoneNumber"`
+        RealName      string `json:"realName"`
+        AccountType   string `json:"accountType"`
+        TradeType     string `json:"tradeType"`
+        ChangeAmount  string `json:"changeAmount"`
+        BalanceBefore string `json:"balanceBefore"`
+        BalanceAfter  string `json:"balanceAfter"`
+        TradeStatus   string `json:"tradeStatus"`
+        Currency      string `json:"currency"`
+        TradeDesc     string `json:"tradeDesc"`
+        Remark        string `json:"remark"`
+        TradeTime     string `json:"tradeTime"`
+    }
+    PageSetFundStatementResp {
+        Rows  []*FundStatementItem `json:"rows"`
+        Total int64                `json:"total"`
+    }
+)
+
+@server(
+    tags: "资金管理"
+    group: fund/statement
+    prefix: /fund/statement
+    middleware: Auth, Sign
+)
+service System {
+    @handler PageSet
+    get /list (PageSetFundStatementReq) returns (PageSetFundStatementResp)
+}

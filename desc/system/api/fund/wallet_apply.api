@@ -1,0 +1,48 @@
+syntax = "v1"
+
+info(
+    desc: "钱包申请列表（占位接口，待接业务表）"
+    author: "ovra"
+)
+
+import "../base.api"
+
+type (
+    FundWalletApplyQuery {
+        Keyword     string `form:"keyword,optional"`
+        Status      string `form:"status,optional"`
+        AccountType string `form:"accountType,optional"`
+    }
+    PageSetFundWalletApplyReq {
+        PageReq
+        FundWalletApplyQuery
+    }
+    FundWalletApplyItem {
+        Id           string `json:"id"`
+        UserName     string `json:"userName"`
+        RealName     string `json:"realName"`
+        PhoneNumber  string `json:"phoneNumber"`
+        AccountType  string `json:"accountType"`
+        Status       string `json:"status"`
+        RiskScore    string `json:"riskScore"`
+        AuditOpinion string `json:"auditOpinion"`
+        ApplyTime    string `json:"applyTime"`
+        AuditTime    string `json:"auditTime"`
+        Auditor      string `json:"auditor"`
+    }
+    PageSetFundWalletApplyResp {
+        Rows  []*FundWalletApplyItem `json:"rows"`
+        Total int64                  `json:"total"`
+    }
+)
+
+@server(
+    tags: "资金管理"
+    group: fund/walletApply
+    prefix: /fund/walletApply
+    middleware: Auth, Sign
+)
+service System {
+    @handler PageSet
+    get /list (PageSetFundWalletApplyReq) returns (PageSetFundWalletApplyResp)
+}

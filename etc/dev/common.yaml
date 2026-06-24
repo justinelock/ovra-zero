@@ -50,7 +50,7 @@ Data:
     Database: ovra_zero
     Ssl: false
   Redis:
-    Pass: redis123456
+    Pass: redis1234
     Host: 127.0.0.1:6379
     Type: node
     Tls: false

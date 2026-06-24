@@ -1,0 +1,46 @@
+syntax = "v1"
+
+info(
+    desc: "充值管理列表（占位接口，待接业务表）"
+    author: "ovra"
+)
+
+import "../base.api"
+
+type (
+    FundRechargeQuery {
+        Keyword string `form:"keyword,optional"`
+        Status  string `form:"status,optional"`
+    }
+    PageSetFundRechargeReq {
+        PageReq
+        FundRechargeQuery
+    }
+    FundRechargeItem {
+        Id             string `json:"id"`
+        UserName       string `json:"userName"`
+        PhoneNumber    string `json:"phoneNumber"`
+        RealName       string `json:"realName"`
+        RechargeAmount string `json:"rechargeAmount"`
+        Status         string `json:"status"`
+        RechargeImage  string `json:"rechargeImage"`
+        Remark         string `json:"remark"`
+        CreateTime     string `json:"createTime"`
+        UpdateTime     string `json:"updateTime"`
+    }
+    PageSetFundRechargeResp {
+        Rows  []*FundRechargeItem `json:"rows"`
+        Total int64                `json:"total"`
+    }
+)
+
+@server(
+    tags: "资金管理"
+    group: fund/recharge
+    prefix: /fund/recharge
+    middleware: Auth, Sign
+)
+service System {
+    @handler PageSet
+    get /list (PageSetFundRechargeReq) returns (PageSetFundRechargeResp)
+}

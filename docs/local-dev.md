@@ -432,6 +432,7 @@ VITE_GLOB_WEBSOCKET_ENABLE=false
 
 ## 相关文档
 
+- [业务 API 接口文档](./biz-api.md)（用户管理～K线管理，含响应 JSON 占位）
 - [项目 README](../README.md)
 - [Helm / k3d 部署](../deploy/helm/ovra-zero/README.md)
 - [配置目录说明](../etc/README.md)

@@ -1,0 +1,54 @@
+syntax = "v1"
+
+info(
+    desc: "业务用户登录记录（占位接口，待接业务表）"
+    author: "ovra"
+)
+
+import "../base.api"
+
+type (
+    MemberLoginLogQuery {
+        Keyword     string `form:"keyword,optional"`
+        LoginResult string `form:"loginResult,optional"`
+        LoginMethod string `form:"loginMethod,optional"`
+        RiskLevel   string `form:"riskLevel,optional"`
+        IpType      string `form:"ipType,optional"`
+        TimeRange   string `form:"timeRange,optional"`
+        FailReason  string `form:"failReason,optional"`
+        DeviceType  string `form:"deviceType,optional"`
+        Browser     string `form:"browser,optional"`
+    }
+    PageSetMemberLoginLogReq {
+        PageReq
+        MemberLoginLogQuery
+    }
+    MemberLoginLogItem {
+        Id           string `json:"id"`
+        UserName     string `json:"userName"`
+        DeviceId     string `json:"deviceId"`
+        LoginTime    string `json:"loginTime"`
+        LoginIp      string `json:"loginIp"`
+        LoginLocation string `json:"loginLocation"`
+        LoginMethod  string `json:"loginMethod"`
+        LoginResult  string `json:"loginResult"`
+        FailReason   string `json:"failReason"`
+        RiskLevel    string `json:"riskLevel"`
+        RiskDetail   string `json:"riskDetail"`
+    }
+    PageSetMemberLoginLogResp {
+        Rows  []*MemberLoginLogItem `json:"rows"`
+        Total int64                  `json:"total"`
+    }
+)
+
+@server(
+    tags: "业务用户"
+    group: member/loginLog
+    prefix: /member/loginLog
+    middleware: Auth, Sign
+)
+service System {
+    @handler PageSet
+    get /list (PageSetMemberLoginLogReq) returns (PageSetMemberLoginLogResp)
+}

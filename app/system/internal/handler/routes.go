@@ -8,11 +8,29 @@ import (
 
 	devencrypt "ovra/app/system/internal/handler/dev/encrypt"
 	devsse "ovra/app/system/internal/handler/dev/sse"
+	fundrecharge "ovra/app/system/internal/handler/fund/recharge"
+	fundstatement "ovra/app/system/internal/handler/fund/statement"
+	fundwalletApply "ovra/app/system/internal/handler/fund/walletApply"
+	fundwithdraw "ovra/app/system/internal/handler/fund/withdraw"
 	health "ovra/app/system/internal/handler/health"
+	investlist "ovra/app/system/internal/handler/invest/list"
+	investposition "ovra/app/system/internal/handler/invest/position"
+	klinekline "ovra/app/system/internal/handler/kline/kline"
+	memberkyc "ovra/app/system/internal/handler/member/kyc"
+	memberloginLog "ovra/app/system/internal/handler/member/loginLog"
+	memberreport "ovra/app/system/internal/handler/member/report"
+	memberteam "ovra/app/system/internal/handler/member/team"
+	memberuser "ovra/app/system/internal/handler/member/user"
+	memberwallet "ovra/app/system/internal/handler/member/wallet"
 	monitorlogininfor "ovra/app/system/internal/handler/monitor/logininfor"
 	monitormonitor "ovra/app/system/internal/handler/monitor/monitor"
 	monitoronline "ovra/app/system/internal/handler/monitor/online"
 	monitoroperLog "ovra/app/system/internal/handler/monitor/operLog"
+	notifynews "ovra/app/system/internal/handler/notify/news"
+	notifypublish "ovra/app/system/internal/handler/notify/publish"
+	productconfig "ovra/app/system/internal/handler/product/config"
+	producthistory "ovra/app/system/internal/handler/product/history"
+	productrealtime "ovra/app/system/internal/handler/product/realtime"
 	resourceoss "ovra/app/system/internal/handler/resource/oss"
 	resourceossconfig "ovra/app/system/internal/handler/resource/oss/config"
 	system_config "ovra/app/system/internal/handler/system/_config"
@@ -27,6 +45,9 @@ import (
 	systemtenant "ovra/app/system/internal/handler/system/tenant"
 	systemtenant_package "ovra/app/system/internal/handler/system/tenant/_package"
 	systemuser "ovra/app/system/internal/handler/system/user"
+	tradecontract "ovra/app/system/internal/handler/trade/contract"
+	tradedeal "ovra/app/system/internal/handler/trade/deal"
+	tradeentrust "ovra/app/system/internal/handler/trade/entrust"
 	"ovra/app/system/internal/svc"
 
 	"github.com/zeromicro/go-zero/rest"
@@ -806,5 +827,309 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			}...,
 		),
 		rest.WithPrefix("/test/api/encrypt"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Auth, serverCtx.Sign},
+			[]rest.Route{
+				{
+					Method:  http.MethodGet,
+					Path:    "/stats",
+					Handler: memberuser.StatsHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/list",
+					Handler: memberuser.PageSetHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/member/user"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Auth, serverCtx.Sign},
+			[]rest.Route{
+				{
+					Method:  http.MethodGet,
+					Path:    "/list",
+					Handler: memberkyc.PageSetHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/member/kyc"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Auth, serverCtx.Sign},
+			[]rest.Route{
+				{
+					Method:  http.MethodGet,
+					Path:    "/list",
+					Handler: memberwallet.PageSetHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/member/wallet"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Auth, serverCtx.Sign},
+			[]rest.Route{
+				{
+					Method:  http.MethodGet,
+					Path:    "/list",
+					Handler: memberreport.PageSetHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/member/report"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Auth, serverCtx.Sign},
+			[]rest.Route{
+				{
+					Method:  http.MethodGet,
+					Path:    "/stats",
+					Handler: memberteam.StatsHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/list",
+					Handler: memberteam.PageSetHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/member/team"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Auth, serverCtx.Sign},
+			[]rest.Route{
+				{
+					Method:  http.MethodGet,
+					Path:    "/list",
+					Handler: memberloginLog.PageSetHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/member/loginLog"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Auth, serverCtx.Sign},
+			[]rest.Route{
+				{
+					Method:  http.MethodGet,
+					Path:    "/list",
+					Handler: fundwalletApply.PageSetHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/fund/walletApply"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Auth, serverCtx.Sign},
+			[]rest.Route{
+				{
+					Method:  http.MethodGet,
+					Path:    "/list",
+					Handler: fundstatement.PageSetHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/fund/statement"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Auth, serverCtx.Sign},
+			[]rest.Route{
+				{
+					Method:  http.MethodGet,
+					Path:    "/list",
+					Handler: fundwithdraw.PageSetHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/fund/withdraw"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Auth, serverCtx.Sign},
+			[]rest.Route{
+				{
+					Method:  http.MethodGet,
+					Path:    "/list",
+					Handler: fundrecharge.PageSetHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/fund/recharge"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Auth, serverCtx.Sign},
+			[]rest.Route{
+				{
+					Method:  http.MethodGet,
+					Path:    "/list",
+					Handler: tradecontract.PageSetHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/trade/contract"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Auth, serverCtx.Sign},
+			[]rest.Route{
+				{
+					Method:  http.MethodGet,
+					Path:    "/list",
+					Handler: tradeentrust.PageSetHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/trade/entrust"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Auth, serverCtx.Sign},
+			[]rest.Route{
+				{
+					Method:  http.MethodGet,
+					Path:    "/list",
+					Handler: tradedeal.PageSetHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/trade/deal"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Auth, serverCtx.Sign},
+			[]rest.Route{
+				{
+					Method:  http.MethodGet,
+					Path:    "/list",
+					Handler: investposition.PageSetHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/invest/position"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Auth, serverCtx.Sign},
+			[]rest.Route{
+				{
+					Method:  http.MethodGet,
+					Path:    "/list",
+					Handler: investlist.PageSetHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/invest/list"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Auth, serverCtx.Sign},
+			[]rest.Route{
+				{
+					Method:  http.MethodGet,
+					Path:    "/list",
+					Handler: productconfig.PageSetHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/product/config"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Auth, serverCtx.Sign},
+			[]rest.Route{
+				{
+					Method:  http.MethodGet,
+					Path:    "/list",
+					Handler: productrealtime.PageSetHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/product/realtime"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Auth, serverCtx.Sign},
+			[]rest.Route{
+				{
+					Method:  http.MethodGet,
+					Path:    "/list",
+					Handler: producthistory.PageSetHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/product/history"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Auth, serverCtx.Sign},
+			[]rest.Route{
+				{
+					Method:  http.MethodGet,
+					Path:    "/list",
+					Handler: notifynews.PageSetHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/notify/news"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Auth, serverCtx.Sign},
+			[]rest.Route{
+				{
+					Method:  http.MethodGet,
+					Path:    "/list",
+					Handler: notifypublish.PageSetHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/notify/publish"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Auth, serverCtx.Sign},
+			[]rest.Route{
+				{
+					Method:  http.MethodGet,
+					Path:    "/list",
+					Handler: klinekline.PageSetHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/kline/main"),
 	)
 }

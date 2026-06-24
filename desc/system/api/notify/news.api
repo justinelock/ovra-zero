@@ -1,0 +1,45 @@
+syntax = "v1"
+
+info(
+    desc: "市场新闻列表（占位接口，待接业务表）"
+    author: "ovra"
+)
+
+import "../base.api"
+
+type (
+    NotifyNewsQuery {
+        Keyword string `form:"keyword,optional"`
+        Source  string `form:"source,optional"`
+    }
+    PageSetNotifyNewsReq {
+        PageReq
+        NotifyNewsQuery
+    }
+    NotifyNewsItem {
+        Id          string `json:"id"`
+        Title       string `json:"title"`
+        Summary     string `json:"summary"`
+        Content     string `json:"content"`
+        Source      string `json:"source"`
+        Link        string `json:"link"`
+        Image       string `json:"image"`
+        ViewCount   string `json:"viewCount"`
+        PublishTime string `json:"publishTime"`
+    }
+    PageSetNotifyNewsResp {
+        Rows  []*NotifyNewsItem `json:"rows"`
+        Total int64             `json:"total"`
+    }
+)
+
+@server(
+    tags: "通知管理"
+    group: notify/news
+    prefix: /notify/news
+    middleware: Auth, Sign
+)
+service System {
+    @handler PageSet
+    get /list (PageSetNotifyNewsReq) returns (PageSetNotifyNewsResp)
+}

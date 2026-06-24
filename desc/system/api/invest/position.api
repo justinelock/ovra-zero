@@ -1,0 +1,52 @@
+syntax = "v1"
+
+info(
+    desc: "投信持仓订单列表（占位接口，待接业务表）"
+    author: "ovra"
+)
+
+import "../base.api"
+
+type (
+    InvestPositionQuery {
+        Keyword        string `form:"keyword,optional"`
+        InvestCode     string `form:"investCode,optional"`
+        PositionStatus string `form:"positionStatus,optional"`
+    }
+    PageSetInvestPositionReq {
+        PageReq
+        InvestPositionQuery
+    }
+    InvestPositionItem {
+        Id             string `json:"id"`
+        UserName       string `json:"userName"`
+        RealName       string `json:"realName"`
+        InvestCode     string `json:"investCode"`
+        PositionAmount string `json:"positionAmount"`
+        BuyDate        string `json:"buyDate"`
+        StartDate      string `json:"startDate"`
+        EndDate        string `json:"endDate"`
+        PeriodDays     string `json:"periodDays"`
+        FixedYieldRate string `json:"fixedYieldRate"`
+        PositionStatus string `json:"positionStatus"`
+        EndStatus      string `json:"endStatus"`
+        LastProfitDate string `json:"lastProfitDate"`
+        CreateTime     string `json:"createTime"`
+        UpdateTime     string `json:"updateTime"`
+    }
+    PageSetInvestPositionResp {
+        Rows  []*InvestPositionItem `json:"rows"`
+        Total int64                 `json:"total"`
+    }
+)
+
+@server(
+    tags: "投信管理"
+    group: invest/position
+    prefix: /invest/position
+    middleware: Auth, Sign
+)
+service System {
+    @handler PageSet
+    get /list (PageSetInvestPositionReq) returns (PageSetInvestPositionResp)
+}

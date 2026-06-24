@@ -1,0 +1,55 @@
+syntax = "v1"
+
+info(
+    desc: "合约订单列表（占位接口，待接业务表）"
+    author: "ovra"
+)
+
+import "../base.api"
+
+type (
+    TradeContractQuery {
+        Keyword   string `form:"keyword,optional"`
+        Status    string `form:"status,optional"`
+        Symbol    string `form:"symbol,optional"`
+        Direction string `form:"direction,optional"`
+    }
+    PageSetTradeContractReq {
+        PageReq
+        TradeContractQuery
+    }
+    TradeContractItem {
+        Id            string `json:"id"`
+        UserName      string `json:"userName"`
+        RealName      string `json:"realName"`
+        BalanceU      string `json:"balanceU"`
+        Symbol        string `json:"symbol"`
+        Direction     string `json:"direction"`
+        TradeAmount   string `json:"tradeAmount"`
+        ActualProfit  string `json:"actualProfit"`
+        Status        string `json:"status"`
+        DurationSec   string `json:"durationSec"`
+        OpenPrice     string `json:"openPrice"`
+        ClosePrice    string `json:"closePrice"`
+        OrderControl  string `json:"orderControl"`
+        ControlResult string `json:"controlResult"`
+        GlobalControl string `json:"globalControl"`
+        OpenTime      string `json:"openTime"`
+        SettleTime    string `json:"settleTime"`
+    }
+    PageSetTradeContractResp {
+        Rows  []*TradeContractItem `json:"rows"`
+        Total int64               `json:"total"`
+    }
+)
+
+@server(
+    tags: "订单管理"
+    group: trade/contract
+    prefix: /trade/contract
+    middleware: Auth, Sign
+)
+service System {
+    @handler PageSet
+    get /list (PageSetTradeContractReq) returns (PageSetTradeContractResp)
+}

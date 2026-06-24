@@ -1,0 +1,51 @@
+syntax = "v1"
+
+info(
+    desc: "业务用户钱包列表（占位接口，待接业务表）"
+    author: "ovra"
+)
+
+import "../base.api"
+
+type (
+    MemberWalletQuery {
+        Keyword      string `form:"keyword,optional"`
+        AccountType  string `form:"accountType,optional"`
+        Currency     string `form:"currency,optional"`
+        FrozenStatus string `form:"frozenStatus,optional"`
+    }
+    PageSetMemberWalletReq {
+        PageReq
+        MemberWalletQuery
+    }
+    MemberWalletItem {
+        Id            string `json:"id"`
+        UserName      string `json:"userName"`
+        PhoneNumber   string `json:"phoneNumber"`
+        RealName      string `json:"realName"`
+        AccountType   string `json:"accountType"`
+        Balance       string `json:"balance"`
+        FrozenAmount  string `json:"frozenAmount"`
+        Frozen        string `json:"frozen"`
+        Version       string `json:"version"`
+        Currency      string `json:"currency"`
+        LotteryCount  string `json:"lotteryCount"`
+        CreateTime    string `json:"createTime"`
+        UpdateTime    string `json:"updateTime"`
+    }
+    PageSetMemberWalletResp {
+        Rows  []*MemberWalletItem `json:"rows"`
+        Total int64               `json:"total"`
+    }
+)
+
+@server(
+    tags: "业务用户"
+    group: member/wallet
+    prefix: /member/wallet
+    middleware: Auth, Sign
+)
+service System {
+    @handler PageSet
+    get /list (PageSetMemberWalletReq) returns (PageSetMemberWalletResp)
+}

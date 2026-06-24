@@ -1,0 +1,50 @@
+syntax = "v1"
+
+info(
+    desc: "业务用户报表列表（占位接口，待接业务表）"
+    author: "ovra"
+)
+
+import "../base.api"
+
+type (
+    MemberReportQuery {
+        Keyword string `form:"keyword,optional"`
+        Level   string `form:"level,optional"`
+    }
+    PageSetMemberReportReq {
+        PageReq
+        MemberReportQuery
+    }
+    MemberReportItem {
+        Id            string `json:"id"`
+        UserName      string `json:"userName"`
+        RealName      string `json:"realName"`
+        Level         string `json:"level"`
+        Balance       string `json:"balance"`
+        TotalRecharge string `json:"totalRecharge"`
+        TotalWithdraw string `json:"totalWithdraw"`
+        RechargeDiff  string `json:"rechargeDiff"`
+        TotalProfit   string `json:"totalProfit"`
+        ParentInfo    string `json:"parentInfo"`
+        TeamCount     string `json:"teamCount"`
+        CreateTime    string `json:"createTime"`
+        LastLoginTime string `json:"lastLoginTime"`
+        LoginIp       string `json:"loginIp"`
+    }
+    PageSetMemberReportResp {
+        Rows  []*MemberReportItem `json:"rows"`
+        Total int64                `json:"total"`
+    }
+)
+
+@server(
+    tags: "业务用户"
+    group: member/report
+    prefix: /member/report
+    middleware: Auth, Sign
+)
+service System {
+    @handler PageSet
+    get /list (PageSetMemberReportReq) returns (PageSetMemberReportResp)
+}

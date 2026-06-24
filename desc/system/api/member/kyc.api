@@ -1,0 +1,47 @@
+syntax = "v1"
+
+info(
+    desc: "业务用户实名认证列表（占位接口，待接业务表）"
+    author: "ovra"
+)
+
+import "../base.api"
+
+type (
+    MemberKycQuery {
+        Keyword    string `form:"keyword,optional"`
+        AuthStatus string `form:"authStatus,optional"`
+    }
+    PageSetMemberKycReq {
+        PageReq
+        MemberKycQuery
+    }
+    MemberKycItem {
+        Id           string `json:"id"`
+        UserName     string `json:"userName"`
+        RealName     string `json:"realName"`
+        PhoneNumber  string `json:"phoneNumber"`
+        IdCardNo     string `json:"idCardNo"`
+        IdCardFront  string `json:"idCardFront"`
+        IdCardBack   string `json:"idCardBack"`
+        AuthStatus   string `json:"authStatus"`
+        RejectReason string `json:"rejectReason"`
+        SubmitTime   string `json:"submitTime"`
+        AuthTime     string `json:"authTime"`
+    }
+    PageSetMemberKycResp {
+        Rows  []*MemberKycItem `json:"rows"`
+        Total int64            `json:"total"`
+    }
+)
+
+@server(
+    tags: "业务用户"
+    group: member/kyc
+    prefix: /member/kyc
+    middleware: Auth, Sign
+)
+service System {
+    @handler PageSet
+    get /list (PageSetMemberKycReq) returns (PageSetMemberKycResp)
+}

@@ -1026,3 +1026,690 @@ type EncryptDemoResp struct {
 	Plain   string `json:"plain"`
 	Message string `json:"message"`
 }
+
+type MemberUserQuery struct {
+	Keyword    string `form:"keyword,optional"`
+	AuthStatus string `form:"authStatus,optional"`
+	Deleted    string `form:"deleted,optional"`
+}
+
+type PageSetMemberUserReq struct {
+	PageReq
+	MemberUserQuery
+}
+
+type MemberUserItem struct {
+	Id             string `json:"id"`
+	UserName       string `json:"userName"`
+	TotalBalance   string `json:"totalBalance"`
+	InvestPosition string `json:"investPosition"`
+	InvestDividend string `json:"investDividend"`
+	RealName       string `json:"realName"`
+	OnlineStatus   string `json:"onlineStatus"`
+	Status         string `json:"status"`
+	InviteCode     string `json:"inviteCode"`
+	CreateTime     string `json:"createTime"`
+	LastLoginTime  string `json:"lastLoginTime"`
+}
+
+type PageSetMemberUserResp struct {
+	Rows  []*MemberUserItem `json:"rows"`
+	Total int64             `json:"total"`
+}
+
+type MemberUserStatsResp struct {
+	TotalActiveSessions int64 `json:"totalActiveSessions"`
+}
+
+type MemberKycQuery struct {
+	Keyword    string `form:"keyword,optional"`
+	AuthStatus string `form:"authStatus,optional"`
+}
+
+type PageSetMemberKycReq struct {
+	PageReq
+	MemberKycQuery
+}
+
+type MemberKycItem struct {
+	Id           string `json:"id"`
+	UserName     string `json:"userName"`
+	RealName     string `json:"realName"`
+	PhoneNumber  string `json:"phoneNumber"`
+	IdCardNo     string `json:"idCardNo"`
+	IdCardFront  string `json:"idCardFront"`
+	IdCardBack   string `json:"idCardBack"`
+	AuthStatus   string `json:"authStatus"`
+	RejectReason string `json:"rejectReason"`
+	SubmitTime   string `json:"submitTime"`
+	AuthTime     string `json:"authTime"`
+}
+
+type PageSetMemberKycResp struct {
+	Rows  []*MemberKycItem `json:"rows"`
+	Total int64            `json:"total"`
+}
+
+type MemberWalletQuery struct {
+	Keyword      string `form:"keyword,optional"`
+	AccountType  string `form:"accountType,optional"`
+	Currency     string `form:"currency,optional"`
+	FrozenStatus string `form:"frozenStatus,optional"`
+}
+
+type PageSetMemberWalletReq struct {
+	PageReq
+	MemberWalletQuery
+}
+
+type MemberWalletItem struct {
+	Id           string `json:"id"`
+	UserName     string `json:"userName"`
+	PhoneNumber  string `json:"phoneNumber"`
+	RealName     string `json:"realName"`
+	AccountType  string `json:"accountType"`
+	Balance      string `json:"balance"`
+	FrozenAmount string `json:"frozenAmount"`
+	Frozen       string `json:"frozen"`
+	Version      string `json:"version"`
+	Currency     string `json:"currency"`
+	LotteryCount string `json:"lotteryCount"`
+	CreateTime   string `json:"createTime"`
+	UpdateTime   string `json:"updateTime"`
+}
+
+type PageSetMemberWalletResp struct {
+	Rows  []*MemberWalletItem `json:"rows"`
+	Total int64               `json:"total"`
+}
+
+type MemberReportQuery struct {
+	Keyword string `form:"keyword,optional"`
+	Level   string `form:"level,optional"`
+}
+
+type PageSetMemberReportReq struct {
+	PageReq
+	MemberReportQuery
+}
+
+type MemberReportItem struct {
+	Id            string `json:"id"`
+	UserName      string `json:"userName"`
+	RealName      string `json:"realName"`
+	Level         string `json:"level"`
+	Balance       string `json:"balance"`
+	TotalRecharge string `json:"totalRecharge"`
+	TotalWithdraw string `json:"totalWithdraw"`
+	RechargeDiff  string `json:"rechargeDiff"`
+	TotalProfit   string `json:"totalProfit"`
+	ParentInfo    string `json:"parentInfo"`
+	TeamCount     string `json:"teamCount"`
+	CreateTime    string `json:"createTime"`
+	LastLoginTime string `json:"lastLoginTime"`
+	LoginIp       string `json:"loginIp"`
+}
+
+type PageSetMemberReportResp struct {
+	Rows  []*MemberReportItem `json:"rows"`
+	Total int64               `json:"total"`
+}
+
+type MemberTeamQuery struct {
+	Keyword string `form:"keyword,optional"`
+	Status  string `form:"status,optional"`
+}
+
+type PageSetMemberTeamReq struct {
+	PageReq
+	MemberTeamQuery
+}
+
+type MemberTeamStatsResp struct {
+	Level1Count  int64  `json:"level1Count"`
+	Level2Count  int64  `json:"level2Count"`
+	Level3Count  int64  `json:"level3Count"`
+	Level4Count  int64  `json:"level4Count"`
+	Level5Count  int64  `json:"level5Count"`
+	TotalMembers int64  `json:"totalMembers"`
+	TotalBalance string `json:"totalBalance"`
+}
+
+type MemberTeamItem struct {
+	Id             string `json:"id"`
+	UserName       string `json:"userName"`
+	Balance        string `json:"balance"`
+	RealName       string `json:"realName"`
+	ParentAgent    string `json:"parentAgent"`
+	AgentLevel1    string `json:"agentLevel1"`
+	AgentLevel2    string `json:"agentLevel2"`
+	AgentLevel3    string `json:"agentLevel3"`
+	AgentLevel4    string `json:"agentLevel4"`
+	AgentLevel5    string `json:"agentLevel5"`
+	AgentTier      string `json:"agentTier"`
+	SubTeamCount   string `json:"subTeamCount"`
+	SubTeamBalance string `json:"subTeamBalance"`
+	Status         string `json:"status"`
+	RegisterTime   string `json:"registerTime"`
+}
+
+type PageSetMemberTeamResp struct {
+	Rows  []*MemberTeamItem `json:"rows"`
+	Total int64             `json:"total"`
+}
+
+type MemberLoginLogQuery struct {
+	Keyword     string `form:"keyword,optional"`
+	LoginResult string `form:"loginResult,optional"`
+	LoginMethod string `form:"loginMethod,optional"`
+	RiskLevel   string `form:"riskLevel,optional"`
+	IpType      string `form:"ipType,optional"`
+	TimeRange   string `form:"timeRange,optional"`
+	FailReason  string `form:"failReason,optional"`
+	DeviceType  string `form:"deviceType,optional"`
+	Browser     string `form:"browser,optional"`
+}
+
+type PageSetMemberLoginLogReq struct {
+	PageReq
+	MemberLoginLogQuery
+}
+
+type MemberLoginLogItem struct {
+	Id            string `json:"id"`
+	UserName      string `json:"userName"`
+	DeviceId      string `json:"deviceId"`
+	LoginTime     string `json:"loginTime"`
+	LoginIp       string `json:"loginIp"`
+	LoginLocation string `json:"loginLocation"`
+	LoginMethod   string `json:"loginMethod"`
+	LoginResult   string `json:"loginResult"`
+	FailReason    string `json:"failReason"`
+	RiskLevel     string `json:"riskLevel"`
+	RiskDetail    string `json:"riskDetail"`
+}
+
+type PageSetMemberLoginLogResp struct {
+	Rows  []*MemberLoginLogItem `json:"rows"`
+	Total int64                 `json:"total"`
+}
+
+type FundWalletApplyQuery struct {
+	Keyword     string `form:"keyword,optional"`
+	Status      string `form:"status,optional"`
+	AccountType string `form:"accountType,optional"`
+}
+
+type PageSetFundWalletApplyReq struct {
+	PageReq
+	FundWalletApplyQuery
+}
+
+type FundWalletApplyItem struct {
+	Id           string `json:"id"`
+	UserName     string `json:"userName"`
+	RealName     string `json:"realName"`
+	PhoneNumber  string `json:"phoneNumber"`
+	AccountType  string `json:"accountType"`
+	Status       string `json:"status"`
+	RiskScore    string `json:"riskScore"`
+	AuditOpinion string `json:"auditOpinion"`
+	ApplyTime    string `json:"applyTime"`
+	AuditTime    string `json:"auditTime"`
+	Auditor      string `json:"auditor"`
+}
+
+type PageSetFundWalletApplyResp struct {
+	Rows  []*FundWalletApplyItem `json:"rows"`
+	Total int64                  `json:"total"`
+}
+
+type FundStatementQuery struct {
+	Keyword     string `form:"keyword,optional"`
+	TradeType   string `form:"tradeType,optional"`
+	TradeStatus string `form:"tradeStatus,optional"`
+	Currency    string `form:"currency,optional"`
+}
+
+type PageSetFundStatementReq struct {
+	PageReq
+	FundStatementQuery
+}
+
+type FundStatementItem struct {
+	Id            string `json:"id"`
+	UserName      string `json:"userName"`
+	PhoneNumber   string `json:"phoneNumber"`
+	RealName      string `json:"realName"`
+	AccountType   string `json:"accountType"`
+	TradeType     string `json:"tradeType"`
+	ChangeAmount  string `json:"changeAmount"`
+	BalanceBefore string `json:"balanceBefore"`
+	BalanceAfter  string `json:"balanceAfter"`
+	TradeStatus   string `json:"tradeStatus"`
+	Currency      string `json:"currency"`
+	TradeDesc     string `json:"tradeDesc"`
+	Remark        string `json:"remark"`
+	TradeTime     string `json:"tradeTime"`
+}
+
+type PageSetFundStatementResp struct {
+	Rows  []*FundStatementItem `json:"rows"`
+	Total int64                `json:"total"`
+}
+
+type FundWithdrawQuery struct {
+	Keyword        string `form:"keyword,optional"`
+	WithdrawStatus string `form:"withdrawStatus,optional"`
+	WithdrawType   string `form:"withdrawType,optional"`
+}
+
+type PageSetFundWithdrawReq struct {
+	PageReq
+	FundWithdrawQuery
+}
+
+type FundWithdrawItem struct {
+	Id             string `json:"id"`
+	UserName       string `json:"userName"`
+	RealName       string `json:"realName"`
+	WithdrawAmount string `json:"withdrawAmount"`
+	UsdtAddress    string `json:"usdtAddress"`
+	WithdrawStatus string `json:"withdrawStatus"`
+	WithdrawType   string `json:"withdrawType"`
+	CreateTime     string `json:"createTime"`
+	UpdateTime     string `json:"updateTime"`
+}
+
+type PageSetFundWithdrawResp struct {
+	Rows  []*FundWithdrawItem `json:"rows"`
+	Total int64               `json:"total"`
+}
+
+type FundRechargeQuery struct {
+	Keyword string `form:"keyword,optional"`
+	Status  string `form:"status,optional"`
+}
+
+type PageSetFundRechargeReq struct {
+	PageReq
+	FundRechargeQuery
+}
+
+type FundRechargeItem struct {
+	Id             string `json:"id"`
+	UserName       string `json:"userName"`
+	PhoneNumber    string `json:"phoneNumber"`
+	RealName       string `json:"realName"`
+	RechargeAmount string `json:"rechargeAmount"`
+	Status         string `json:"status"`
+	RechargeImage  string `json:"rechargeImage"`
+	Remark         string `json:"remark"`
+	CreateTime     string `json:"createTime"`
+	UpdateTime     string `json:"updateTime"`
+}
+
+type PageSetFundRechargeResp struct {
+	Rows  []*FundRechargeItem `json:"rows"`
+	Total int64               `json:"total"`
+}
+
+type TradeContractQuery struct {
+	Keyword   string `form:"keyword,optional"`
+	Status    string `form:"status,optional"`
+	Symbol    string `form:"symbol,optional"`
+	Direction string `form:"direction,optional"`
+}
+
+type PageSetTradeContractReq struct {
+	PageReq
+	TradeContractQuery
+}
+
+type TradeContractItem struct {
+	Id            string `json:"id"`
+	UserName      string `json:"userName"`
+	RealName      string `json:"realName"`
+	BalanceU      string `json:"balanceU"`
+	Symbol        string `json:"symbol"`
+	Direction     string `json:"direction"`
+	TradeAmount   string `json:"tradeAmount"`
+	ActualProfit  string `json:"actualProfit"`
+	Status        string `json:"status"`
+	DurationSec   string `json:"durationSec"`
+	OpenPrice     string `json:"openPrice"`
+	ClosePrice    string `json:"closePrice"`
+	OrderControl  string `json:"orderControl"`
+	ControlResult string `json:"controlResult"`
+	GlobalControl string `json:"globalControl"`
+	OpenTime      string `json:"openTime"`
+	SettleTime    string `json:"settleTime"`
+}
+
+type PageSetTradeContractResp struct {
+	Rows  []*TradeContractItem `json:"rows"`
+	Total int64                `json:"total"`
+}
+
+type TradeEntrustQuery struct {
+	Keyword     string `form:"keyword,optional"`
+	OrderStatus string `form:"orderStatus,optional"`
+	MarketCode  string `form:"marketCode,optional"`
+}
+
+type PageSetTradeEntrustReq struct {
+	PageReq
+	TradeEntrustQuery
+}
+
+type TradeEntrustItem struct {
+	Id              string `json:"id"`
+	OrderNo         string `json:"orderNo"`
+	UserName        string `json:"userName"`
+	MarketCode      string `json:"marketCode"`
+	StockCode       string `json:"stockCode"`
+	OrderType       string `json:"orderType"`
+	EntrustPrice    string `json:"entrustPrice"`
+	EntrustQty      string `json:"entrustQty"`
+	DealQty         string `json:"dealQty"`
+	OrderStatus     string `json:"orderStatus"`
+	StopLossPrice   string `json:"stopLossPrice"`
+	PriceType       string `json:"priceType"`
+	PriceFloatRange string `json:"priceFloatRange"`
+	Validity        string `json:"validity"`
+	Fee             string `json:"fee"`
+	Direction       string `json:"direction"`
+	LimitPrice      string `json:"limitPrice"`
+	EntrustTime     string `json:"entrustTime"`
+}
+
+type PageSetTradeEntrustResp struct {
+	Rows  []*TradeEntrustItem `json:"rows"`
+	Total int64               `json:"total"`
+}
+
+type TradeDealQuery struct {
+	Keyword    string `form:"keyword,optional"`
+	MarketCode string `form:"marketCode,optional"`
+	DealType   string `form:"dealType,optional"`
+}
+
+type PageSetTradeDealReq struct {
+	PageReq
+	TradeDealQuery
+}
+
+type TradeDealItem struct {
+	Id         string `json:"id"`
+	DealNo     string `json:"dealNo"`
+	UserName   string `json:"userName"`
+	MarketCode string `json:"marketCode"`
+	StockCode  string `json:"stockCode"`
+	DealType   string `json:"dealType"`
+	DealPrice  string `json:"dealPrice"`
+	DealQty    string `json:"dealQty"`
+	DealAmount string `json:"dealAmount"`
+	Fee        string `json:"fee"`
+	DealTime   string `json:"dealTime"`
+}
+
+type PageSetTradeDealResp struct {
+	Rows  []*TradeDealItem `json:"rows"`
+	Total int64            `json:"total"`
+}
+
+type InvestPositionQuery struct {
+	Keyword        string `form:"keyword,optional"`
+	InvestCode     string `form:"investCode,optional"`
+	PositionStatus string `form:"positionStatus,optional"`
+}
+
+type PageSetInvestPositionReq struct {
+	PageReq
+	InvestPositionQuery
+}
+
+type InvestPositionItem struct {
+	Id             string `json:"id"`
+	UserName       string `json:"userName"`
+	RealName       string `json:"realName"`
+	InvestCode     string `json:"investCode"`
+	PositionAmount string `json:"positionAmount"`
+	BuyDate        string `json:"buyDate"`
+	StartDate      string `json:"startDate"`
+	EndDate        string `json:"endDate"`
+	PeriodDays     string `json:"periodDays"`
+	FixedYieldRate string `json:"fixedYieldRate"`
+	PositionStatus string `json:"positionStatus"`
+	EndStatus      string `json:"endStatus"`
+	LastProfitDate string `json:"lastProfitDate"`
+	CreateTime     string `json:"createTime"`
+	UpdateTime     string `json:"updateTime"`
+}
+
+type PageSetInvestPositionResp struct {
+	Rows  []*InvestPositionItem `json:"rows"`
+	Total int64                 `json:"total"`
+}
+
+type InvestListQuery struct {
+	Keyword string `form:"keyword,optional"`
+	Status  string `form:"status,optional"`
+	SoldOut string `form:"soldOut,optional"`
+}
+
+type PageSetInvestListReq struct {
+	PageReq
+	InvestListQuery
+}
+
+type InvestListItem struct {
+	Id               string `json:"id"`
+	InvestCode       string `json:"investCode"`
+	InvestName       string `json:"investName"`
+	Logo             string `json:"logo"`
+	ProductDesc      string `json:"productDesc"`
+	Status           string `json:"status"`
+	SoldOut          string `json:"soldOut"`
+	SortOrder        string `json:"sortOrder"`
+	YieldDisplay     string `json:"yieldDisplay"`
+	YieldRate        string `json:"yieldRate"`
+	InvestableAmount string `json:"investableAmount"`
+	MinAddAmount     string `json:"minAddAmount"`
+	Period           string `json:"period"`
+	YieldType        string `json:"yieldType"`
+	ExpireDate       string `json:"expireDate"`
+	CreateTime       string `json:"createTime"`
+	UpdateTime       string `json:"updateTime"`
+}
+
+type PageSetInvestListResp struct {
+	Rows  []*InvestListItem `json:"rows"`
+	Total int64             `json:"total"`
+}
+
+type ProductConfigQuery struct {
+	Keyword     string `form:"keyword,optional"`
+	ProductType string `form:"productType,optional"`
+	Status      string `form:"status,optional"`
+}
+
+type PageSetProductConfigReq struct {
+	PageReq
+	ProductConfigQuery
+}
+
+type ProductConfigItem struct {
+	Id           string `json:"id"`
+	ProductCode  string `json:"productCode"`
+	ProductAlias string `json:"productAlias"`
+	Symbol       string `json:"symbol"`
+	ProductName  string `json:"productName"`
+	ProductType  string `json:"productType"`
+	Market       string `json:"market"`
+	Odds         string `json:"odds"`
+	TradeTime    string `json:"tradeTime"`
+	Currencies   string `json:"currencies"`
+	Status       string `json:"status"`
+	CreateTime   string `json:"createTime"`
+	UpdateTime   string `json:"updateTime"`
+}
+
+type PageSetProductConfigResp struct {
+	Rows  []*ProductConfigItem `json:"rows"`
+	Total int64                `json:"total"`
+}
+
+type ProductRealtimeQuery struct {
+	Keyword     string `form:"keyword,optional"`
+	ProductCode string `form:"productCode,optional"`
+	Type        string `form:"type,optional"`
+}
+
+type PageSetProductRealtimeReq struct {
+	PageReq
+	ProductRealtimeQuery
+}
+
+type ProductRealtimeItem struct {
+	Id            string `json:"id"`
+	ProductCode   string `json:"productCode"`
+	TradeCode     string `json:"tradeCode"`
+	Name          string `json:"name"`
+	Type          string `json:"type"`
+	CurrentPrice  string `json:"currentPrice"`
+	ChangeAmount  string `json:"changeAmount"`
+	ChangePercent string `json:"changePercent"`
+	OpenPrice     string `json:"openPrice"`
+	HighPrice     string `json:"highPrice"`
+	LowPrice      string `json:"lowPrice"`
+	Volume        string `json:"volume"`
+	Turnover      string `json:"turnover"`
+	Direction     string `json:"direction"`
+	TradeDate     string `json:"tradeDate"`
+	UpdateTime    string `json:"updateTime"`
+}
+
+type PageSetProductRealtimeResp struct {
+	Rows  []*ProductRealtimeItem `json:"rows"`
+	Total int64                  `json:"total"`
+}
+
+type ProductHistoryQuery struct {
+	Keyword     string `form:"keyword,optional"`
+	ProductCode string `form:"productCode,optional"`
+	Market      string `form:"market,optional"`
+}
+
+type PageSetProductHistoryReq struct {
+	PageReq
+	ProductHistoryQuery
+}
+
+type ProductHistoryItem struct {
+	Id            string `json:"id"`
+	ProductCode   string `json:"productCode"`
+	ProductName   string `json:"productName"`
+	ProductType   string `json:"productType"`
+	Market        string `json:"market"`
+	TradeDate     string `json:"tradeDate"`
+	OpenPrice     string `json:"openPrice"`
+	HighPrice     string `json:"highPrice"`
+	LowPrice      string `json:"lowPrice"`
+	ClosePrice    string `json:"closePrice"`
+	ChangeAmount  string `json:"changeAmount"`
+	ChangePercent string `json:"changePercent"`
+	Volume        string `json:"volume"`
+	Turnover      string `json:"turnover"`
+	UpdateTime    string `json:"updateTime"`
+}
+
+type PageSetProductHistoryResp struct {
+	Rows  []*ProductHistoryItem `json:"rows"`
+	Total int64                 `json:"total"`
+}
+
+type NotifyNewsQuery struct {
+	Keyword string `form:"keyword,optional"`
+	Source  string `form:"source,optional"`
+}
+
+type PageSetNotifyNewsReq struct {
+	PageReq
+	NotifyNewsQuery
+}
+
+type NotifyNewsItem struct {
+	Id          string `json:"id"`
+	Title       string `json:"title"`
+	Summary     string `json:"summary"`
+	Content     string `json:"content"`
+	Source      string `json:"source"`
+	Link        string `json:"link"`
+	Image       string `json:"image"`
+	ViewCount   string `json:"viewCount"`
+	PublishTime string `json:"publishTime"`
+}
+
+type PageSetNotifyNewsResp struct {
+	Rows  []*NotifyNewsItem `json:"rows"`
+	Total int64             `json:"total"`
+}
+
+type NotifyPublishQuery struct {
+	Keyword    string `form:"keyword,optional"`
+	NotifyType string `form:"notifyType,optional"`
+	ReadStatus string `form:"readStatus,optional"`
+}
+
+type PageSetNotifyPublishReq struct {
+	PageReq
+	NotifyPublishQuery
+}
+
+type NotifyPublishItem struct {
+	Id            string `json:"id"`
+	ReceiveUserId string `json:"receiveUserId"`
+	Title         string `json:"title"`
+	Content       string `json:"content"`
+	NotifyType    string `json:"notifyType"`
+	ReadStatus    string `json:"readStatus"`
+	Deleted       string `json:"deleted"`
+	SendTime      string `json:"sendTime"`
+	ExpireTime    string `json:"expireTime"`
+}
+
+type PageSetNotifyPublishResp struct {
+	Rows  []*NotifyPublishItem `json:"rows"`
+	Total int64                `json:"total"`
+}
+
+type KlineMainQuery struct {
+	Keyword     string `form:"keyword,optional"`
+	ProductCode string `form:"productCode,optional"`
+	Symbol      string `form:"symbol,optional"`
+}
+
+type PageSetKlineMainReq struct {
+	PageReq
+	KlineMainQuery
+}
+
+type KlineMainItem struct {
+	Id          string `json:"id"`
+	ProductCode string `json:"productCode"`
+	Symbol      string `json:"symbol"`
+	RedisKey    string `json:"redisKey"`
+	BarCount    string `json:"barCount"`
+	LatestTime  string `json:"latestTime"`
+	Open        string `json:"open"`
+	High        string `json:"high"`
+	Low         string `json:"low"`
+	Close       string `json:"close"`
+	Volume      string `json:"volume"`
+}
+
+type PageSetKlineMainResp struct {
+	Rows  []*KlineMainItem `json:"rows"`
+	Total int64            `json:"total"`
+}

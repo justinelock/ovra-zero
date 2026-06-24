@@ -1,0 +1,50 @@
+syntax = "v1"
+
+info(
+    desc: "产品配置列表（占位接口，待接业务表）"
+    author: "ovra"
+)
+
+import "../base.api"
+
+type (
+    ProductConfigQuery {
+        Keyword     string `form:"keyword,optional"`
+        ProductType string `form:"productType,optional"`
+        Status      string `form:"status,optional"`
+    }
+    PageSetProductConfigReq {
+        PageReq
+        ProductConfigQuery
+    }
+    ProductConfigItem {
+        Id           string `json:"id"`
+        ProductCode  string `json:"productCode"`
+        ProductAlias string `json:"productAlias"`
+        Symbol       string `json:"symbol"`
+        ProductName  string `json:"productName"`
+        ProductType  string `json:"productType"`
+        Market       string `json:"market"`
+        Odds         string `json:"odds"`
+        TradeTime    string `json:"tradeTime"`
+        Currencies   string `json:"currencies"`
+        Status       string `json:"status"`
+        CreateTime   string `json:"createTime"`
+        UpdateTime   string `json:"updateTime"`
+    }
+    PageSetProductConfigResp {
+        Rows  []*ProductConfigItem `json:"rows"`
+        Total int64               `json:"total"`
+    }
+)
+
+@server(
+    tags: "产品管理"
+    group: product/config
+    prefix: /product/config
+    middleware: Auth, Sign
+)
+service System {
+    @handler PageSet
+    get /list (PageSetProductConfigReq) returns (PageSetProductConfigResp)
+}
