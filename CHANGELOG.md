@@ -5,6 +5,9 @@
 
 ## [未发布]
 
+### 新增
+- **开发参考菜单**：`sys_menu` 新增「开发参考」目录，挂载 `演示使用自行删除` 下全部演示页；补 SSE/加解密演示 API（`bin/sql/patch_dev_reference_menu.sql`、`desc/system/api/dev/`、`app/system/internal/logic/dev/`）
+
 ### 维护
 - **开发规范**：新增 Cursor 规则，要求代码步骤级注释、更新本变更日志、Git 提交优先中文（`.cursor/rules/code-comments-changelog.mdc`）
 - **前端动画**：页面切换默认改为 `fade` 淡入淡出，并在 `preferences.ts` 补充动画配置说明注释（`ruoyi-plus-vben5/apps/web-antd/src/preferences.ts`）

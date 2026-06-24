@@ -24,9 +24,11 @@ import "monitor/online.api"
 import "monitor/oper_log.api"
 import "monitor/logininfor.api"
 import "monitor/monitor.api"
+import "dev/sse.api"
+import "dev/encrypt.api"
 
 type HealthResp {
-	status string `json:"status"`
+	Status string `json:"status"`
 }
 
 @server (
@@ -36,4 +38,3 @@ service System {
 	@handler Health
 	get /health returns (HealthResp)
 }
-
