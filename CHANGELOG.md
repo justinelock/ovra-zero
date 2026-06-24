@@ -10,6 +10,7 @@
 - **前端动画**：页面切换默认改为 `fade` 淡入淡出，并在 `preferences.ts` 补充动画配置说明注释（`ruoyi-plus-vben5/apps/web-antd/src/preferences.ts`）
 
 ### 修复
+- **登录过期**：认证中间件改返回 `{code:401}` JSON，修复仅弹提示不跳转登录页（`toolkit/middlewares/auth_middleware.go`、`ruoyi-plus-vben5/apps/web-antd/src/utils/http/checkStatus.ts`）
 - **部门管理**：新增/编辑接口兼容 `parentId` 数值类型入参，统一转字符串后再反序列化，修复编辑时报 `type mismatch for field "parentId"`（`app/system/internal/handler/system/dept/add_handler.go`、`app/system/internal/handler/system/dept/update_handler.go`）
 - **通知公告**：新增时生成 `notice_id` 雪花主键，修复 Duplicate entry '' for key PRIMARY（`app/system/internal/logic/system/notice/add_logic.go`）
 - **通知公告**：列表从嵌入 `SysNotice` 正确映射 `noticeId`，修复编辑请求 `row_xx`、删除假成功（`app/system/internal/logic/system/notice/page_set_logic.go`、`app/system/internal/dal/sys_notice.go`）

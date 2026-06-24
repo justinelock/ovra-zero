@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"ovra/toolkit/auth"
@@ -13,17 +14,28 @@ import (
 	"github.com/zeromicro/go-zero/core/stores/redis"
 )
 
+// writeUnauthorized 返回与 RuoYi/Vben 一致的业务 JSON（code=401，HTTP 200），
+// 前端据此执行登出并跳转登录页；勿用 http.Error 返回裸 401 文本。
+func writeUnauthorized(w http.ResponseWriter, msg string) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
+	_ = json.NewEncoder(w).Encode(map[string]any{
+		"code": http.StatusUnauthorized,
+		"msg":  msg,
+	})
+}
+
 func ExecHandle(next http.HandlerFunc, accessSecret string, rds *redis.Redis, multipleLoginDevices bool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authorization := r.Header.Get("Authorization")
 		if authorization == "" {
-			http.Error(w, "Unauthorized: missing token", http.StatusUnauthorized)
+			writeUnauthorized(w, "未登录或登录已过期")
 			return
 		}
 		tokenString := strings.TrimPrefix(authorization, "Bearer ")
 		uc, err := auth.AnalyseToken(tokenString, accessSecret)
 		if err != nil {
-			http.Error(w, "Unauthorized: invalid token", http.StatusUnauthorized)
+			writeUnauthorized(w, "登录认证无效，请重新登录")
 			return
 		}
 		authInstance := auth.NewAuth(rds, &uc.UserInfo)
@@ -38,16 +50,16 @@ func ExecHandle(next http.HandlerFunc, accessSecret string, rds *redis.Redis, mu
 		}
 		expired, err := authInstance.CheckToken(r.Context(), key, tokenString)
 		if err != nil {
-			http.Error(w, "Unauthorized: invalid token", http.StatusUnauthorized)
+			writeUnauthorized(w, "登录认证无效，请重新登录")
 			return
 		}
 		if expired {
-			http.Error(w, "Unauthorized: token expired (idle timeout)", http.StatusUnauthorized)
+			writeUnauthorized(w, "登录认证过期，请重新登录后继续")
 			return
 		}
 		tenantId, err := tenant.GetTenantId(r.Context(), rds, &uc.UserInfo)
 		if err != nil {
-			http.Error(w, "Unauthorized: invalid token", http.StatusUnauthorized)
+			writeUnauthorized(w, "登录认证无效，请重新登录")
 			return
 		}
 		r.Header.Set(auth.UserIDKey, uc.UserId)
