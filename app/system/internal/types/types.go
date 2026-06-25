@@ -1317,8 +1317,8 @@ type PageSetMemberReportFlowResp struct {
 }
 
 type MemberTeamQuery struct {
-	Keyword string `form:"keyword,optional"` // 用户名/手机号/用户ID
-	Status  string `form:"status,optional"`  // fb_users.status
+	Keyword string `form:"keyword,optional"` // 用户名/手机号/身份证/姓名；stats 模糊 LIMIT 1
+	Status  string `form:"status,optional"`  // fb_users.status（仅 GET /list）
 }
 
 type PageSetMemberTeamReq struct {
@@ -1334,7 +1334,7 @@ type MemberTeamAgent struct {
 
 type MemberTeamStatsResp struct {
 	TotalMembers     int64   `json:"totalMembers"`
-	Level1Members    int64   `json:"level1Members"` // parent_id 树一级；全局时为顶层用户数
+	Level1Members    int64   `json:"level1Members"` // 一级下级数（全局时为顶层用户数）
 	Level2Members    int64   `json:"level2Members"`
 	Level3Members    int64   `json:"level3Members"`
 	Level4Members    int64   `json:"level4Members"`
@@ -1398,8 +1398,8 @@ type PageSetMemberTeamMembersResp struct {
 }
 
 type MemberTeamChangeParentReq struct {
-	UserId   string `json:"userId"`            // 被操作用户 fb_users.id
-	Username string `json:"username,optional"` // 新上级用户名；对齐 Java AgentChangeRequest
+	UserId   string `json:"userId"`   // 被操作用户 fb_users.id
+	Username string `json:"username"` // 新上级用户名（必填）；对齐 Java AgentChangeRequest
 }
 
 type MemberTeamChangeParentResp struct {
@@ -1457,9 +1457,15 @@ type PageSetMemberLoginLogResp struct {
 }
 
 type FundWalletApplyQuery struct {
-	Keyword     string `form:"keyword,optional"`
-	Status      string `form:"status,optional"`
-	AccountType string `form:"accountType,optional"`
+	Keyword     string `form:"keyword,optional"`     // 用户名/手机/姓名模糊
+	Status      string `form:"status,optional"`      // a.status：PENDING/APPROVED/REJECTED
+	State       string `form:"state,optional"`       // a.state
+	Verified    string `form:"verified,optional"`    // u.verified
+	UserId      string `form:"userId,optional"`      // a.user_id 精确
+	Username    string `form:"username,optional"`    // u.username LIKE
+	Mobile      string `form:"mobile,optional"`      // u.mobile LIKE
+	RealName    string `form:"realName,optional"`    // u.real_name LIKE
+	AccountType string `form:"accountType,optional"` // a.account_type（Go 扩展）
 }
 
 type PageSetFundWalletApplyReq struct {
@@ -1468,22 +1474,130 @@ type PageSetFundWalletApplyReq struct {
 }
 
 type FundWalletApplyItem struct {
-	Id           string `json:"id"`
-	UserName     string `json:"userName"`
-	RealName     string `json:"realName"`
-	PhoneNumber  string `json:"phoneNumber"`
-	AccountType  string `json:"accountType"`
-	Status       string `json:"status"`
-	RiskScore    string `json:"riskScore"`
-	AuditOpinion string `json:"auditOpinion"`
-	ApplyTime    string `json:"applyTime"`
-	AuditTime    string `json:"auditTime"`
-	Auditor      string `json:"auditor"`
+	Id                  string `json:"id"`
+	UserId              string `json:"userId"`
+	Username            string `json:"username,optional"`
+	Mobile              string `json:"mobile,optional"`
+	RealName            string `json:"realName,optional"`
+	AccountType         string `json:"accountType,optional"`
+	Status              string `json:"status,optional"`
+	State               string `json:"state,optional"`
+	RiskAssessmentScore int64  `json:"riskAssessmentScore,optional"`
+	RejectReason        string `json:"rejectReason,optional"`
+	ApplyTime           string `json:"applyTime,optional"`
+	AuditTime           string `json:"auditTime,optional"`
+	AuditUserId         string `json:"auditUserId,optional"`
+	AuditUser           string `json:"auditUser,optional"`
+	Remark              string `json:"remark,optional"`
+	CreatedAt           string `json:"createdAt,optional"`
+	UpdatedAt           string `json:"updatedAt,optional"`
 }
 
 type PageSetFundWalletApplyResp struct {
 	Rows  []*FundWalletApplyItem `json:"rows"`
 	Total int64                  `json:"total"`
+}
+
+type FundWalletApplyBasicInfo struct {
+	Id                  string `json:"id"`
+	Username            string `json:"username,optional"`
+	AccountType         string `json:"accountType,optional"`
+	RiskAssessmentScore int64  `json:"riskAssessmentScore,optional"`
+	Status              string `json:"status,optional"`
+	ApplyTime           string `json:"applyTime,optional"`
+	AuditTime           string `json:"auditTime,optional"`
+	RejectReason        string `json:"rejectReason,optional"`
+	Remark              string `json:"remark,optional"`
+}
+
+type FundWalletApplySecurityInfo struct {
+	TwoFactorEnabled bool  `json:"twoFactorEnabled"`
+	SecurityScore    int64 `json:"securityScore"`
+	IdentityVerified bool  `json:"identityVerified"`
+}
+
+type FundWalletApplyLoginStats struct {
+	CommonLoginIp   string `json:"commonLoginIp,optional"`
+	LastLoginTime   string `json:"lastLoginTime,optional"`
+	CommonLoginArea string `json:"commonLoginArea,optional"`
+	MonthLoginCount int64  `json:"monthLoginCount,optional"`
+}
+
+type FundWalletApplyFlowStats struct {
+	TradeSuccessRate string           `json:"tradeSuccessRate,optional"`
+	MonthFlowCount   int64            `json:"monthFlowCount,optional"`
+	DailyAvgAmount   float64          `json:"dailyAvgAmount,optional"`
+	MonthIncome      float64          `json:"monthIncome,optional"`
+	MonthExpense     float64          `json:"monthExpense,optional"`
+	TypeStatsMap     map[string]int64 `json:"typeStatsMap,optional"`
+}
+
+type FundWalletApplyDetailResp struct {
+	Id           string                       `json:"id,optional"`
+	UserId       string                       `json:"userId,optional"`
+	BasicInfo    *FundWalletApplyBasicInfo    `json:"basicInfo,optional"`
+	SecurityInfo *FundWalletApplySecurityInfo `json:"securityInfo,optional"`
+	LoginStats   *FundWalletApplyLoginStats   `json:"loginStats,optional"`
+	FlowStats    *FundWalletApplyFlowStats    `json:"flowStats,optional"`
+}
+
+type FundWalletApplyCurrentMonthFlowReq struct {
+	UserId string `form:"userId"`
+}
+
+type FundWalletApplyFlowItem struct {
+	Id           string  `json:"id"`
+	UserId       string  `json:"userId"`
+	AccountType  string  `json:"accountType,optional"`
+	FlowType     string  `json:"flowType,optional"`
+	BeforeAmount float64 `json:"beforeAmount,optional"`
+	FlowAmount   float64 `json:"flowAmount,optional"`
+	AfterAmount  float64 `json:"afterAmount,optional"`
+	BusinessNo   string  `json:"businessNo,optional"`
+	Remark       string  `json:"remark,optional"`
+	CreatedAt    string  `json:"createdAt,optional"`
+	WalletId     string  `json:"walletId,optional"`
+	Currency     string  `json:"currency,optional"`
+	Description  string  `json:"description,optional"`
+	Status       string  `json:"status,optional"`
+	UpdatedAt    string  `json:"updatedAt,optional"`
+}
+
+type FundWalletApplyCurrentMonthFlowResp struct {
+	Rows  []*FundWalletApplyFlowItem `json:"rows"`
+	Total int64                      `json:"total"`
+}
+
+type FundWalletApplyLoginLogQuery struct {
+	Status   string `form:"status,optional"`   // d.login_result
+	Keyword  string `form:"keyword,optional"`  // 用户名/手机/姓名/IP 模糊
+	Username string `form:"username,optional"` // u.username LIKE
+	RealName string `form:"realName,optional"` // u.real_name LIKE
+}
+
+type PageSetFundWalletApplyLoginLogReq struct {
+	PageReq
+	UserId string `path:"userId"`
+	FundWalletApplyLoginLogQuery
+}
+
+type FundWalletApplyLoginLogItem struct {
+	Id            string `json:"id"`
+	UserId        string `json:"userId"`
+	Username      string `json:"username,optional"`
+	LoginTime     string `json:"loginTime,optional"`
+	LoginIp       string `json:"loginIp,optional"`
+	LoginLocation string `json:"loginLocation,optional"`
+	LoginType     string `json:"loginType,optional"`
+	LoginResult   string `json:"loginResult,optional"`
+	FailReason    string `json:"failReason,optional"`
+	RiskLevel     string `json:"riskLevel,optional"`
+	RiskDetail    string `json:"riskDetail,optional"`
+}
+
+type PageSetFundWalletApplyLoginLogResp struct {
+	Rows  []*FundWalletApplyLoginLogItem `json:"rows"`
+	Total int64                          `json:"total"`
 }
 
 type FundStatementQuery struct {

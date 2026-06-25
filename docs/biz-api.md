@@ -94,6 +94,9 @@ GET /member/user/list?pageNum=1&pageSize=10
 | 用户管理 | 代理层级 | PUT | `/member/team/agentLevel` | `member:team:list` |
 | 用户管理 | 登录记录 | GET | `/member/loginLog/list` | `member:loginLog:list` |
 | 资金管理 | 钱包申请 | GET | `/fund/walletApply/list` | `fund:walletApply:list` |
+| 资金管理 | 钱包申请详情 | GET | `/fund/walletApply/detail/{id}` | `fund:walletApply:list` |
+| 资金管理 | 钱包申请流水 | GET | `/fund/walletApply/flow/currentMonth` | `fund:walletApply:list` |
+| 资金管理 | 钱包申请登录记录 | GET | `/fund/walletApply/loginLog/{userId}` | `fund:walletApply:list` |
 | 资金管理 | 账户流水 | GET | `/fund/statement/list` | `fund:statement:list` |
 | 资金管理 | 提现管理 | GET | `/fund/withdraw/list` | `fund:withdraw:list` |
 | 资金管理 | 充值管理 | GET | `/fund/recharge/list` | `fund:recharge:list` |
@@ -1095,7 +1098,7 @@ GET /member/user/list?pageNum=1&pageSize=10
 
 ## 二、资金管理
 
-### 2.1 钱包申请
+### 2.1 钱包申请（列表）
 
 | 项 | 值 |
 | --- | --- |
@@ -1103,20 +1106,253 @@ GET /member/user/list?pageNum=1&pageSize=10
 | 路径 | `/fund/walletApply/list` |
 | 权限 | `fund:walletApply:list` |
 | API 定义 | `desc/system/api/fund/wallet_apply.api` |
+| Java 对照 | `GET /fubang/fbaccountapplication/page` |
 | 行实体 | `FundWalletApplyItem` |
 
-**查询参数**：`keyword`、`status`、`accountType`
+**查询参数**：
 
-**`rows[]` 字段**：`id`、`userName`、`realName`、`phoneNumber`、`accountType`、`status`、`riskScore`、`auditOpinion`、`applyTime`、`auditTime`、`auditor`
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `keyword` | string | 用户名/手机/姓名模糊 |
+| `status` | string | `a.status`：`PENDING` / `APPROVED` / `REJECTED` |
+| `state` | string | `a.state` |
+| `verified` | string | `u.verified` |
+| `userId` | string | `a.user_id` 精确 |
+| `username` | string | 用户名模糊 |
+| `mobile` | string | 手机号模糊 |
+| `realName` | string | 真实姓名模糊 |
+| `accountType` | string | 账户类型 `main` / `fund` / `forex` 等 |
+| `params[beginTime]` / `params[endTime]` | string | 创建时间范围；同时传时 `a.created_at BETWEEN` |
 
-**响应示例**（待补充）：
+**查询逻辑**：`fb_account_application a LEFT JOIN fb_users u LEFT JOIN sys_user su`（审核人 `su.user_id = CAST(a.audit_user_id AS CHAR)`，`auditUser` 取 `su.user_name`），`ORDER BY a.created_at DESC`。
+
+**`rows[]` 字段**：
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| `id` | string | 申请主键 |
+| `userId` | string | 用户 ID |
+| `username` | string | 用户名 |
+| `mobile` | string | 手机号 |
+| `realName` | string | 真实姓名 |
+| `accountType` | string | 账户类型 |
+| `status` | string | 审核状态 |
+| `state` | string | 状态副本 |
+| `riskAssessmentScore` | int64 | 风险评估分 |
+| `rejectReason` | string | 拒绝原因/审核意见 |
+| `applyTime` | string | 申请时间 |
+| `auditTime` | string | 审核时间 |
+| `auditUserId` | string | 审核人 ID |
+| `auditUser` | string | 审核人账号 |
+| `remark` | string | 备注 |
+| `createdAt` / `updatedAt` | string | 创建/更新时间 |
+
+**响应示例**：
 
 ```json
 {
   "code": 200,
   "msg": "操作成功",
-  "total": 0,
-  "rows": []
+  "total": 1,
+  "rows": [{
+    "id": "2070129356581711873",
+    "userId": "2021488651577335809",
+    "username": "mm78928",
+    "mobile": null,
+    "realName": "张玉中",
+    "accountType": "fund",
+    "status": "APPROVED",
+    "state": "APPROVED",
+    "riskAssessmentScore": 18,
+    "rejectReason": "1111111",
+    "applyTime": "2026-06-25 20:57:54",
+    "auditTime": "2026-06-25 21:01:46",
+    "auditUserId": "2004024338266054657",
+    "auditUser": "admin",
+    "remark": null,
+    "createdAt": "2026-06-25 20:57:54",
+    "updatedAt": "2026-06-25 21:01:46"
+  }]
+}
+```
+
+---
+
+### 2.1.1 钱包申请-详情
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `GET` |
+| 路径 | `/fund/walletApply/detail/{id}` |
+| 权限 | `fund:walletApply:list` |
+| Java 对照 | `GET /fubang/fbaccountapplication/detail/{id}` |
+| 响应实体 | `FundWalletApplyDetailResp`（在 `data` 内） |
+
+**路径参数**：`id` — 申请主键 `fb_account_application.id`。
+
+**`data` 结构**：
+
+| 块 | 字段 | 说明 |
+| --- | --- | --- |
+| `basicInfo` | `id`、`username`、`accountType`、`riskAssessmentScore`、`status`、`applyTime`、`auditTime`、`rejectReason`、`remark` | 申请基本信息 |
+| `securityInfo` | `twoFactorEnabled`、`securityScore`、`identityVerified` | 安全认证（对齐 Java `calculateSecurityScore`） |
+| `loginStats` | `commonLoginIp`、`lastLoginTime`、`commonLoginArea`、`monthLoginCount` | 登录统计 |
+| `flowStats` | `tradeSuccessRate`、`monthFlowCount`、`dailyAvgAmount`、`monthIncome`、`monthExpense`、`typeStatsMap` | 当月流水统计 |
+
+**响应示例**：
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功",
+  "data": {
+    "id": null,
+    "userId": null,
+    "basicInfo": {
+      "id": "2070129356581711873",
+      "username": "mm78928",
+      "accountType": "fund",
+      "riskAssessmentScore": 18,
+      "status": "APPROVED",
+      "applyTime": "2026-06-25 20:57:54",
+      "auditTime": "2026-06-25 21:01:46",
+      "rejectReason": "1111111",
+      "remark": null
+    },
+    "securityInfo": {
+      "twoFactorEnabled": false,
+      "securityScore": 20,
+      "identityVerified": true
+    },
+    "loginStats": {
+      "commonLoginIp": "112.46.214.6",
+      "lastLoginTime": "2026-06-25 21:23:02",
+      "commonLoginArea": "112.46.214.6",
+      "monthLoginCount": 94
+    },
+    "flowStats": {
+      "tradeSuccessRate": "100.00",
+      "monthFlowCount": 80,
+      "dailyAvgAmount": 2559.28,
+      "monthIncome": 32905.38,
+      "monthExpense": 33636.00,
+      "typeStatsMap": {
+        "CONTRACT_PROFIT": 39,
+        "CONTRACT_BUY": 39,
+        "DEPOSIT": 1,
+        "PURCHASE": 1
+      }
+    }
+  }
+}
+```
+
+---
+
+### 2.1.2 钱包申请-最近流水
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `GET` |
+| 路径 | `/fund/walletApply/flow/currentMonth` |
+| 权限 | `fund:walletApply:list` |
+| Java 对照 | `GET /fubang/fbaccountflowrecords/getCurrentMonthList` |
+| 行实体 | `FundWalletApplyFlowItem` |
+
+**查询参数**：
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `userId` | string | 申请人 `fb_users.id`（必填） |
+
+**说明**：返回**当月全量**流水（`created_at >= 当月 1 日 00:00:00`），**不分页**；`total` 为 `rows` 条数，便于 VxeGrid 无分页展示。
+
+**抽屉标题**：`{realName}的最近流水`（无 `realName` 时回退 `username`）。
+
+**表格列**：交易类型（`flowType`）、变动金额（`flowAmount`）、交易前余额（`beforeAmount`）、交易后余额（`afterAmount`）、交易状态（`status`）、交易描述（`description`）。
+
+**`rows[]` 字段**：`id`、`userId`、`accountType`、`flowType`、`beforeAmount`、`flowAmount`、`afterAmount`、`businessNo`、`remark`、`createdAt`、`walletId`、`currency`、`description`、`status`、`updatedAt`。
+
+**响应示例**：
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功",
+  "total": 1,
+  "rows": [{
+    "id": "2070137374010585089",
+    "userId": "2021488651577335809",
+    "accountType": "main",
+    "flowType": "PURCHASE",
+    "beforeAmount": 1009.31,
+    "flowAmount": -1009.00,
+    "afterAmount": 0.31,
+    "businessNo": "fd0fcfc760154819bd3c9fc0eca68d9e",
+    "remark": "FUBON",
+    "createdAt": "2026-06-24 21:32:24",
+    "walletId": "2021488651615084545",
+    "currency": "USD",
+    "description": "投信购买",
+    "status": "SUCCESS",
+    "updatedAt": null
+  }]
+}
+```
+
+---
+
+### 2.1.3 钱包申请-登录记录
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `GET` |
+| 路径 | `/fund/walletApply/loginLog/{userId}` |
+| 权限 | `fund:walletApply:list` |
+| Java 对照 | `GET /fubang/fbdeviceloginlog/page` |
+| 行实体 | `FundWalletApplyLoginLogItem` |
+
+**路径参数**：`userId` — 申请人 `fb_users.id`（必填）。
+
+**查询参数**：
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `pageNum` / `pageSize` | int | 标准分页 |
+| `status` | string | 登录结果，映射 `d.login_result` |
+| `keyword` | string | 用户名/手机/姓名/登录 IP 模糊 |
+| `username` | string | 用户名模糊 |
+| `realName` | string | 真实姓名模糊 |
+| `params[beginTime]` / `params[endTime]` | string | 登录时间范围；同时传时 `d.login_time BETWEEN` |
+
+**查询逻辑**：`fb_device_login_log d LEFT JOIN fb_users u ON u.id = d.user_id AND d.user_id > 0`，`ORDER BY d.login_time DESC`。
+
+**抽屉标题**：`{realName}的登录记录`。
+
+**表格列**：登录时间、登录 IP、登录地点、登录方式、登录结果、失败原因、风险等级。
+
+**`rows[]` 字段**：`id`、`userId`、`username`、`loginTime`、`loginIp`、`loginLocation`、`loginType`、`loginResult`、`failReason`、`riskLevel`、`riskDetail`。
+
+**响应示例**：
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功",
+  "total": 1,
+  "rows": [{
+    "id": "2070135678979092482",
+    "userId": "2021488651577335809",
+    "username": "mm78928",
+    "loginTime": "2026-06-25 21:23:02",
+    "loginIp": "112.46.213.221",
+    "loginLocation": "Unknown",
+    "loginType": "PASSWORD",
+    "loginResult": "SUCCESS",
+    "failReason": null,
+    "riskLevel": "LOW",
+    "riskDetail": null
+  }]
 }
 ```
 

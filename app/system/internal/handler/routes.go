@@ -992,6 +992,21 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Path:    "/list",
 					Handler: fundwalletApply.PageSetHandler(serverCtx),
 				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/detail/:id",
+					Handler: fundwalletApply.DetailHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/flow/currentMonth",
+					Handler: fundwalletApply.CurrentMonthFlowHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/loginLog/:userId",
+					Handler: fundwalletApply.LoginLogHandler(serverCtx),
+				},
 			}...,
 		),
 		rest.WithPrefix("/fund/walletApply"),
