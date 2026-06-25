@@ -188,7 +188,19 @@ GET /member/user/list?pageNum=1&pageSize=10
 
 **行为**：逻辑删除，设置 `fb_users.flag = 1`（仅 `flag=0` 的用户可删）。
 
-#### 1.1.2 重置密码
+#### 1.1.2 恢复已删用户
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `PUT` |
+| 路径 | `/member/user/restore/{ids}` |
+| 权限 | `member:list:list` |
+
+**路径参数**：`ids` — 用户 id，逗号分隔。
+
+**行为**：将 `fb_users.flag` 置为 `0`（仅 `flag=1` 的用户可恢复）。
+
+#### 1.1.3 重置密码
 
 | 项 | 值 |
 | --- | --- |
@@ -207,7 +219,7 @@ GET /member/user/list?pageNum=1&pageSize=10
 
 **行为**：明文密码经 MD5 后写入 `fb_users.password` 或 `pay_password`。
 
-#### 1.1.3 用户详情
+#### 1.1.4 用户详情
 
 | 项 | 值 |
 | --- | --- |
@@ -252,7 +264,7 @@ GET /member/user/list?pageNum=1&pageSize=10
 | `onlineStatus` | int64 | Redis 在线状态 1/0 |
 | `createdAt` / `updatedAt` | string | 创建/更新时间 |
 
-#### 1.1.4 保存用户编辑
+#### 1.1.5 保存用户编辑
 
 | 项 | 值 |
 | --- | --- |

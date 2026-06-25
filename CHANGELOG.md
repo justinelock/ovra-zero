@@ -6,12 +6,14 @@
 ## [未发布]
 
 ### 变更
+- **操作列按钮间距**：新增全局 `TableActionSpace`（2px），替换各页 `#action` 内默认 8px `Space`（`components/global/table-action-space.vue`、各 `views/**/index.vue`）
 - **业务用户编辑判重**：`PUT /member/user` 在用户名或身份证号变更时查询去重，冲突返回「用户名已经存在」「身份证号已经存在」（`fb_member.go`）
 - **业务用户编辑头像**：编辑抽屉支持裁剪上传头像（参考系统用户 Avatar + 个人中心 CropperAvatar）；`PUT /member/user` 增加 `avatar` 字段（`user-edit-drawer.vue`、`member/user.api`、`fb_member.go`）
 - **用户详情接口**：`GET /member/user/{id}` 响应改为独立实体 `MemberUserInfoResp`，补全 fb_users 字段、上级摘要、钱包/投信聚合与 Redis 在线状态（`member/user.api`、`fb_member.go`、`info_logic.go`）
 - **业务用户编辑表单**：改为右侧抽屉双列布局，字段对齐管理端（密码/密保/佣金/实名/合约控制等）（`member/user.api`、`user-edit-drawer.vue`）
 
 ### 新增
+- **已删用户抽屉**：列表「已删用户」打开抽屉展示 `deleted=1` 列表，操作列「恢复」调用 `PUT /member/user/restore/{ids}`（`deleted-users-drawer.vue`、`restore_logic.go`）
 - **业务用户编辑**：`GET /member/user/{id}` 详情与 `PUT /member/user` 保存；列表编辑按 id 拉取并提交（`member/user.api`、`fb_member.go`、`views/member/list/`）
 - **业务用户删除/重置密码**：`DELETE /member/user/{ids}` 逻辑删、`PUT /member/user/resetPwd` MD5 更新密码（`member/user.api`、`fb_member.go`、`views/member/list/`）
 - **钱包加减款接口**：新增 `PUT /member/wallet/addOrSubtract`，按 Java `addOrSubtract` 实现加款/减款、流水写入与 flowType 校验（`desc/system/api/member/wallet.api`、`dal/fb_user_wallet.go`、`logic/member/wallet/add_or_subtract_logic.go`）

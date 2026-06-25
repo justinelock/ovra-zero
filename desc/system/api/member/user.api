@@ -152,6 +152,9 @@ service System {
     @handler Delete
     delete /:ids (IdsReq)
 
+    @handler Restore
+    put /restore/:ids (IdsReq)
+
     @handler ResetPwd
     put /resetPwd (MemberUserResetPwdReq)
 }

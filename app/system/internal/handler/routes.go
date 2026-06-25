@@ -860,6 +860,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				},
 				{
 					Method:  http.MethodPut,
+					Path:    "/restore/:ids",
+					Handler: memberuser.RestoreHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPut,
 					Path:    "/resetPwd",
 					Handler: memberuser.ResetPwdHandler(serverCtx),
 				},

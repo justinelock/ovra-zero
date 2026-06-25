@@ -612,6 +612,28 @@ func (d *FbMemberDal) ResetUserPassword(ctx context.Context, id, plainPwd string
 	return nil
 }
 
+// RestoreUsers 恢复已删用户：fb_users.flag=0（仅 flag=1）
+func (d *FbMemberDal) RestoreUsers(ctx context.Context, ids []string) error {
+	if d == nil || d.db == nil || len(ids) == 0 {
+		return nil
+	}
+	now := time.Now()
+	res := d.db.WithContext(ctx).Table("fb_users").
+		Where("id IN ?", ids).
+		Where("flag = 1").
+		Updates(map[string]any{
+			"flag":       0,
+			"updated_at": now,
+		})
+	if res.Error != nil {
+		return errx.GORMErr(res.Error)
+	}
+	if res.RowsAffected == 0 {
+		return errx.BizErr("用户不存在或未被删除")
+	}
+	return nil
+}
+
 func md5Hex(s string) string {
 	return utils.Md5(s)
 }
