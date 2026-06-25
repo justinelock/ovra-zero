@@ -356,6 +356,7 @@ type AccountFlowPageQuery struct {
 	UserID    string
 	Status    string
 	FlowType  string // Java 参数名 type
+	Currency  string
 	Keyword   string
 	Username  string
 	Mobile    string
@@ -403,6 +404,10 @@ func accountFlowWhere(q AccountFlowPageQuery) (string, []any) {
 		where = append(where, "f.flow_type = ?")
 		args = append(args, ft)
 	}
+	if cur := strings.TrimSpace(q.Currency); cur != "" {
+		where = append(where, "f.currency = ?")
+		args = append(args, cur)
+	}
 	if q.BeginTime != "" && q.EndTime != "" {
 		where = append(where, "f.created_at BETWEEN ? AND ?")
 		args = append(args, q.BeginTime, q.EndTime)
@@ -429,11 +434,8 @@ func accountFlowWhere(q AccountFlowPageQuery) (string, []any) {
 	return strings.Join(where, " AND "), args
 }
 
-// PageAccountFlow 账户流水分页（对齐 selectPageWithUser）
+// PageAccountFlow 账户流水分页（对齐 selectPageWithUser；userId 可选，报表抽屉必传）
 func (d *FbMemberDal) PageAccountFlow(ctx context.Context, q AccountFlowPageQuery) (rows []memberFlowRow, total int64, err error) {
-	if strings.TrimSpace(q.UserID) == "" {
-		return nil, 0, errx.BizErr("用户ID不能为空")
-	}
 	where, args := accountFlowWhere(q)
 	base := `FROM fb_account_flow_records f LEFT JOIN fb_users u ON u.id = f.user_id WHERE ` + where
 	if err = d.db.WithContext(ctx).Raw("SELECT COUNT(*) "+base, args...).Scan(&total).Error; err != nil {
@@ -449,4 +451,26 @@ func (d *FbMemberDal) PageAccountFlow(ctx context.Context, q AccountFlowPageQuer
 		return nil, 0, errx.GORMErr(err)
 	}
 	return rows, total, nil
+}
+
+// GetAccountFlowByID 按流水主键查详情（对齐 Java GET /fbaccountflowrecords/{id}）
+func (d *FbMemberDal) GetAccountFlowByID(ctx context.Context, id int64) (*memberFlowRow, error) {
+	if id <= 0 {
+		return nil, errx.BizErr("流水记录不存在")
+	}
+	var row memberFlowRow
+	err := d.db.WithContext(ctx).Raw(`
+		SELECT f.id, f.user_id, u.username, u.mobile, u.real_name, f.account_type, f.flow_type,
+			f.before_amount, f.flow_amount, f.after_amount, f.business_no, f.remark, f.created_at,
+			COALESCE(f.wallet_id, 0) AS wallet_id, f.currency, f.description, f.status, f.updated_at
+		FROM fb_account_flow_records f
+		LEFT JOIN fb_users u ON u.id = f.user_id
+		WHERE f.id = ?`, id).Scan(&row).Error
+	if err != nil {
+		return nil, errx.GORMErr(err)
+	}
+	if row.ID == 0 {
+		return nil, errx.BizErr("流水记录不存在")
+	}
+	return &row, nil
 }

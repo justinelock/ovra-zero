@@ -1021,6 +1021,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Path:    "/list",
 					Handler: fundstatement.PageSetHandler(serverCtx),
 				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/detail/:id",
+					Handler: fundstatement.DetailHandler(serverCtx),
+				},
 			}...,
 		),
 		rest.WithPrefix("/fund/statement"),

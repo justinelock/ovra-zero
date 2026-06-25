@@ -1601,10 +1601,14 @@ type PageSetFundWalletApplyLoginLogResp struct {
 }
 
 type FundStatementQuery struct {
-	Keyword     string `form:"keyword,optional"`
-	TradeType   string `form:"tradeType,optional"`
-	TradeStatus string `form:"tradeStatus,optional"`
-	Currency    string `form:"currency,optional"`
+	Keyword  string `form:"keyword,optional"`  // 用户名/手机/姓名/业务单号模糊
+	Status   string `form:"status,optional"`   // f.status（Java 参数名 status）
+	Type     string `form:"type,optional"`     // f.flow_type（Java 参数名 type）
+	Currency string `form:"currency,optional"` // f.currency
+	UserId   string `form:"userId,optional"`   // f.user_id 精确
+	Username string `form:"username,optional"` // u.username LIKE
+	Mobile   string `form:"mobile,optional"`   // u.mobile LIKE
+	RealName string `form:"realName,optional"` // u.real_name LIKE
 }
 
 type PageSetFundStatementReq struct {
@@ -1613,20 +1617,24 @@ type PageSetFundStatementReq struct {
 }
 
 type FundStatementItem struct {
-	Id            string `json:"id"`
-	UserName      string `json:"userName"`
-	PhoneNumber   string `json:"phoneNumber"`
-	RealName      string `json:"realName"`
-	AccountType   string `json:"accountType"`
-	TradeType     string `json:"tradeType"`
-	ChangeAmount  string `json:"changeAmount"`
-	BalanceBefore string `json:"balanceBefore"`
-	BalanceAfter  string `json:"balanceAfter"`
-	TradeStatus   string `json:"tradeStatus"`
-	Currency      string `json:"currency"`
-	TradeDesc     string `json:"tradeDesc"`
-	Remark        string `json:"remark"`
-	TradeTime     string `json:"tradeTime"`
+	Id           string  `json:"id"`
+	UserId       string  `json:"userId"`
+	Username     string  `json:"username,optional"`
+	Mobile       string  `json:"mobile,optional"`
+	RealName     string  `json:"realName,optional"`
+	AccountType  string  `json:"accountType,optional"`
+	FlowType     string  `json:"flowType,optional"`
+	BeforeAmount float64 `json:"beforeAmount,optional"`
+	FlowAmount   float64 `json:"flowAmount,optional"`
+	AfterAmount  float64 `json:"afterAmount,optional"`
+	BusinessNo   string  `json:"businessNo,optional"`
+	Remark       string  `json:"remark,optional"`
+	CreatedAt    string  `json:"createdAt,optional"`
+	WalletId     string  `json:"walletId,optional"`
+	Currency     string  `json:"currency,optional"`
+	Description  string  `json:"description,optional"`
+	Status       string  `json:"status,optional"`
+	UpdatedAt    string  `json:"updatedAt,optional"`
 }
 
 type PageSetFundStatementResp struct {

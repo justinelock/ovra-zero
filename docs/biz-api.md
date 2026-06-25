@@ -98,6 +98,7 @@ GET /member/user/list?pageNum=1&pageSize=10
 | 资金管理 | 钱包申请流水 | GET | `/fund/walletApply/flow/currentMonth` | `fund:walletApply:list` |
 | 资金管理 | 钱包申请登录记录 | GET | `/fund/walletApply/loginLog/{userId}` | `fund:walletApply:list` |
 | 资金管理 | 账户流水 | GET | `/fund/statement/list` | `fund:statement:list` |
+| 资金管理 | 账户流水详情 | GET | `/fund/statement/detail/{id}` | `fund:statement:list` |
 | 资金管理 | 提现管理 | GET | `/fund/withdraw/list` | `fund:withdraw:list` |
 | 资金管理 | 充值管理 | GET | `/fund/recharge/list` | `fund:recharge:list` |
 | 订单管理 | 合约订单 | GET | `/trade/contract/list` | `trade:contract:list` |
@@ -1366,20 +1367,115 @@ GET /member/user/list?pageNum=1&pageSize=10
 | 路径 | `/fund/statement/list` |
 | 权限 | `fund:statement:list` |
 | API 定义 | `desc/system/api/fund/statement.api` |
+| Java 对照 | `GET /fubang/fbaccountflowrecords/page` |
 | 行实体 | `FundStatementItem` |
 
-**查询参数**：`keyword`、`tradeType`、`tradeStatus`、`currency`
+**查询参数**（对齐 Java `selectPageWithUser`）：
 
-**`rows[]` 字段**：`id`、`userName`、`phoneNumber`、`realName`、`accountType`、`tradeType`、`changeAmount`、`balanceBefore`、`balanceAfter`、`tradeStatus`、`currency`、`tradeDesc`、`remark`、`tradeTime`
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `keyword` | string | 用户名/手机/姓名/业务单号模糊 |
+| `status` | string | 交易状态 `f.status` |
+| `type` | string | 交易类型 `f.flow_type` |
+| `currency` | string | 币种 `f.currency` |
+| `userId` | string | 用户 ID 精确 |
+| `username` | string | 用户名模糊 |
+| `mobile` | string | 手机号模糊 |
+| `realName` | string | 真实姓名模糊 |
+| `params[beginTime]` / `params[endTime]` | string | 交易时间；同时传时 `f.created_at BETWEEN` |
 
-**响应示例**（待补充）：
+**查询逻辑**：`fb_account_flow_records f LEFT JOIN fb_users u`，`ORDER BY f.created_at DESC`。
+
+**`rows[]` 字段**：
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| `id` | string | 流水主键 |
+| `userId` | string | 用户 ID |
+| `username` | string | 用户名 |
+| `mobile` | string | 手机号 |
+| `realName` | string | 真实姓名 |
+| `accountType` | string | 账户类型 |
+| `flowType` | string | 交易类型 |
+| `beforeAmount` | float64 | 交易前余额 |
+| `flowAmount` | float64 | 变动金额 |
+| `afterAmount` | float64 | 交易后余额 |
+| `businessNo` | string | 业务单号 |
+| `remark` | string | 备注 |
+| `createdAt` | string | 交易时间 |
+| `walletId` | string | 钱包 ID |
+| `currency` | string | 币种 |
+| `description` | string | 交易描述 |
+| `status` | string | 交易状态 |
+| `updatedAt` | string | 更新时间 |
+
+**响应示例**：
 
 ```json
 {
   "code": 200,
   "msg": "操作成功",
-  "total": 0,
-  "rows": []
+  "total": 1,
+  "rows": [{
+    "id": "2069393879385845762",
+    "userId": "653",
+    "username": "09612345678",
+    "mobile": null,
+    "realName": "杨阳洋",
+    "accountType": "main",
+    "flowType": "CONTRACT_PROFIT",
+    "beforeAmount": 9628.87,
+    "flowAmount": 40.00,
+    "afterAmount": 9668.87,
+    "businessNo": "a7392d6a-1419-4482-95e5-f032d1aa3a71",
+    "remark": "合约盈利",
+    "createdAt": "2026-06-23 20:15:23",
+    "walletId": "1549",
+    "currency": "USD",
+    "description": "合约盈利",
+    "status": "SUCCESS",
+    "updatedAt": null
+  }]
+}
+```
+
+---
+
+### 2.2.1 账户流水-详情
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `GET` |
+| 路径 | `/fund/statement/detail/{id}` |
+| 权限 | `fund:statement:list` |
+| Java 对照 | `GET /fubang/fbaccountflowrecords/{id}` |
+| 响应实体 | `FundStatementItem`（在 `data` 内） |
+
+**路径参数**：`id` — 流水主键 `fb_account_flow_records.id`。
+
+**响应示例**：
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功",
+  "data": {
+    "id": "2069393879385845762",
+    "userId": "653",
+    "accountType": "main",
+    "flowType": "CONTRACT_PROFIT",
+    "beforeAmount": 9628.87,
+    "flowAmount": 40.00,
+    "afterAmount": 9668.87,
+    "businessNo": "a7392d6a-1419-4482-95e5-f032d1aa3a71",
+    "remark": "合约盈利",
+    "createdAt": "2026-06-23 20:15:23",
+    "walletId": "1549",
+    "currency": "USD",
+    "description": "合约盈利",
+    "status": "SUCCESS",
+    "updatedAt": null
+  }
 }
 ```
 
