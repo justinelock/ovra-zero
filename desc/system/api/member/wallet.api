@@ -68,4 +68,7 @@ service System {
 
     @handler AddOrSubtract
     put /addOrSubtract (MemberWalletAddOrSubtractReq)
+
+    @handler Delete
+    delete /:ids (IdsReq)
 }

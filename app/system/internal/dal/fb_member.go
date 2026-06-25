@@ -118,37 +118,61 @@ type memberKycRow struct {
 	UpdatedAt    *time.Time
 }
 
-// PageKyc 实名认证分页
-func (d *FbMemberDal) PageKyc(ctx context.Context, f MemberListFilter) (rows []memberKycRow, total int64, err error) {
+// KycPageQuery 实名认证列表筛选（对齐 Java selectPageWithUser）
+type KycPageQuery struct {
+	Keyword    string
+	AuthStatus string
+	IdCardNo   string
+	Username   string
+	RealName   string
+	BeginTime  string
+	EndTime    string
+	PageNum    int64
+	PageSize   int64
+}
+
+// PageKyc 实名认证分页：fb_identity_verify LEFT JOIN fb_users
+func (d *FbMemberDal) PageKyc(ctx context.Context, q KycPageQuery) (rows []memberKycRow, total int64, err error) {
 	where := []string{"1=1"}
 	var args []any
-	if f.Keyword != "" {
-		where = append(where, "(u.username LIKE ? OR u.mobile LIKE ? OR v.real_name LIKE ? OR CAST(v.id AS CHAR) LIKE ?)")
-		kw := "%" + f.Keyword + "%"
-		args = append(args, kw, kw, kw, kw)
+	if idCard := strings.TrimSpace(q.IdCardNo); idCard != "" {
+		where = append(where, "v.id_card_no = ?")
+		args = append(args, idCard)
 	}
-	if f.AuthStatus != "" {
+	if st := strings.TrimSpace(q.AuthStatus); st != "" {
 		where = append(where, "v.status = ?")
-		args = append(args, f.AuthStatus)
+		args = append(args, st)
 	}
-	if f.BeginTime != "" {
-		where = append(where, "v.created_at >= ?")
-		args = append(args, f.BeginTime)
+	// 提交时间：起止同时存在时用 BETWEEN
+	if q.BeginTime != "" && q.EndTime != "" {
+		where = append(where, "v.created_at BETWEEN ? AND ?")
+		args = append(args, q.BeginTime, q.EndTime)
 	}
-	if f.EndTime != "" {
-		where = append(where, "v.created_at <= ?")
-		args = append(args, f.EndTime)
+	if kw := strings.TrimSpace(q.Keyword); kw != "" {
+		where = append(where, `(
+			u.username LIKE ? OR u.mobile LIKE ? OR u.real_name LIKE ? OR v.id_card_no LIKE ?
+		)`)
+		like := "%" + kw + "%"
+		args = append(args, like, like, like, like)
+	}
+	if un := strings.TrimSpace(q.Username); un != "" {
+		where = append(where, "u.username LIKE ?")
+		args = append(args, "%"+un+"%")
+	}
+	if rn := strings.TrimSpace(q.RealName); rn != "" {
+		where = append(where, "v.real_name LIKE ?")
+		args = append(args, "%"+rn+"%")
 	}
 	w := strings.Join(where, " AND ")
 	base := `FROM fb_identity_verify v LEFT JOIN fb_users u ON u.id = v.user_id WHERE ` + w
 	if err = d.db.WithContext(ctx).Raw("SELECT COUNT(*) "+base, args...).Scan(&total).Error; err != nil {
 		return nil, 0, errx.GORMErr(err)
 	}
-	offset := (f.PageNum - 1) * f.PageSize
-	listSQL := `SELECT v.id, v.user_id, u.username, u.mobile, v.real_name, v.id_card_no,
-  		v.id_card_front, v.id_card_back, v.status, v.reject_reason, v.verified_at, v.created_at, v.updated_at ` +
-		base + " ORDER BY v.created_at DESC LIMIT ? OFFSET ?"
-	listArgs := append(append([]any{}, args...), f.PageSize, offset)
+	offset := (q.PageNum - 1) * q.PageSize
+	listSQL := `SELECT v.id, v.user_id, v.id_card_no, v.id_card_front, v.id_card_back,
+		v.status, v.reject_reason, v.verified_at, v.created_at, v.updated_at,
+		u.username, u.mobile, u.real_name AS real_name ` + base + " ORDER BY v.created_at DESC LIMIT ? OFFSET ?"
+	listArgs := append(append([]any{}, args...), q.PageSize, offset)
 	if err = d.db.WithContext(ctx).Raw(listSQL, listArgs...).Scan(&rows).Error; err != nil {
 		return nil, 0, errx.GORMErr(err)
 	}

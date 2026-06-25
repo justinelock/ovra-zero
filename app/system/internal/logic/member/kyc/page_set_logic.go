@@ -30,15 +30,17 @@ func NewPageSetLogic(ctx context.Context, svcCtx *svc.ServiceContext) *PageSetLo
 
 // PageSet 分页查询 fb_identity_verify 并联用户基础信息
 func (l *PageSetLogic) PageSet(req *types.PageSetMemberKycReq) (resp *types.PageSetMemberKycResp, err error) {
-	f := dal.MemberListFilter{
+	rows, total, err := l.svcCtx.Dal.FbMemberDal.PageKyc(l.ctx, dal.KycPageQuery{
 		Keyword:    req.Keyword,
 		AuthStatus: req.AuthStatus,
+		IdCardNo:   req.IdCardNo,
+		Username:   req.Username,
+		RealName:   req.RealName,
 		BeginTime:  req.BeginTime,
 		EndTime:    req.EndTime,
 		PageNum:    req.PageNum,
 		PageSize:   req.PageSize,
-	}
-	rows, total, err := l.svcCtx.Dal.FbMemberDal.PageKyc(l.ctx, f)
+	})
 	if err != nil {
 		return nil, err
 	}

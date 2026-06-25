@@ -169,3 +169,18 @@ func genWalletBusinessNo(prefix string) string {
 	_, _ = rand.Read(buf)
 	return fmt.Sprintf("%s_%d%s", prefix, time.Now().UnixMilli(), hex.EncodeToString(buf))
 }
+
+// DeleteByIds 按主键物理删除钱包（对齐 Java DELETE /fubang/fbuserwallets）
+func (d *FbUserWalletDal) DeleteByIds(ctx context.Context, ids []int64) error {
+	if len(ids) == 0 {
+		return errx.BizErr("请选择要删除的钱包")
+	}
+	res := d.db.WithContext(ctx).Where("id IN ?", ids).Delete(&model.FbUserWallet{})
+	if res.Error != nil {
+		return errx.GORMErr(res.Error)
+	}
+	if res.RowsAffected == 0 {
+		return errx.BizErr("钱包不存在或已删除")
+	}
+	return nil
+}

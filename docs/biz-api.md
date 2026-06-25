@@ -83,6 +83,7 @@ GET /member/user/list?pageNum=1&pageSize=10
 | 用户管理 | 实名认证 | GET | `/member/kyc/list` | `member:kyc:list` |
 | 用户管理 | 钱包管理 | GET | `/member/wallet/list` | `member:wallet:list` |
 | 用户管理 | 钱包加减款 | PUT | `/member/wallet/addOrSubtract` | `member:wallet:list` |
+| 用户管理 | 钱包删除 | DELETE | `/member/wallet/{ids}` | `member:wallet:list` |
 | 用户管理 | 用户报表 | GET | `/member/report/list` | `member:report:list` |
 | 用户管理 | 团队管理 | GET | `/member/team/list` | `member:team:list` |
 | 用户管理 | 团队统计 | GET | `/member/team/stats` | `member:team:list` |
@@ -328,8 +329,14 @@ GET /member/user/list?pageNum=1&pageSize=10
 
 | 参数 | 类型 | 说明 |
 | --- | --- | --- |
-| `keyword` | string | 关键词 |
-| `authStatus` | string | 认证状态 |
+| `keyword` | string | 用户名/手机号/姓名/身份证号模糊（`u.username`、`u.mobile`、`u.real_name`、`v.id_card_no`） |
+| `authStatus` | string | 认证状态，映射 `v.status`（`VERIFIED` / `PENDING` / `REJECTED` 等） |
+| `idCardNo` | string | 身份证号精确匹配 `v.id_card_no` |
+| `username` | string | 用户名模糊 |
+| `realName` | string | 实名表 `v.real_name` 模糊 |
+| `params[beginTime]` / `params[endTime]` | string | 提交时间范围；**同时传**时 `v.created_at BETWEEN` |
+
+**查询逻辑**：`fb_identity_verify v LEFT JOIN fb_users u ON u.id = v.user_id`，`ORDER BY v.created_at DESC`；`realName` 列来自 `u.real_name`。
 
 **`rows[]` 字段**：
 
@@ -488,6 +495,21 @@ GET /member/user/list?pageNum=1&pageSize=10
 ```
 
 **响应**：`{ "code": 200, "msg": "操作成功" }`（与通知公告等 PUT 接口一致）
+
+#### 1.4.2 钱包删除
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `DELETE` |
+| 路径 | `/member/wallet/{ids}` |
+| 权限 | `member:wallet:list` |
+| API 定义 | `desc/system/api/member/wallet.api` |
+
+**路径参数**：`ids` 为钱包主键，多个用英文逗号分隔（`fb_user_wallets.id`）。
+
+**行为**：物理删除 `fb_user_wallets` 记录（对齐 Java `DELETE /fubang/fbuserwallets`）。
+
+**响应**：`{ "code": 200, "msg": "操作成功" }`
 
 ---
 

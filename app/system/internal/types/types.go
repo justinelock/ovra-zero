@@ -1150,8 +1150,11 @@ type MemberUserUpdateReq struct {
 }
 
 type MemberKycQuery struct {
-	Keyword    string `form:"keyword,optional"`    // 用户名/手机号/姓名/记录ID
-	AuthStatus string `form:"authStatus,optional"` // 认证状态
+	Keyword    string `form:"keyword,optional"`    // 用户名/手机号/姓名/身份证号模糊
+	AuthStatus string `form:"authStatus,optional"` // 认证状态，映射 v.status
+	IdCardNo   string `form:"idCardNo,optional"`   // 身份证号精确匹配
+	Username   string `form:"username,optional"`   // 用户名模糊
+	RealName   string `form:"realName,optional"`   // 实名表 v.real_name 模糊
 }
 
 type PageSetMemberKycReq struct {

@@ -6,6 +6,8 @@
 ## [未发布]
 
 ### 变更
+- **表格用户名列复制**：抽取 `renderCopyableValue`/`copyText` 公共工具，所有含「用户名」列的 member/biz 列表均支持一键复制（`utils/render-copyable.tsx`、`views/**/data.tsx`）
+- **实名认证列表查询**：`GET /member/kyc/list` 对齐 Java `selectPageWithUser`（JOIN 字段、keyword/idCardNo/BETWEEN 时间等）（`fb_member.go`、`kyc.api`）
 - **操作列按钮间距**：新增全局 `TableActionSpace`（2px），替换各页 `#action` 内默认 8px `Space`（`components/global/table-action-space.vue`、各 `views/**/index.vue`）
 - **业务用户编辑判重**：`PUT /member/user` 在用户名或身份证号变更时查询去重，冲突返回「用户名已经存在」「身份证号已经存在」（`fb_member.go`）
 - **业务用户编辑头像**：编辑抽屉支持裁剪上传头像（参考系统用户 Avatar + 个人中心 CropperAvatar）；`PUT /member/user` 增加 `avatar` 字段（`user-edit-drawer.vue`、`member/user.api`、`fb_member.go`）
@@ -13,6 +15,8 @@
 - **业务用户编辑表单**：改为右侧抽屉双列布局，字段对齐管理端（密码/密保/佣金/实名/合约控制等）（`member/user.api`、`user-edit-drawer.vue`）
 
 ### 新增
+- **钱包删除**：`DELETE /member/wallet/{ids}` 按主键物理删除 `fb_user_wallets`；钱包管理操作列改为仅「删除」（`wallet.api`、`fb_user_wallet.go`、`views/member/wallet/index.vue`）
+- **实名认证详情弹窗**：列表「详情」左侧 Descriptions、右侧身份证正反面预览（`ruoyi-plus-vben5/apps/web-antd/src/views/member/kyc/kyc-detail-modal.vue`）
 - **已删用户抽屉**：列表「已删用户」打开抽屉展示 `deleted=1` 列表，操作列「恢复」调用 `PUT /member/user/restore/{ids}`（`deleted-users-drawer.vue`、`restore_logic.go`）
 - **业务用户编辑**：`GET /member/user/{id}` 详情与 `PUT /member/user` 保存；列表编辑按 id 拉取并提交（`member/user.api`、`fb_member.go`、`views/member/list/`）
 - **业务用户删除/重置密码**：`DELETE /member/user/{ids}` 逻辑删、`PUT /member/user/resetPwd` MD5 更新密码（`member/user.api`、`fb_member.go`、`views/member/list/`）
