@@ -944,6 +944,26 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Path:    "/list",
 					Handler: memberteam.PageSetHandler(serverCtx),
 				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/:id",
+					Handler: memberteam.InfoHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/members/:userId",
+					Handler: memberteam.MembersHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPut,
+					Path:    "/changeParent",
+					Handler: memberteam.ChangeParentHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPut,
+					Path:    "/agentLevel",
+					Handler: memberteam.AgentLevelHandler(serverCtx),
+				},
 			}...,
 		),
 		rest.WithPrefix("/member/team"),

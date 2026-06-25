@@ -5,7 +5,19 @@
 
 ## [未发布]
 
+### 维护
+- **biz-api.md**：补齐团队管理 1.6.1～1.6.4（详情/下级团队/更换上级/代理层级）请求响应与错误文案；总览表增加报表流水；团队列表补注册时间筛选参数
+
+### 修复
+- **更换上级**：仅更新 `parent_id`，不再走 `UpdateUser` 误触「用户名不能为空」；上级用户名前后端必填（`fb_team.go`、`team-change-parent-modal.vue`）
+- **团队管理弹窗刷新**：关闭代理层级/更换上级弹窗后 `reload` 携带查询区当前筛选（`keyword` 等），不再空参 `query()`（`views/member/team/index.vue`）
+- **团队管理写操作响应**：`PUT /member/team/changeParent`、`PUT /member/team/agentLevel` 改 `OkJsonCtx` 返回 `data`（`{userId,parentId}` / `{userId,agentLevel}`），修复 `httpx.Ok` 无 body 导致弹窗提交后不关闭（`team/*_handler.go`、`*-modal.vue`）
+
 ### 变更
+- **更换上级弹窗**：展示只读上级 ID + 可编辑上级用户名；`PUT /member/team/changeParent` 改按 `username` 查上级（对齐 Java `changeAgent`）（`team-change-parent-modal.vue`、`fb_team.go`）
+- **团队管理代理层级**：`PUT /member/team/agentLevel` 对齐 Java `FbUsersServiceImpl.updateAgentLevel`（校验文案、`updated_at`）；下级团队列表深度随 `agent_level` 限制（`fb_team.go`）
+- **团队管理代理层级弹窗**：代理层级 label 左对齐，Radio 选项单行展示（`team-agent-level-modal.vue`）
+- **团队管理代理卡片**：顶部统计卡片数值字号由 `text-2xl` 改为 `text-xl`（`ruoyi-plus-vben5/apps/web-antd/src/views/member/team/team-stats.vue`）
 - **用户报表流水抽屉**：`GET /member/report/flow/{userId}` 查询对齐 Java `selectPageWithUser`；抽屉 9 列与「{姓名}的流水记录」标题（`fb_report.go`、`report-flow-drawer.vue`）
 - **用户报表列表**：`GET /member/report/list` 两阶段对齐 Java `getPageData`（批量聚合余额/充提/盈亏/团队/登录 IP）（`fb_report.go`、`report.api`）
 - **表格用户名列复制**：抽取 `renderCopyableValue`/`copyText` 公共工具，所有含「用户名」列的 member/biz 列表均支持一键复制（`utils/render-copyable.tsx`、`views/**/data.tsx`）
@@ -17,6 +29,7 @@
 - **业务用户编辑表单**：改为右侧抽屉双列布局，字段对齐管理端（密码/密保/佣金/实名/合约控制等）（`member/user.api`、`user-edit-drawer.vue`）
 
 ### 新增
+- **团队管理操作**：详情弹窗、下级团队抽屉、更换上级与代理层级；后端 `GET /member/team/{id}`、`GET /members/{userId}`、`PUT /changeParent`、`PUT /agentLevel`（`fb_team.go`、`views/member/team/`）
 - **钱包删除**：`DELETE /member/wallet/{ids}` 按主键物理删除 `fb_user_wallets`；钱包管理操作列改为仅「删除」（`wallet.api`、`fb_user_wallet.go`、`views/member/wallet/index.vue`）
 - **实名认证详情弹窗**：列表「详情」左侧 Descriptions、右侧身份证正反面预览（`ruoyi-plus-vben5/apps/web-antd/src/views/member/kyc/kyc-detail-modal.vue`）
 - **已删用户抽屉**：列表「已删用户」打开抽屉展示 `deleted=1` 列表，操作列「恢复」调用 `PUT /member/user/restore/{ids}`（`deleted-users-drawer.vue`、`restore_logic.go`）

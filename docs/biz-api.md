@@ -85,8 +85,13 @@ GET /member/user/list?pageNum=1&pageSize=10
 | 用户管理 | 钱包加减款 | PUT | `/member/wallet/addOrSubtract` | `member:wallet:list` |
 | 用户管理 | 钱包删除 | DELETE | `/member/wallet/{ids}` | `member:wallet:list` |
 | 用户管理 | 用户报表 | GET | `/member/report/list` | `member:report:list` |
+| 用户管理 | 报表流水 | GET | `/member/report/flow/{userId}` | `member:report:list` |
 | 用户管理 | 团队管理 | GET | `/member/team/list` | `member:team:list` |
 | 用户管理 | 团队统计 | GET | `/member/team/stats` | `member:team:list` |
+| 用户管理 | 团队详情 | GET | `/member/team/{id}` | `member:team:list` |
+| 用户管理 | 下级团队 | GET | `/member/team/members/{userId}` | `member:team:list` |
+| 用户管理 | 更换上级 | PUT | `/member/team/changeParent` | `member:team:list` |
+| 用户管理 | 代理层级 | PUT | `/member/team/agentLevel` | `member:team:list` |
 | 用户管理 | 登录记录 | GET | `/member/loginLog/list` | `member:loginLog:list` |
 | 资金管理 | 钱包申请 | GET | `/fund/walletApply/list` | `fund:walletApply:list` |
 | 资金管理 | 账户流水 | GET | `/fund/statement/list` | `fund:statement:list` |
@@ -699,8 +704,9 @@ GET /member/user/list?pageNum=1&pageSize=10
 
 | 参数 | 类型 | 说明 |
 | --- | --- | --- |
-| `keyword` | string | 关键词 |
-| `status` | string | 状态 |
+| `keyword` | string | 用户名/手机号/用户 ID |
+| `status` | string | 用户状态 `fb_users.status` |
+| `params[beginTime]` / `params[endTime]` | string | 注册时间范围；**同时传**时 `u.created_at BETWEEN` |
 
 **`rows[]` 字段**：
 
@@ -752,6 +758,199 @@ GET /member/user/list?pageNum=1&pageSize=10
       "createdAt": null 
     }
   ]
+}
+```
+
+---
+
+### 1.6.1 团队详情
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `GET` |
+| 路径 | `/member/team/{id}` |
+| 权限 | `member:team:list` |
+| API 定义 | `desc/system/api/member/team.api` |
+| 响应实体 | `MemberTeamDetailResp`（在 `data` 内） |
+
+**路径参数**：`id` — 业务用户 ID（`fb_users.id`）。
+
+**`data` 字段**：
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| `id` | string | 用户 ID |
+| `username` | string | 用户名 |
+| `agentLevel` | int64 | 代理展开层级 3/4/5 |
+| `walletCount` | int64 | 钱包数量 |
+| `totalAssets` | float64 | 总资产（`fb_user_wallets` 余额汇总） |
+| `totalDeposit` | float64 | 总充值（`fb_deposits` SUCCESS） |
+| `totalWithdraw` | float64 | 总提现（`fb_withdraws` SUCCESS） |
+| `createdAt` | string | 加入时间 |
+
+**响应示例**：
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功",
+  "data": {
+    "id": "2070046854793998337",
+    "username": "19516713881",
+    "agentLevel": 3,
+    "walletCount": 0,
+    "totalAssets": 0.00,
+    "totalDeposit": 0.00,
+    "totalWithdraw": 0.00,
+    "createdAt": "2026-01-15 10:20:00"
+  }
+}
+```
+
+---
+
+### 1.6.2 下级团队成员
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `GET` |
+| 路径 | `/member/team/members/{userId}` |
+| 权限 | `member:team:list` |
+| API 定义 | `desc/system/api/member/team.api` |
+| 行实体 | `MemberTeamMemberItem` |
+
+**路径参数**：`userId` — 根用户 ID（抽屉所属用户）。
+
+**查询参数**：标准分页 `pageNum`、`pageSize`。
+
+**查询逻辑**：递归查 `parent_id` 下级树；**最大深度**随根用户 `agent_level` 限制（对齐 Java `getSubTeamByUserIdPage`）：3=仅三级、4=含四级、5=含五级。`level` 为相对根用户的层级 1～N。
+
+**`rows[]` 字段**：
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| `level` | int64 | 相对层级 |
+| `username` | string | 用户名 |
+| `totalAssets` | float64 | 总资产（钱包余额汇总） |
+| `totalDeposit` | float64 | 总充值 |
+| `totalInvest` | float64 | 总投信（PENDING 投信本金） |
+| `totalWithdraw` | float64 | 总提现 |
+
+**响应示例**：
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功",
+  "total": 2,
+  "rows": [
+    {
+      "level": 1,
+      "username": "user_a",
+      "totalAssets": 100.00,
+      "totalDeposit": 500.00,
+      "totalInvest": 200.00,
+      "totalWithdraw": 50.00
+    }
+  ]
+}
+```
+
+---
+
+### 1.6.3 更换上级
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `PUT` |
+| 路径 | `/member/team/changeParent` |
+| 权限 | `member:team:list` |
+| API 定义 | `desc/system/api/member/team.api` |
+| Java 对照 | `PUT /fubang/fbusers/changeAgent`（`AgentChangeRequest`） |
+
+**请求体**（`MemberTeamChangeParentReq`）：
+
+| 字段 | 类型 | 必填 | 说明 |
+| --- | --- | --- | --- |
+| `userId` | string | 是 | 被操作用户 `fb_users.id` |
+| `username` | string | 是 | **新上级用户名**（按 `fb_users.username` 精确匹配，非 ID） |
+
+**行为**：
+
+- 按 `username` 查上级用户（`flag=0`），更新被操作用户的 `parent_id`
+- 禁止将自己设为上级、禁止将下级设为上级（防环）
+
+**错误提示**（业务码非 200）：`用户ID不能为空`、`上级代理用户名不能为空`、`用户不存在`（被操作用户或上级用户名不存在）、`不能将自己设为上级`、`不能将下级设为上级`
+
+**请求示例**：
+
+```json
+{
+  "userId": "2070046854793998337",
+  "username": "wu52886"
+}
+```
+
+**响应**（`MemberTeamChangeParentResp`，在 `data` 内）：
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| `userId` | string | 被操作用户 ID |
+| `parentId` | string | 新上级用户 ID |
+| `parentUsername` | string | 新上级用户名 |
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功",
+  "data": {
+    "userId": "2070046854793998337",
+    "parentId": "2000844918397870081",
+    "parentUsername": "wu52886"
+  }
+}
+```
+
+### 1.6.4 调整代理层级
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `PUT` |
+| 路径 | `/member/team/agentLevel` |
+| 权限 | `member:team:list` |
+| API 定义 | `desc/system/api/member/team.api` |
+| Java 对照 | `PUT /fubang/fbusers/agentLevel`（`AgentLevelUpdateRequest`） |
+
+**请求体**（`MemberTeamAgentLevelReq`）：
+
+| 字段 | 类型 | 必填 | 说明 |
+| --- | --- | --- | --- |
+| `userId` | string | 是 | 被操作用户 `fb_users.id` |
+| `agentLevel` | int64 | 是 | 团队最大展开层级，仅允许 `3` / `4` / `5` |
+
+**行为**：更新 `fb_users.agent_level` 与 `updated_at`；影响该用户「下级团队」抽屉可见深度。
+
+**错误提示**：`用户ID不能为空`、`代理层级必须为 3、4 或 5`、`用户不存在`
+
+**请求示例**：
+
+```json
+{
+  "userId": "653",
+  "agentLevel": 4
+}
+```
+
+**响应**（`MemberTeamAgentLevelResp`，在 `data` 内）：
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功",
+  "data": {
+    "userId": "653",
+    "agentLevel": 4
+  }
 }
 ```
 

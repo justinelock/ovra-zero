@@ -1276,9 +1276,9 @@ type PageSetMemberReportResp struct {
 }
 
 type MemberReportFlowQuery struct {
-	Status   string `form:"status,optional"`   // f.status
-	Type     string `form:"type,optional"`     // f.flow_type（Java 参数名 type）
-	Keyword  string `form:"keyword,optional"`  // 用户名/手机/姓名/业务单号模糊
+	Status   string `form:"status,optional"`  // f.status
+	Type     string `form:"type,optional"`    // f.flow_type（Java 参数名 type）
+	Keyword  string `form:"keyword,optional"` // 用户名/手机/姓名/业务单号模糊
 	Username string `form:"username,optional"`
 	Mobile   string `form:"mobile,optional"`
 	RealName string `form:"realName,optional"`
@@ -1365,6 +1365,57 @@ type MemberTeamItem struct {
 type PageSetMemberTeamResp struct {
 	Rows  []*MemberTeamItem `json:"rows"`
 	Total int64             `json:"total"`
+}
+
+type MemberTeamDetailResp struct {
+	Id            string  `json:"id"`
+	Username      string  `json:"username,optional"`
+	AgentLevel    int64   `json:"agentLevel,optional"`
+	WalletCount   int64   `json:"walletCount,optional"`
+	TotalAssets   float64 `json:"totalAssets,optional"`
+	TotalDeposit  float64 `json:"totalDeposit,optional"`
+	TotalWithdraw float64 `json:"totalWithdraw,optional"`
+	CreatedAt     string  `json:"createdAt,optional"`
+}
+
+type MemberTeamMemberItem struct {
+	Level         int64   `json:"level,optional"`
+	Username      string  `json:"username,optional"`
+	TotalAssets   float64 `json:"totalAssets,optional"`
+	TotalDeposit  float64 `json:"totalDeposit,optional"`
+	TotalInvest   float64 `json:"totalInvest,optional"`
+	TotalWithdraw float64 `json:"totalWithdraw,optional"`
+}
+
+type PageSetMemberTeamMembersReq struct {
+	PageReq
+	UserId string `path:"userId"`
+}
+
+type PageSetMemberTeamMembersResp struct {
+	Rows  []*MemberTeamMemberItem `json:"rows"`
+	Total int64                   `json:"total"`
+}
+
+type MemberTeamChangeParentReq struct {
+	UserId   string `json:"userId"`            // 被操作用户 fb_users.id
+	Username string `json:"username,optional"` // 新上级用户名；对齐 Java AgentChangeRequest
+}
+
+type MemberTeamChangeParentResp struct {
+	UserId         string `json:"userId"`
+	ParentId       string `json:"parentId,optional"`
+	ParentUsername string `json:"parentUsername,optional"`
+}
+
+type MemberTeamAgentLevelReq struct {
+	UserId     string `json:"userId"`     // fb_users.id，对齐 Java AgentLevelUpdateRequest
+	AgentLevel int64  `json:"agentLevel"` // 最大展开层级 3/4/5
+}
+
+type MemberTeamAgentLevelResp struct {
+	UserId     string `json:"userId"`
+	AgentLevel int64  `json:"agentLevel"`
 }
 
 type MemberLoginLogQuery struct {

@@ -57,6 +57,53 @@ type (
         Rows  []*MemberTeamItem `json:"rows"`
         Total int64             `json:"total"`
     }
+    // 团队详情弹窗；总资产=钱包余额汇总，充提对齐报表聚合
+    MemberTeamDetailResp {
+        Id             string  `json:"id"`
+        Username       string  `json:"username,optional"`
+        AgentLevel     int64   `json:"agentLevel,optional"`
+        WalletCount    int64   `json:"walletCount,optional"`
+        TotalAssets    float64 `json:"totalAssets,optional"`
+        TotalDeposit   float64 `json:"totalDeposit,optional"`
+        TotalWithdraw  float64 `json:"totalWithdraw,optional"`
+        CreatedAt      string  `json:"createdAt,optional"`
+    }
+    // 下级团队成员行；level 为相对选中用户的层级 1～5
+    MemberTeamMemberItem {
+        Level          int64   `json:"level,optional"`
+        Username       string  `json:"username,optional"`
+        TotalAssets    float64 `json:"totalAssets,optional"`
+        TotalDeposit   float64 `json:"totalDeposit,optional"`
+        TotalInvest    float64 `json:"totalInvest,optional"`
+        TotalWithdraw  float64 `json:"totalWithdraw,optional"`
+    }
+    PageSetMemberTeamMembersReq {
+        PageReq
+        UserId string `path:"userId"`
+    }
+    PageSetMemberTeamMembersResp {
+        Rows  []*MemberTeamMemberItem `json:"rows"`
+        Total int64                   `json:"total"`
+    }
+    MemberTeamChangeParentReq {
+        UserId   string `json:"userId"`   // 被操作用户 fb_users.id
+        Username string `json:"username"` // 新上级用户名（必填）；对齐 Java AgentChangeRequest
+    }
+    // 更换上级成功响应（data 内返回）
+    MemberTeamChangeParentResp {
+        UserId         string `json:"userId"`
+        ParentId       string `json:"parentId,optional"`
+        ParentUsername string `json:"parentUsername,optional"`
+    }
+    MemberTeamAgentLevelReq {
+        UserId     string `json:"userId"`              // fb_users.id，对齐 Java AgentLevelUpdateRequest
+        AgentLevel int64  `json:"agentLevel"`          // 最大展开层级 3/4/5
+    }
+    // 调整代理层级成功响应（data 内返回）
+    MemberTeamAgentLevelResp {
+        UserId     string `json:"userId"`
+        AgentLevel int64  `json:"agentLevel"`
+    }
 )
 
 @server(
@@ -71,4 +118,16 @@ service System {
 
     @handler PageSet
     get /list (PageSetMemberTeamReq) returns (PageSetMemberTeamResp)
+
+    @handler Info
+    get /:id (IdReq) returns (MemberTeamDetailResp)
+
+    @handler Members
+    get /members/:userId (PageSetMemberTeamMembersReq) returns (PageSetMemberTeamMembersResp)
+
+    @handler ChangeParent
+    put /changeParent (MemberTeamChangeParentReq) returns (MemberTeamChangeParentResp)
+
+    @handler AgentLevel
+    put /agentLevel (MemberTeamAgentLevelReq) returns (MemberTeamAgentLevelResp)
 }
