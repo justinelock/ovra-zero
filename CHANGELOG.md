@@ -12,6 +12,8 @@
 
 ### 变更
 - **用户列表/活跃统计对齐 Java**：USD 钱包余额、profit_log 投信分红、keyword 精确匹配；`onlineStatus` 与 stats 三项改 Redis 全局（`fb_user_redis.go`、`fb_member.go`、`member/user/*_logic.go`）
+- **用户列表表格增强**：真实姓名/邀请码/ID 可复制；余额点开钱包抽屉；投信持仓分红着色；ACTIVE 显示正常（`views/member/list/`）
+- **用户钱包抽屉列对齐 Java**：余额抽屉改为钱包类型/可用余额/冻结金额/券数量/货币，并新增操作列入口（加减款、开关账户、冻解金额、加减券、划转），查询优先透传 `userId`（`views/member/list/user-wallet-drawer.vue`）
 - **前端 Vite 代理**：统一 `/api` → Traefik `28080`；网关补全 `/member` 等业务 PathPrefix（`vite.config.ts`、`bin/traefik/dynamic.yaml`）
 - **用户管理契约对齐**：`docs/biz-api.md` 1.1～1.8 字段表与响应 JSON 一致；前端 `api/member`、`views/member` 列字段改为 `username`、`createdAt`、`level1Members` 等（`ruoyi-plus-vben5/apps/web-antd/src/api/member/`、`views/member/`）
 
