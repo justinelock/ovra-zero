@@ -14,6 +14,7 @@
 - **团队管理写操作响应**：`PUT /member/team/changeParent`、`PUT /member/team/agentLevel` 改 `OkJsonCtx` 返回 `data`（`{userId,parentId}` / `{userId,agentLevel}`），修复 `httpx.Ok` 无 body 导致弹窗提交后不关闭（`team/*_handler.go`、`*-modal.vue`）
 
 ### 变更
+- **提现管理 2.3**：`GET /fund/withdraw/list` 对接 `fb_withdraws`（对齐 Java `selectPageWithUser`）；新增批准/拒绝接口与前端 Popconfirm、拒绝理由弹窗（`withdraw.api`、`fb_withdraw.go`、`views/biz/fund/withdraw/`、`biz-api.md` 2.3～2.3.2）
 - **账户流水 2.2**：`GET /fund/statement/list` 对接 `fb_account_flow_records`（对齐 Java `selectPageWithUser`）；新增 `GET /detail/{id}` 与详情弹窗（`statement.api`、`fb_report.go`、`views/biz/fund/statement/`、`biz-api.md` 2.2～2.2.1）
 - **钱包申请对齐 Java**：列表 `selectPageWithUser`（`created_at` 时间、`state`/`verified`/`userId` 等筛选）；流水改 `GET /flow/currentMonth?userId=` 当月全量；登录记录对齐 `selectPageWithUser`；前端详情弹窗与流水/登录抽屉（`wallet_apply.api`、`fb_wallet_apply.go`、`views/biz/fund/walletApply/`、`biz-api.md` 2.1～2.1.3）
 - **团队统计**：`GET /member/team/stats` 对齐 Java `getTeamStatsAll`（keyword 定位根用户、parent_id 树计数、agent_level 截断与下级余额汇总）；stats 仅 keyword（`fb_team.go`、`stats_logic.go`、`biz-api.md` 1.7）

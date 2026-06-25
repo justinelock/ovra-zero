@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math"
 	"strconv"
+	"strings"
 	"time"
 
 	"ovra/app/system/internal/dal/model"
@@ -69,6 +70,62 @@ func NormalizeAddOrSubtractFlowType(isAdd bool, flowType string) (string, error)
 		return "", errx.BizErr("减款流水类型无效")
 	}
 	return flowType, nil
+}
+
+// AddBalanceByUserID 按用户主钱包加款并写流水（对齐 Java addBalance(userId, businessNo, ...)）
+func (d *FbUserWalletDal) AddBalanceByUserID(ctx context.Context, userID int64, amount float64, businessNo, remark, description, flowType string) error {
+	amount = math.Abs(amount)
+	if strings.TrimSpace(businessNo) == "" {
+		return errx.BizErr("业务单号不能为空")
+	}
+	return d.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		return addBalanceByUserIDTx(tx, userID, amount, businessNo, remark, description, flowType)
+	})
+}
+
+func addBalanceByUserIDTx(tx *gorm.DB, userID int64, amount float64, businessNo, remark, description, flowType string) error {
+	var cnt int64
+	if err := tx.Raw(`SELECT COUNT(*) FROM fb_account_flow_records WHERE business_no = ?`, businessNo).Scan(&cnt).Error; err != nil {
+		return errx.GORMErr(err)
+	}
+	if cnt > 0 {
+		return errx.BizErr("资金流水已存在")
+	}
+	var wallet model.FbUserWallet
+	err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+		Where("user_id = ? AND account_type = ? AND currency = ?", userID, "main", "USD").
+		First(&wallet).Error
+	if err != nil {
+		return errx.GORMErrMsg(err, "用户钱包不存在")
+	}
+	before := wallet.Balance
+	after := before + amount
+	now := time.Now()
+	if err := tx.Model(&model.FbUserWallet{}).Where("id = ?", wallet.ID).Updates(map[string]any{
+		"balance":    after,
+		"updated_at": now,
+	}).Error; err != nil {
+		return errx.GORMErr(err)
+	}
+	flow := &model.FbAccountFlowRecord{
+		UserID:       wallet.UserID,
+		AccountType:  wallet.AccountType,
+		FlowType:     flowType,
+		BeforeAmount: before,
+		FlowAmount:   amount,
+		AfterAmount:  after,
+		BusinessNo:   businessNo,
+		Remark:       remark,
+		CreatedAt:    now,
+		WalletID:     wallet.ID,
+		Currency:     wallet.Currency,
+		Description:  description,
+		Status:       "SUCCESS",
+	}
+	if err := tx.Create(flow).Error; err != nil {
+		return errx.BizErr("资金流水写入失败")
+	}
+	return nil
 }
 
 // AddBalance 按钱包 id 加款并写 fb_account_flow_records（对齐 addBalance(walletId, ...)）

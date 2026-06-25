@@ -1040,6 +1040,16 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Path:    "/list",
 					Handler: fundwithdraw.PageSetHandler(serverCtx),
 				},
+				{
+					Method:  http.MethodPut,
+					Path:    "/approved/:id",
+					Handler: fundwithdraw.ApprovedHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPut,
+					Path:    "/rejected",
+					Handler: fundwithdraw.RejectedHandler(serverCtx),
+				},
 			}...,
 		),
 		rest.WithPrefix("/fund/withdraw"),

@@ -1643,9 +1643,12 @@ type PageSetFundStatementResp struct {
 }
 
 type FundWithdrawQuery struct {
-	Keyword        string `form:"keyword,optional"`
-	WithdrawStatus string `form:"withdrawStatus,optional"`
-	WithdrawType   string `form:"withdrawType,optional"`
+	Keyword  string `form:"keyword,optional"`  // 用户名/手机/姓名/订单号模糊
+	Status   string `form:"status,optional"`   // w.status
+	Type     string `form:"type,optional"`     // w.withdraw_type（Java 参数名 type）
+	Username string `form:"username,optional"` // u.username LIKE
+	Mobile   string `form:"mobile,optional"`   // u.mobile LIKE
+	RealName string `form:"realName,optional"` // u.real_name LIKE
 }
 
 type PageSetFundWithdrawReq struct {
@@ -1654,20 +1657,35 @@ type PageSetFundWithdrawReq struct {
 }
 
 type FundWithdrawItem struct {
-	Id             string `json:"id"`
-	UserName       string `json:"userName"`
-	RealName       string `json:"realName"`
-	WithdrawAmount string `json:"withdrawAmount"`
-	UsdtAddress    string `json:"usdtAddress"`
-	WithdrawStatus string `json:"withdrawStatus"`
-	WithdrawType   string `json:"withdrawType"`
-	CreateTime     string `json:"createTime"`
-	UpdateTime     string `json:"updateTime"`
+	Id            string  `json:"id"`
+	UserId        string  `json:"userId"`
+	Username      string  `json:"username,optional"`
+	Mobile        string  `json:"mobile,optional"`
+	RealName      string  `json:"realName,optional"`
+	OrderNo       string  `json:"orderNo,optional"`
+	Amount        float64 `json:"amount,optional"`
+	Status        string  `json:"status,optional"`
+	WithdrawType  string  `json:"withdrawType,optional"`
+	BankName      string  `json:"bankName,optional"`
+	BankCardNo    string  `json:"bankCardNo,optional"`
+	AccountName   string  `json:"accountName,optional"`
+	PaymentStatus string  `json:"paymentStatus,optional"`
+	PaymentNo     string  `json:"paymentNo,optional"`
+	PaymentTime   string  `json:"paymentTime,optional"`
+	Remark        string  `json:"remark,optional"`
+	RejectReason  string  `json:"rejectReason,optional"`
+	CreatedAt     string  `json:"createdAt,optional"`
+	UpdatedAt     string  `json:"updatedAt,optional"`
 }
 
 type PageSetFundWithdrawResp struct {
 	Rows  []*FundWithdrawItem `json:"rows"`
 	Total int64               `json:"total"`
+}
+
+type FundWithdrawRejectReq struct {
+	Id     string `json:"id"`
+	Remark string `json:"remark"`
 }
 
 type FundRechargeQuery struct {

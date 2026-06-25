@@ -100,6 +100,8 @@ GET /member/user/list?pageNum=1&pageSize=10
 | 资金管理 | 账户流水 | GET | `/fund/statement/list` | `fund:statement:list` |
 | 资金管理 | 账户流水详情 | GET | `/fund/statement/detail/{id}` | `fund:statement:list` |
 | 资金管理 | 提现管理 | GET | `/fund/withdraw/list` | `fund:withdraw:list` |
+| 资金管理 | 提现批准 | PUT | `/fund/withdraw/approved/{id}` | `fund:withdraw:list` |
+| 资金管理 | 提现拒绝 | PUT | `/fund/withdraw/rejected` | `fund:withdraw:list` |
 | 资金管理 | 充值管理 | GET | `/fund/recharge/list` | `fund:recharge:list` |
 | 订单管理 | 合约订单 | GET | `/trade/contract/list` | `trade:contract:list` |
 | 订单管理 | 委托订单 | GET | `/trade/entrust/list` | `trade:entrust:list` |
@@ -1489,22 +1491,109 @@ GET /member/user/list?pageNum=1&pageSize=10
 | 路径 | `/fund/withdraw/list` |
 | 权限 | `fund:withdraw:list` |
 | API 定义 | `desc/system/api/fund/withdraw.api` |
+| Java 对照 | `GET /fubang/fbwithdraws/page` |
 | 行实体 | `FundWithdrawItem` |
 
-**查询参数**：`keyword`、`withdrawStatus`、`withdrawType`
+**查询参数**（对齐 Java `selectPageWithUser`）：
 
-**`rows[]` 字段**：`id`、`userName`、`realName`、`withdrawAmount`、`usdtAddress`、`withdrawStatus`、`withdrawType`、`createTime`、`updateTime`
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `keyword` | string | 用户名/手机/姓名/订单号模糊 |
+| `status` | string | `w.status`：`PENDING` / `SUCCESS` / `REJECTED` |
+| `type` | string | `w.withdraw_type`（Java 参数名 `type`） |
+| `username` | string | 用户名模糊 |
+| `mobile` | string | 手机号模糊 |
+| `realName` | string | 真实姓名模糊 |
+| `params[beginTime]` / `params[endTime]` | string | 创建时间；同时传时 `w.created_at BETWEEN` |
 
-**响应示例**（待补充）：
+**查询逻辑**：`fb_withdraws w LEFT JOIN fb_users u`，`ORDER BY w.created_at DESC`。
+
+**`rows[]` 字段**：
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| `id` | string | 提现主键 |
+| `userId` | string | 用户 ID |
+| `username` | string | 用户名 |
+| `mobile` | string | 手机号 |
+| `realName` | string | 真实姓名 |
+| `orderNo` | string | 订单号 |
+| `amount` | float64 | 提现金额 |
+| `status` | string | 状态 |
+| `withdrawType` | string | 提现类型 |
+| `bankName` | string | 银行名称/链类型 |
+| `bankCardNo` | string | 银行卡号/USDT 地址 |
+| `accountName` | string | 开户名 |
+| `paymentStatus` | string | 支付状态 |
+| `paymentNo` | string | 支付流水号 |
+| `paymentTime` | string | 支付时间 |
+| `remark` | string | 备注 |
+| `rejectReason` | string | 拒绝原因 |
+| `createdAt` / `updatedAt` | string | 创建/更新时间 |
+
+**响应示例**：
 
 ```json
 {
   "code": 200,
   "msg": "操作成功",
   "total": 0,
-  "rows": []
+  "rows": [
+    {
+      "id": "2070128205987655681",
+      "userId": "2035283111301906434",
+      "username": "wm0529",
+      "realName": "王敏",
+      "orderNo": "W1782392000086884a1e",
+      "amount": 108.00,
+      "status": "SUCCESS",
+      "withdrawType": "USDT",
+      "bankName": "TRC20",
+      "bankCardNo": "TDLQEEs2tsj2eEFks1os7AH8mqiSjuVye2",
+      "accountName": "TRC20",
+      "paymentStatus": "SUCCESS",
+      "paymentTime": "2026-06-25 21:02:55",
+      "remark": "USDT提现  TRC20 TDLQEEs2tsj2eEFks1os7AH8mqiSjuVye2",
+      "rejectReason": null,
+      "createdAt": "2026-06-25 20:53:20",
+      "updatedAt": "2026-06-25 21:02:55"
+    }
+  ]
 }
 ```
+
+---
+
+### 2.3.1 提现管理-批准
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `PUT` |
+| 路径 | `/fund/withdraw/approved/{id}` |
+| 权限 | `fund:withdraw:list` |
+| Java 对照 | `PUT /fubang/fbwithdraws/approved/{id}` |
+
+**说明**：将 `status`、`payment_status` 置为 `SUCCESS`，写入 `payment_time`；仅非 `SUCCESS` 订单可批准。
+
+---
+
+### 2.3.2 提现管理-拒绝
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `PUT` |
+| 路径 | `/fund/withdraw/rejected` |
+| 权限 | `fund:withdraw:list` |
+| Java 对照 | `PUT /fubang/fbwithdraws/rejected` |
+
+**请求体**：
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| `id` | string | 提现主键 |
+| `remark` | string | 拒绝理由（必填，写入 `reject_reason`） |
+
+**说明**：仅 `PENDING` 可拒绝；拒绝后退回主账户余额并写 `WITHDRAW_FAILED` 流水（`business_no = orderNo + _WITHDRAW_REFUND`）。
 
 ---
 
