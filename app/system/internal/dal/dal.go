@@ -22,8 +22,9 @@ type Dal struct {
 	SysDictDatumDal *SysDictDatumDal
 	SysDictTypeDal  *SysDictTypeDal
 	SysNoticeDal    *SysNoticeDal
-	FbMemberDal     *FbMemberDal
-	FbUserRedisDal  *FbUserRedisDal
+	FbMemberDal      *FbMemberDal
+	FbUserRedisDal   *FbUserRedisDal
+	FbUserWalletDal  *FbUserWalletDal
 }
 
 func NewDal(db *gorm.DB, query *query.Query, c config.Config, rds *redis.Redis) *Dal {
@@ -41,7 +42,8 @@ func NewDal(db *gorm.DB, query *query.Query, c config.Config, rds *redis.Redis) 
 		SysDictDatumDal: NewSysDictDatumDal(db, query),
 		SysDictTypeDal:  NewSysDictTypeDal(db, query),
 		SysNoticeDal:    NewSysNoticeDal(db, query),
-		FbMemberDal:    NewFbMemberDal(db),
-		FbUserRedisDal: NewFbUserRedisDal(rds),
+		FbMemberDal:     NewFbMemberDal(db),
+		FbUserRedisDal:  NewFbUserRedisDal(rds),
+		FbUserWalletDal: NewFbUserWalletDal(db),
 	}
 }

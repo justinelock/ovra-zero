@@ -39,12 +39,17 @@ func (ap *AuditPlugin) Initialize(db *gorm.DB) error {
 	if err := db.Callback().Update().Before("gorm:update").
 		Register("audit:update", func(db *gorm.DB) {
 			userID, ok := getUserID(db)
-			if !ok {
+			if !ok || db.Statement == nil || db.Statement.Schema == nil {
 				return
 			}
 			now := time.Now()
-			db.Statement.SetColumn("UpdateBy", userID)
-			db.Statement.SetColumn("UpdateTime", now)
+			// 仅 sys_* 等带审计字段的表写入；fb_* 业务表无 UpdateBy/UpdateTime 须跳过
+			if db.Statement.Schema.LookUpField("UpdateBy") != nil {
+				db.Statement.SetColumn("UpdateBy", userID)
+			}
+			if db.Statement.Schema.LookUpField("UpdateTime") != nil {
+				db.Statement.SetColumn("UpdateTime", now)
+			}
 		}); err != nil {
 		return err
 	}

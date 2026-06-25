@@ -6,6 +6,7 @@
 ## [未发布]
 
 ### 新增
+- **钱包加减款接口**：新增 `PUT /member/wallet/addOrSubtract`，按 Java `addOrSubtract` 实现加款/减款、流水写入与 flowType 校验（`desc/system/api/member/wallet.api`、`dal/fb_user_wallet.go`、`logic/member/wallet/add_or_subtract_logic.go`）
 - **用户管理接口对接 fb_* 表**：9 个 member 列表/统计/流水接口接入真实查询；新增 `FbMemberDal` 封装多表 JOIN 与聚合（`app/system/internal/dal/fb_member.go`、`app/system/internal/logic/member/`）
 - **报表流水**：新增 `GET /member/report/flow/{userId}` 及前端抽屉展示（`desc/system/api/member/report.api`、`views/member/report/report-flow-drawer.vue`）
 - **gentool fb_* 表**：`gen/system/gen.yaml` 增加 8 张业务表代码生成（`app/system/internal/dal/model/fb_*.gen.go`）
@@ -13,7 +14,7 @@
 ### 变更
 - **用户列表/活跃统计对齐 Java**：USD 钱包余额、profit_log 投信分红、keyword 精确匹配；`onlineStatus` 与 stats 三项改 Redis 全局（`fb_user_redis.go`、`fb_member.go`、`member/user/*_logic.go`）
 - **用户列表表格增强**：真实姓名/邀请码/ID 可复制；余额点开钱包抽屉；投信持仓分红着色；ACTIVE 显示正常（`views/member/list/`）
-- **用户钱包抽屉列对齐 Java**：余额抽屉改为钱包类型/可用余额/冻结金额/券数量/货币，并新增操作列入口（加减款、开关账户、冻解金额、加减券、划转），查询优先透传 `userId`（`views/member/list/user-wallet-drawer.vue`）
+- **用户钱包抽屉列对齐 Java**：余额抽屉改为钱包类型/可用余额/冻结金额/券数量/货币；操作列合并为 ±款、开/关账户、冻/解金额、±抽奖券、划转五组按钮；加减款弹窗支持按加款/减款切换 flowType，并按 `id/type/amount/remark/flowType` 对接 `addOrSubtract`（`views/member/list/user-wallet-drawer.vue`、`wallet-action-modal.vue`、`api/member/wallet/index.ts`）
 - **前端 Vite 代理**：统一 `/api` → Traefik `28080`；网关补全 `/member` 等业务 PathPrefix（`vite.config.ts`、`bin/traefik/dynamic.yaml`）
 - **用户管理契约对齐**：`docs/biz-api.md` 1.1～1.8 字段表与响应 JSON 一致；前端 `api/member`、`views/member` 列字段改为 `username`、`createdAt`、`level1Members` 等（`ruoyi-plus-vben5/apps/web-antd/src/api/member/`、`views/member/`）
 
@@ -44,6 +45,8 @@
 - **前端动画**：页面切换默认改为 `fade` 淡入淡出，并在 `preferences.ts` 补充动画配置说明注释（`ruoyi-plus-vben5/apps/web-antd/src/preferences.ts`）
 
 ### 修复
+- **钱包加减款 Unknown column UpdateBy**：AuditPlugin 更新回调改为仅当表模型含 `UpdateBy`/`UpdateTime` 字段时才写入（`toolkit/gorm/plugin/audit_plugin.go`）
+- **钱包加减款响应**：`addOrSubtract` 改 `OkJsonCtx` 返回 `{code,msg}`，修复前端无法关弹窗（`handler/member/wallet/add_or_subtract_handler.go`）`GET /member/wallet/list` 补充 `userId` 并按 `w.user_id` 精确筛选；`PageWallets` SQL 对齐 Java `selectPageWithUser`（keyword 仅 username/mobile/realName、BETWEEN 时间、status/verified 等）（`dal/fb_member.go`、`wallet.api`）
 - **登录过期**：认证中间件改返回 `{code:401}` JSON，修复仅弹提示不跳转登录页（`toolkit/middlewares/auth_middleware.go`、`ruoyi-plus-vben5/apps/web-antd/src/utils/http/checkStatus.ts`）
 - **部门管理**：新增/编辑接口兼容 `parentId` 数值类型入参，统一转字符串后再反序列化，修复编辑时报 `type mismatch for field "parentId"`（`app/system/internal/handler/system/dept/add_handler.go`、`app/system/internal/handler/system/dept/update_handler.go`）
 - **通知公告**：新增时生成 `notice_id` 雪花主键，修复 Duplicate entry '' for key PRIMARY（`app/system/internal/logic/system/notice/add_logic.go`）

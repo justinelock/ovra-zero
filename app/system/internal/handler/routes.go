@@ -871,6 +871,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Path:    "/list",
 					Handler: memberwallet.PageSetHandler(serverCtx),
 				},
+				{
+					Method:  http.MethodPut,
+					Path:    "/addOrSubtract",
+					Handler: memberwallet.AddOrSubtractHandler(serverCtx),
+				},
 			}...,
 		),
 		rest.WithPrefix("/member/wallet"),

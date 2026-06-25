@@ -1099,10 +1099,16 @@ type PageSetMemberKycResp struct {
 }
 
 type MemberWalletQuery struct {
-	Keyword      string `form:"keyword,optional"`      // 用户名/手机号/钱包ID
-	AccountType  string `form:"accountType,optional"`  // main / sub
-	Currency     string `form:"currency,optional"`     // USD / CNY
-	FrozenStatus string `form:"frozenStatus,optional"` // 1 冻结 / 0 正常
+	Keyword      string `form:"keyword,optional"`      // 用户名/手机号/真实姓名模糊
+	UserId       string `form:"userId,optional"`       // w.user_id 精确
+	AccountType  string `form:"accountType,optional"`  // 对应 Java type → w.account_type
+	Status       string `form:"status,optional"`       // u.status
+	Verified     string `form:"verified,optional"`     // u.verified
+	Username     string `form:"username,optional"`     // u.username LIKE
+	Mobile       string `form:"mobile,optional"`       // u.mobile LIKE
+	RealName     string `form:"realName,optional"`     // u.real_name LIKE
+	Currency     string `form:"currency,optional"`     // 扩展：w.currency
+	FrozenStatus string `form:"frozenStatus,optional"` // 扩展：w.frozen
 }
 
 type PageSetMemberWalletReq struct {
@@ -1130,6 +1136,14 @@ type MemberWalletItem struct {
 type PageSetMemberWalletResp struct {
 	Rows  []*MemberWalletItem `json:"rows"`
 	Total int64               `json:"total"`
+}
+
+type MemberWalletAddOrSubtractReq struct {
+	Id       string  `json:"id"`                // 钱包 id（fb_user_wallets.id）
+	Type     bool    `json:"type"`              // true=加款，false=减款
+	Amount   float64 `json:"amount"`            // 金额（正数，服务端取绝对值）
+	Remark   string  `json:"remark,optional"`   // 备注；空则默认「后台调整加/减款」
+	FlowType string  `json:"flowType,optional"` // ADD_AMOUNT/ADD_BONUS/ADD_DIVIDEND/ADD_TRANSFER 或 SUBTRACT_AMOUNT/ADD_TRANSFER
 }
 
 type MemberReportQuery struct {

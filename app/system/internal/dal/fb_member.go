@@ -171,45 +171,85 @@ type memberWalletRow struct {
 	UpdatedAt    time.Time
 }
 
-// PageWallets 钱包分页
-func (d *FbMemberDal) PageWallets(ctx context.Context, f MemberListFilter, accountType, currency, frozenStatus string) (rows []memberWalletRow, total int64, err error) {
+// WalletPageQuery 钱包列表筛选（对齐 Java selectPageWithUser）
+type WalletPageQuery struct {
+	Keyword      string
+	UserId       string
+	AccountType  string
+	Status       string
+	Verified     string
+	Username     string
+	Mobile       string
+	RealName     string
+	Currency     string
+	FrozenStatus string
+	BeginTime    string
+	EndTime      string
+	PageNum      int64
+	PageSize     int64
+}
+
+// PageWallets 钱包分页（SQL 对齐 Java FbUserWalletsDao.selectPageWithUser）
+func (d *FbMemberDal) PageWallets(ctx context.Context, q WalletPageQuery) (rows []memberWalletRow, total int64, err error) {
 	where := []string{"1=1"}
 	var args []any
-	if f.Keyword != "" {
-		where = append(where, "(u.username LIKE ? OR u.mobile LIKE ? OR u.real_name LIKE ? OR CAST(w.id AS CHAR) LIKE ?)")
-		kw := "%" + f.Keyword + "%"
-		args = append(args, kw, kw, kw, kw)
+	if q.UserId != "" {
+		where = append(where, "w.user_id = ?")
+		args = append(args, q.UserId)
 	}
-	if accountType != "" {
+	if q.Status != "" {
+		where = append(where, "u.status = ?")
+		args = append(args, q.Status)
+	}
+	if q.Verified != "" {
+		where = append(where, "u.verified = ?")
+		args = append(args, q.Verified)
+	}
+	if q.AccountType != "" {
 		where = append(where, "w.account_type = ?")
-		args = append(args, accountType)
+		args = append(args, q.AccountType)
 	}
-	if currency != "" {
+	// Java：startTime/endTime 同时存在时用 BETWEEN
+	if q.BeginTime != "" && q.EndTime != "" {
+		where = append(where, "w.created_at BETWEEN ? AND ?")
+		args = append(args, q.BeginTime, q.EndTime)
+	}
+	if q.Keyword != "" {
+		where = append(where, "(u.username LIKE ? OR u.mobile LIKE ? OR u.real_name LIKE ?)")
+		kw := "%" + q.Keyword + "%"
+		args = append(args, kw, kw, kw)
+	}
+	if q.Username != "" {
+		where = append(where, "u.username LIKE ?")
+		args = append(args, "%"+q.Username+"%")
+	}
+	if q.Mobile != "" {
+		where = append(where, "u.mobile LIKE ?")
+		args = append(args, "%"+q.Mobile+"%")
+	}
+	if q.RealName != "" {
+		where = append(where, "u.real_name LIKE ?")
+		args = append(args, "%"+q.RealName+"%")
+	}
+	// 以下为 Go 钱包管理页扩展筛选（Java selectPageWithUser 无此项）
+	if q.Currency != "" {
 		where = append(where, "w.currency = ?")
-		args = append(args, currency)
+		args = append(args, q.Currency)
 	}
-	if frozenStatus != "" {
+	if q.FrozenStatus != "" {
 		where = append(where, "w.frozen = ?")
-		args = append(args, frozenStatus == "1" || frozenStatus == "true")
-	}
-	if f.BeginTime != "" {
-		where = append(where, "w.created_at >= ?")
-		args = append(args, f.BeginTime)
-	}
-	if f.EndTime != "" {
-		where = append(where, "w.created_at <= ?")
-		args = append(args, f.EndTime)
+		args = append(args, q.FrozenStatus == "1" || q.FrozenStatus == "true")
 	}
 	w := strings.Join(where, " AND ")
 	base := `FROM fb_user_wallets w LEFT JOIN fb_users u ON u.id = w.user_id WHERE ` + w
 	if err = d.db.WithContext(ctx).Raw("SELECT COUNT(*) "+base, args...).Scan(&total).Error; err != nil {
 		return nil, 0, errx.GORMErr(err)
 	}
-	offset := (f.PageNum - 1) * f.PageSize
+	offset := (q.PageNum - 1) * q.PageSize
 	listSQL := `SELECT w.id, w.user_id, u.username, u.mobile, u.real_name, w.account_type,
   		w.balance, w.frozen_amount, w.frozen, w.version, w.currency, w.draw_ticket, w.created_at, w.updated_at ` +
 		base + " ORDER BY w.created_at DESC LIMIT ? OFFSET ?"
-	listArgs := append(append([]any{}, args...), f.PageSize, offset)
+	listArgs := append(append([]any{}, args...), q.PageSize, offset)
 	if err = d.db.WithContext(ctx).Raw(listSQL, listArgs...).Scan(&rows).Error; err != nil {
 		return nil, 0, errx.GORMErr(err)
 	}

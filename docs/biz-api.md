@@ -69,6 +69,7 @@ GET /member/user/list?pageNum=1&pageSize=10
 | 用户管理 | 活跃用户统计 | GET | `/member/user/stats` | `member:list:list` |
 | 用户管理 | 实名认证 | GET | `/member/kyc/list` | `member:kyc:list` |
 | 用户管理 | 钱包管理 | GET | `/member/wallet/list` | `member:wallet:list` |
+| 用户管理 | 钱包加减款 | PUT | `/member/wallet/addOrSubtract` | `member:wallet:list` |
 | 用户管理 | 用户报表 | GET | `/member/report/list` | `member:report:list` |
 | 用户管理 | 团队管理 | GET | `/member/team/list` | `member:team:list` |
 | 用户管理 | 团队统计 | GET | `/member/team/stats` | `member:team:list` |
@@ -277,10 +278,17 @@ GET /member/user/list?pageNum=1&pageSize=10
 
 | 参数 | 类型 | 说明 |
 | --- | --- | --- |
-| `keyword` | string | 关键词 |
-| `accountType` | string | 账户类型 |
-| `currency` | string | 币种 |
-| `frozenStatus` | string | 冻结状态 |
+| `userId` | string | 用户 id（`w.user_id`，抽屉必传） |
+| `keyword` | string | 用户名/手机号/真实姓名模糊（对齐 Java） |
+| `accountType` | string | 账户类型（Java `type` → `w.account_type`） |
+| `status` | string | 用户状态 `u.status` |
+| `verified` | string | 认证状态 `u.verified` |
+| `username` | string | 用户名模糊 |
+| `mobile` | string | 手机号模糊 |
+| `realName` | string | 真实姓名模糊 |
+| `currency` | string | 币种（Go 扩展） |
+| `frozenStatus` | string | 冻结状态（Go 扩展） |
+| `params[beginTime]` / `params[endTime]` | string | 创建时间区间（同时传时用 BETWEEN） |
 
 **`rows[]` 字段**：
 
@@ -328,6 +336,45 @@ GET /member/user/list?pageNum=1&pageSize=10
   ]
 }
 ```
+
+#### 1.4.1 钱包加减款
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `PUT` |
+| 路径 | `/member/wallet/addOrSubtract` |
+| 权限 | `member:wallet:list`（待细化为 update 权限） |
+| API 定义 | `desc/system/api/member/wallet.api` |
+| 对齐 Java | `PUT /fubang/fbuserwallets/addOrSubtract` |
+
+**请求体**（`MemberWalletAddOrSubtractReq`）：
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| `id` | string | 钱包 id（`fb_user_wallets.id`） |
+| `type` | bool | `true`=加款，`false`=减款 |
+| `amount` | float64 | 金额（正数，服务端取绝对值） |
+| `remark` | string | 备注；空则默认「后台调整加/减款」 |
+| `flowType` | string | 加款：`ADD_AMOUNT`/`ADD_BONUS`/`ADD_DIVIDEND`/`ADD_TRANSFER`；减款：`SUBTRACT_AMOUNT`/`ADD_TRANSFER` |
+
+**行为**：
+
+- `type=true`：调用 `FbUserWalletDal.AddBalance`，更新余额并写入 `fb_account_flow_records`
+- `type=false`：调用 `FbUserWalletDal.ReduceBalance`，校验余额后扣款并写流水
+
+**请求示例**：
+
+```json
+{
+  "id": "9",
+  "type": true,
+  "amount": 100.5,
+  "remark": "活动补款",
+  "flowType": "ADD_BONUS"
+}
+```
+
+**响应**：`{ "code": 200, "msg": "操作成功" }`（与通知公告等 PUT 接口一致）
 
 ---
 

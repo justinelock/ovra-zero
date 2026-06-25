@@ -28,16 +28,25 @@ func NewPageSetLogic(ctx context.Context, svcCtx *svc.ServiceContext) *PageSetLo
 	}
 }
 
-// PageSet 分页查询 fb_user_wallets 并联用户信息
+// PageSet 分页查询 fb_user_wallets 并联用户信息（对齐 Java selectPageWithUser）
 func (l *PageSetLogic) PageSet(req *types.PageSetMemberWalletReq) (resp *types.PageSetMemberWalletResp, err error) {
-	f := dal.MemberListFilter{
-		Keyword:   req.Keyword,
-		BeginTime: req.BeginTime,
-		EndTime:   req.EndTime,
-		PageNum:   req.PageNum,
-		PageSize:  req.PageSize,
+	q := dal.WalletPageQuery{
+		Keyword:      req.Keyword,
+		UserId:       req.UserId,
+		AccountType:  req.AccountType,
+		Status:       req.Status,
+		Verified:     req.Verified,
+		Username:     req.Username,
+		Mobile:       req.Mobile,
+		RealName:     req.RealName,
+		Currency:     req.Currency,
+		FrozenStatus: req.FrozenStatus,
+		BeginTime:    req.BeginTime,
+		EndTime:      req.EndTime,
+		PageNum:      req.PageNum,
+		PageSize:     req.PageSize,
 	}
-	rows, total, err := l.svcCtx.Dal.FbMemberDal.PageWallets(l.ctx, f, req.AccountType, req.Currency, req.FrozenStatus)
+	rows, total, err := l.svcCtx.Dal.FbMemberDal.PageWallets(l.ctx, q)
 	if err != nil {
 		return nil, err
 	}
