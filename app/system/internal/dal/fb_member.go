@@ -330,38 +330,6 @@ func (d *FbMemberDal) PageTeams(ctx context.Context, f MemberListFilter) (rows [
 	return rows, total, nil
 }
 
-// TeamStats 团队代理统计（按 fb_users.level 1～5 分层计数）
-func (d *FbMemberDal) TeamStats(ctx context.Context, f MemberListFilter) (levels [6]int64, totalMembers int64, totalBalance float64, err error) {
-	where, args := d.userWhere(f)
-	if f.Status != "" {
-		where += " AND u.status = ?"
-		args = append(args, f.Status)
-	}
-	type levelRow struct {
-		Level int32
-		Cnt   int64
-	}
-	var lr []levelRow
-	if err = d.db.WithContext(ctx).Raw(
-		"SELECT u.level, COUNT(*) AS cnt FROM fb_users u WHERE "+where+" GROUP BY u.level", args...,
-	).Scan(&lr).Error; err != nil {
-		return levels, 0, 0, errx.GORMErr(err)
-	}
-	for _, r := range lr {
-		totalMembers += r.Cnt
-		if r.Level >= 1 && r.Level <= 5 {
-			levels[r.Level] = r.Cnt
-		}
-	}
-	if err = d.db.WithContext(ctx).Raw(`
-		SELECT COALESCE(SUM(w.balance), 0) FROM fb_user_wallets w
-		INNER JOIN fb_users u ON u.id = w.user_id WHERE `+where, args...,
-	).Scan(&totalBalance).Error; err != nil {
-		return levels, 0, 0, errx.GORMErr(err)
-	}
-	return levels, totalMembers, totalBalance, nil
-}
-
 type memberLoginLogRow struct {
 	ID            int64
 	UserID        int64

@@ -14,6 +14,7 @@
 - **团队管理写操作响应**：`PUT /member/team/changeParent`、`PUT /member/team/agentLevel` 改 `OkJsonCtx` 返回 `data`（`{userId,parentId}` / `{userId,agentLevel}`），修复 `httpx.Ok` 无 body 导致弹窗提交后不关闭（`team/*_handler.go`、`*-modal.vue`）
 
 ### 变更
+- **团队统计**：`GET /member/team/stats` 对齐 Java `getTeamStatsAll`（keyword 定位根用户、parent_id 树计数、agent_level 截断与下级余额汇总）；stats 仅 keyword（`fb_team.go`、`stats_logic.go`、`biz-api.md` 1.7）
 - **更换上级弹窗**：展示只读上级 ID + 可编辑上级用户名；`PUT /member/team/changeParent` 改按 `username` 查上级（对齐 Java `changeAgent`）（`team-change-parent-modal.vue`、`fb_team.go`）
 - **团队管理代理层级**：`PUT /member/team/agentLevel` 对齐 Java `FbUsersServiceImpl.updateAgentLevel`（校验文案、`updated_at`）；下级团队列表深度随 `agent_level` 限制（`fb_team.go`）
 - **团队管理代理层级弹窗**：代理层级 label 左对齐，Radio 选项单行展示（`team-agent-level-modal.vue`）

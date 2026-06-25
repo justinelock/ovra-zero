@@ -964,23 +964,45 @@ GET /member/user/list?pageNum=1&pageSize=10
 | 路径 | `/member/team/stats` |
 | 权限 | `member:team:list` |
 | API 定义 | `desc/system/api/member/team.api` |
+| Java 对照 | `GET /fubang/fbteam/stats`（`TeamServiceImpl.getTeamStatsAll`） |
 | 响应实体 | `MemberTeamStatsResp`（在 `data` 内） |
 
-**查询参数**：同团队列表（`keyword`、`status`）。
+**查询参数**：
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `keyword` | string | 可选；模糊匹配 `username` / `mobile` / `id_card` / `real_name`，`LIMIT 1` 定位**统计根用户**；无 keyword 或无匹配时走**全局统计** |
+
+> **注意**：stats **仅使用 `keyword`**，不使用 `status`、注册时间等列表筛选（与 Java 一致）。
+
+**统计逻辑**（对齐 Java `getTeamStatsAll`）：
+
+1. **无根用户**（无 keyword 或未匹配到用户）  
+   - 人数：`parent_id IS NULL` 的顶层用户为 `level1Members`，其后代依次为 level2～5（`parent_id` 树 LEFT JOIN）  
+   - 余额：`fb_user_wallets` 全库 `SUM(balance)`
+
+2. **有根用户**（keyword 命中）  
+   - 读取根用户 `agent_level` 并归一化为 3/4/5  
+   - 人数：以该用户为根的子树统计（`level1`=直属下级 `l2`，…，`level5`=第五代 `l6`）  
+   - 按 `agent_level` 截断：`agent_level<4` 时 `level4Members=0`；`<5` 时 `level5Members=0`，并重算 `totalMembers`  
+   - 余额：仅汇总该用户 `agent_level` 深度内**全部下级**钱包余额（不含根用户本人）
+
+**`level1Members` 语义**：
+
+| 模式 | 含义 |
+| --- | --- |
+| 全局（无 keyword） | 顶层代理用户数（`parent_id IS NULL`） |
+| 指定用户（有 keyword） | 该用户的直属下级人数 |
 
 **`data` 字段**：
 
 | 字段 | 类型 | 说明 |
 | --- | --- | --- |
-| `totalMembers` | int64 | 成员总数 |
-| `level1Members` | int64 | 一级代理数 |
-| `level2Members` | int64 | 二级代理数 |
-| `level3Members` | int64 | 三级代理数 |
-| `level4Members` | int64 | 四级代理数 |
-| `level5Members` | int64 | 五级代理数 |
-| `totalTeamBalance` | float64 | 团队总余额 |
+| `totalMembers` | int64 | 各级人数之和（截断后） |
+| `level1Members` ~ `level5Members` | int64 | 相对团队树第 1～5 层人数 |
+| `totalTeamBalance` | float64 | 全库或下级钱包余额总和 |
 
-**响应示例**（待补充）：
+**响应示例**：
 
 ```json
 {

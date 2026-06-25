@@ -1334,12 +1334,12 @@ type MemberTeamAgent struct {
 
 type MemberTeamStatsResp struct {
 	TotalMembers     int64   `json:"totalMembers"`
-	Level1Members    int64   `json:"level1Members"` // level=1 用户数
+	Level1Members    int64   `json:"level1Members"` // parent_id 树一级；全局时为顶层用户数
 	Level2Members    int64   `json:"level2Members"`
 	Level3Members    int64   `json:"level3Members"`
 	Level4Members    int64   `json:"level4Members"`
 	Level5Members    int64   `json:"level5Members"`
-	TotalTeamBalance float64 `json:"totalTeamBalance"` // 筛选范围内钱包余额总和
+	TotalTeamBalance float64 `json:"totalTeamBalance"` // 全库或根用户下级钱包余额总和
 }
 
 type MemberTeamItem struct {

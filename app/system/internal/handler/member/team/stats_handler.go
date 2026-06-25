@@ -20,6 +20,7 @@ func StatsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
+		// stats 仅 keyword 参与统计；status 等列表筛选项在此忽略
 		l := team.NewStatsLogic(r.Context(), svcCtx)
 		resp, err := l.Stats(&req)
 		if err != nil {
