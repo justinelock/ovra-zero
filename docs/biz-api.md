@@ -527,8 +527,26 @@ GET /member/user/list?pageNum=1&pageSize=10
 
 | 参数 | 类型 | 说明 |
 | --- | --- | --- |
-| `keyword` | string | 关键词 |
-| `level` | string | 用户等级 |
+| `keyword` | string | 用户名/手机号/真实姓名**精确**匹配（`u.username` / `u.mobile` / `u.real_name`） |
+| `level` | string | 用户等级 `u.level` |
+| `status` | string | 用户状态 `u.status` |
+| `verified` | string | 认证状态 `u.verified` |
+| `orderField` | string | 排序字段：`created_at`（默认）/ `last_login` / `level` / `username` |
+| `order` | string | `asc` / `desc`，默认 `desc` |
+| `params[beginTime]` / `params[endTime]` | string | 注册时间范围；**同时传**时 `u.created_at BETWEEN` |
+
+**查询逻辑**：阶段 1 分页查 `fb_users`（`flag=0`）；阶段 2 对当前页 `userIds` 批量聚合（对齐 Java `FbUserReportServiceImpl.getPageData`）：
+
+| 响应字段 | 数据来源 |
+| --- | --- |
+| `amount` | `fb_user_wallets` `SUM(balance)` |
+| `rechargeAmount` | `fb_deposits` `status='SUCCESS'` `SUM(amount)` |
+| `withdrawAmount` | `fb_withdraws` `status='SUCCESS'` `SUM(amount)` |
+| `rechargeDiff` | `rechargeAmount - withdrawAmount` |
+| `totalProfit` | `fb_profit_records` `SUM(amount)` |
+| `teamCount` | `fb_users` 直属下级 `parent_id IN (...)` 且 `flag=0` |
+| `loginIp` | `fb_device_login_log` 按 `MAX(login_time)` 取最近 IP |
+| `parentUser` | `fb_users` 按 `parent_id` 批量查上级 |
 
 **`rows[]` 字段**：
 
@@ -544,8 +562,8 @@ GET /member/user/list?pageNum=1&pageSize=10
 | `rechargeAmount` | float64 | 累计充值 |
 | `withdrawAmount` | float64 | 累计提现 |
 | `rechargeDiff` | float64 | 充提差 |
-| `totalProfit` | float64 | 累计盈亏 |
-| `teamCount` | int64 | 团队人数 |
+| `totalProfit` | float64 | 累计盈亏（`fb_profit_records`） |
+| `teamCount` | int64 | 直属下级人数（非 `team_size`） |
 | `registerTime` | string | 注册时间 |
 | `lastLogin` | string | 最后登录 |
 | `loginIp` | string | 登录 IP |
@@ -595,6 +613,20 @@ GET /member/user/list?pageNum=1&pageSize=10
 | 行实体 | `MemberReportFlowItem` |
 
 **路径参数**：`userId` — 业务用户 ID。
+
+**查询参数**（对齐 Java `fbaccountflowrecords/page`）：
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `status` | string | 交易状态 `f.status` |
+| `type` | string | 交易类型 `f.flow_type` |
+| `keyword` | string | 用户名/手机/姓名/业务单号模糊 |
+| `username` | string | 用户名模糊 |
+| `mobile` | string | 手机号模糊 |
+| `realName` | string | 真实姓名模糊 |
+| `params[beginTime]` / `params[endTime]` | string | 交易时间范围；同时传时 `f.created_at BETWEEN` |
+
+**查询逻辑**：`fb_account_flow_records f LEFT JOIN fb_users u`，`ORDER BY f.created_at DESC`。
 
 **`rows[]` 字段**：
 

@@ -1232,8 +1232,13 @@ type MemberWalletAddOrSubtractReq struct {
 }
 
 type MemberReportQuery struct {
-	Keyword string `form:"keyword,optional"` // 用户名/手机号/用户ID
-	Level   string `form:"level,optional"`   // 用户等级 0～5
+	Keyword    string `form:"keyword,optional"`    // 用户名/手机号/真实姓名精确匹配
+	Username   string `form:"username,optional"`   // 预留（Java wrapper 已注释）
+	Level      string `form:"level,optional"`      // fb_users.level
+	Status     string `form:"status,optional"`     // fb_users.status
+	Verified   string `form:"verified,optional"`   // fb_users.verified
+	OrderField string `form:"orderField,optional"` // 排序字段：created_at/last_login/level/username
+	Order      string `form:"order,optional"`      // asc/desc
 }
 
 type PageSetMemberReportReq struct {
@@ -1257,8 +1262,8 @@ type MemberReportItem struct {
 	RechargeAmount float64                 `json:"rechargeAmount,optional"` // 成功充值汇总
 	WithdrawAmount float64                 `json:"withdrawAmount,optional"` // 成功提现汇总
 	RechargeDiff   float64                 `json:"rechargeDiff,optional"`   // 充提差
-	TotalProfit    float64                 `json:"totalProfit,optional"`    // 累计盈亏（预留）
-	TeamCount      int64                   `json:"teamCount,optional"`      // fb_users.team_size
+	TotalProfit    float64                 `json:"totalProfit,optional"`    // fb_profit_records 累计 SUM(amount)
+	TeamCount      int64                   `json:"teamCount,optional"`      // 直属下级人数 parent_id + flag=0
 	RegisterTime   string                  `json:"registerTime,optional"`
 	LastLogin      string                  `json:"lastLogin,optional"`
 	LoginIp        string                  `json:"loginIp,optional"` // 最近登录 IP
@@ -1270,9 +1275,19 @@ type PageSetMemberReportResp struct {
 	Total int64               `json:"total"`
 }
 
+type MemberReportFlowQuery struct {
+	Status   string `form:"status,optional"`   // f.status
+	Type     string `form:"type,optional"`     // f.flow_type（Java 参数名 type）
+	Keyword  string `form:"keyword,optional"`  // 用户名/手机/姓名/业务单号模糊
+	Username string `form:"username,optional"`
+	Mobile   string `form:"mobile,optional"`
+	RealName string `form:"realName,optional"`
+}
+
 type PageSetMemberReportFlowReq struct {
 	PageReq
 	UserId string `path:"userId"`
+	MemberReportFlowQuery
 }
 
 type MemberReportFlowItem struct {

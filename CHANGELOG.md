@@ -6,6 +6,8 @@
 ## [未发布]
 
 ### 变更
+- **用户报表流水抽屉**：`GET /member/report/flow/{userId}` 查询对齐 Java `selectPageWithUser`；抽屉 9 列与「{姓名}的流水记录」标题（`fb_report.go`、`report-flow-drawer.vue`）
+- **用户报表列表**：`GET /member/report/list` 两阶段对齐 Java `getPageData`（批量聚合余额/充提/盈亏/团队/登录 IP）（`fb_report.go`、`report.api`）
 - **表格用户名列复制**：抽取 `renderCopyableValue`/`copyText` 公共工具，所有含「用户名」列的 member/biz 列表均支持一键复制（`utils/render-copyable.tsx`、`views/**/data.tsx`）
 - **实名认证列表查询**：`GET /member/kyc/list` 对齐 Java `selectPageWithUser`（JOIN 字段、keyword/idCardNo/BETWEEN 时间等）（`fb_member.go`、`kyc.api`）
 - **操作列按钮间距**：新增全局 `TableActionSpace`（2px），替换各页 `#action` 内默认 8px `Space`（`components/global/table-action-space.vue`、各 `views/**/index.vue`）

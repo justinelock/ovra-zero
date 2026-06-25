@@ -28,17 +28,22 @@ func NewPageSetLogic(ctx context.Context, svcCtx *svc.ServiceContext) *PageSetLo
 	}
 }
 
-// PageSet 分页查询用户报表（充值/提现/余额/上级）
+// PageSet 分页查询用户报表（两阶段：用户分页 + 批量聚合，对齐 Java getPageData）
 func (l *PageSetLogic) PageSet(req *types.PageSetMemberReportReq) (resp *types.PageSetMemberReportResp, err error) {
-	f := dal.MemberListFilter{
-		Keyword:   req.Keyword,
-		Level:     req.Level,
-		BeginTime: req.BeginTime,
-		EndTime:   req.EndTime,
-		PageNum:   req.PageNum,
-		PageSize:  req.PageSize,
+	q := dal.ReportPageQuery{
+		Keyword:    req.Keyword,
+		Username:   req.Username,
+		Level:      req.Level,
+		Status:     req.Status,
+		Verified:   req.Verified,
+		BeginTime:  req.BeginTime,
+		EndTime:    req.EndTime,
+		OrderField: req.OrderField,
+		Order:      req.Order,
+		PageNum:    req.PageNum,
+		PageSize:   req.PageSize,
 	}
-	rows, total, err := l.svcCtx.Dal.FbMemberDal.PageReports(l.ctx, f)
+	rows, total, err := l.svcCtx.Dal.FbMemberDal.PageReports(l.ctx, q)
 	if err != nil {
 		return nil, err
 	}

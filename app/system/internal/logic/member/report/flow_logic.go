@@ -28,15 +28,22 @@ func NewFlowLogic(ctx context.Context, svcCtx *svc.ServiceContext) *FlowLogic {
 	}
 }
 
-// Flow 按 userId 分页查询 fb_account_flow_records
+// Flow 按 userId 分页查询 fb_account_flow_records（对齐 Java selectPageWithUser）
 func (l *FlowLogic) Flow(req *types.PageSetMemberReportFlowReq) (resp *types.PageSetMemberReportFlowResp, err error) {
-	f := dal.MemberListFilter{
+	q := dal.AccountFlowPageQuery{
+		UserID:    req.UserId,
+		Status:    req.Status,
+		FlowType:  req.Type,
+		Keyword:   req.Keyword,
+		Username:  req.Username,
+		Mobile:    req.Mobile,
+		RealName:  req.RealName,
 		BeginTime: req.BeginTime,
 		EndTime:   req.EndTime,
 		PageNum:   req.PageNum,
 		PageSize:  req.PageSize,
 	}
-	rows, total, err := l.svcCtx.Dal.FbMemberDal.PageReportFlow(l.ctx, req.UserId, f)
+	rows, total, err := l.svcCtx.Dal.FbMemberDal.PageAccountFlow(l.ctx, q)
 	if err != nil {
 		return nil, err
 	}
