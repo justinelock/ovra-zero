@@ -1605,22 +1605,108 @@ GET /member/user/list?pageNum=1&pageSize=10
 | 路径 | `/fund/recharge/list` |
 | 权限 | `fund:recharge:list` |
 | API 定义 | `desc/system/api/fund/recharge.api` |
+| Java 对照 | `GET /fubang/fbdeposits/page` |
 | 行实体 | `FundRechargeItem` |
 
-**查询参数**：`keyword`、`status`
+**查询参数**（对齐 Java `selectPageWithUser`）：
 
-**`rows[]` 字段**：`id`、`userName`、`phoneNumber`、`realName`、`rechargeAmount`、`status`、`rechargeImage`、`remark`、`createTime`、`updateTime`
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `keyword` | string | 用户名/手机/姓名/订单号模糊 |
+| `status` | string | `d.status`：`PENDING` / `REVIEWING` / `SUCCESS` / `CANCELLED` |
+| `username` | string | 用户名模糊 |
+| `mobile` | string | 手机号模糊 |
+| `realName` | string | 真实姓名模糊 |
+| `params[beginTime]` / `params[endTime]` | string | 创建时间；同时传时 `d.created_at BETWEEN` |
 
-**响应示例**（待补充）：
+**查询逻辑**：`fb_deposits d LEFT JOIN fb_users u`，`ORDER BY d.created_at DESC`。
+
+**`rows[]` 字段**：
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| `id` | string | 充值主键 |
+| `userId` | string | 用户 ID |
+| `username` | string | 用户名 |
+| `mobile` | string | 手机号 |
+| `realName` | string | 真实姓名 |
+| `orderNo` | string | 订单号 |
+| `amount` | float64 | 充值金额 |
+| `status` | string | 状态 |
+| `paymentMethod` | string | 支付方式 |
+| `paymentStatus` | string | 支付状态 |
+| `paymentNo` | string | 支付流水号 |
+| `paymentTime` | string | 支付时间 |
+| `remark` | string | 备注/拒绝理由 |
+| `currency` | string | 币种 |
+| `targetAccount` | string | 目标账户（`MAIN` / `FOREX` 等） |
+| `screenshot` | string | 充值截图路径 |
+| `createdAt` / `updatedAt` | string | 创建/更新时间 |
+
+**响应示例**：
 
 ```json
 {
   "code": 200,
   "msg": "操作成功",
   "total": 0,
-  "rows": []
+  "rows": [
+    {
+      "id": "2067607428763561985",
+      "userId": "2067602058431246337",
+      "username": "chen258369",
+      "mobile": null,
+      "realName": "陈苗",
+      "orderNo": "D17817909999280d1ca0",
+      "amount": 1000.00,
+      "status": "SUCCESS",
+      "paymentMethod": "USDT",
+      "paymentStatus": "SUCCESS",
+      "paymentNo": null,
+      "paymentTime": "2026-06-18 21:57:47",
+      "remark": null,
+      "currency": "USDT",
+      "targetAccount": "MAIN",
+      "screenshot": "/deposit/a479f238ff3147e3afabcb0f11f4fb94_D17817909999280d1ca0_USDT_USDT_MAIN.jpeg",
+      "createdAt": "2026-06-18 21:56:40",
+      "updatedAt": "2026-06-18 21:57:47"
+    }
+  ]
 }
 ```
+
+---
+
+### 2.4.1 充值管理-批准
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `PUT` |
+| 路径 | `/fund/recharge/approved/{id}` |
+| 权限 | `fund:recharge:list` |
+| Java 对照 | `PUT /fubang/fbdeposits/approved/{id}` |
+
+**说明**：仅 `PENDING` / `REVIEWING` 可批准；先按 `userId` + `currency` + `targetAccount` 入账并写 `DEPOSIT` 流水（`business_no = orderNo`），再将 `status`、`payment_status` 置为 `SUCCESS`，写入 `payment_time`。
+
+---
+
+### 2.4.2 充值管理-拒绝
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `PUT` |
+| 路径 | `/fund/recharge/rejected` |
+| 权限 | `fund:recharge:list` |
+| Java 对照 | `PUT /fubang/fbdeposits/rejected` |
+
+**请求体**：
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| `id` | string | 充值主键 |
+| `remark` | string | 拒绝理由（必填，写入 `remark`） |
+
+**说明**：仅 `PENDING` / `REVIEWING` 可拒绝；`status`、`payment_status` 置为 `CANCELLED`（充值未入账，不退款）。
 
 ---
 

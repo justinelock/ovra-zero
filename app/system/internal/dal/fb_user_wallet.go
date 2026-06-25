@@ -227,6 +227,122 @@ func genWalletBusinessNo(prefix string) string {
 	return fmt.Sprintf("%s_%d%s", prefix, time.Now().UnixMilli(), hex.EncodeToString(buf))
 }
 
+// resolveDepositWalletCurrency 充值订单币种 → 入账钱包币种（对齐 Java resolveWalletCurrency）
+func resolveDepositWalletCurrency(depositCurrency, accountType string) string {
+	cur := strings.ToUpper(strings.TrimSpace(depositCurrency))
+	if cur == "" {
+		return "USD"
+	}
+	if accountType == "main" && cur == "USDT" {
+		return "USD"
+	}
+	return cur
+}
+
+// resolveDepositCreditAmount 充值金额 → 钱包入账金额（USDT 主账户按 1:1 写入 USD）
+func resolveDepositCreditAmount(amount float64, depositCurrency, walletCurrency string) float64 {
+	if strings.EqualFold(depositCurrency, walletCurrency) {
+		return amount
+	}
+	if strings.EqualFold(depositCurrency, "USDT") && strings.EqualFold(walletCurrency, "USD") {
+		return amount
+	}
+	return amount
+}
+
+// depositCreditTx 充值批准入账：按目标账户+币种定位钱包，加款并写 DEPOSIT 流水
+func depositCreditTx(tx *gorm.DB, userID int64, amount float64, businessNo, remark, currency, targetAccount string) error {
+	amount = math.Abs(amount)
+	if userID <= 0 || amount <= 0 {
+		return errx.BizErr("充值入账参数无效")
+	}
+	if strings.TrimSpace(currency) == "" || strings.TrimSpace(targetAccount) == "" {
+		return errx.BizErr("充值入账缺少币种或目标账户")
+	}
+	if strings.TrimSpace(businessNo) == "" {
+		return errx.BizErr("业务单号不能为空")
+	}
+	var cnt int64
+	if err := tx.Raw(`SELECT COUNT(*) FROM fb_account_flow_records WHERE business_no = ?`, businessNo).Scan(&cnt).Error; err != nil {
+		return errx.GORMErr(err)
+	}
+	if cnt > 0 {
+		return errx.BizErr("资金流水已存在")
+	}
+	accountType := mapTargetAccountType(targetAccount)
+	walletCurrency := resolveDepositWalletCurrency(currency, accountType)
+	creditAmount := resolveDepositCreditAmount(amount, currency, walletCurrency)
+
+	wallet, err := lockWalletByUserAccount(tx, userID, accountType, walletCurrency)
+	if err != nil {
+		// 钱包不存在时自动补建（对齐 Java ensureWallet）
+		wallet, err = createWalletTx(tx, userID, accountType, walletCurrency)
+		if err != nil {
+			return err
+		}
+	}
+	if wallet.Frozen {
+		return errx.BizErr("充值入账失败：钱包已冻结")
+	}
+	before := wallet.Balance
+	after := before + creditAmount
+	now := time.Now()
+	if err := tx.Model(&model.FbUserWallet{}).Where("id = ?", wallet.ID).Updates(map[string]any{
+		"balance":    after,
+		"updated_at": now,
+	}).Error; err != nil {
+		return errx.GORMErr(err)
+	}
+	flow := &model.FbAccountFlowRecord{
+		UserID:       wallet.UserID,
+		AccountType:  wallet.AccountType,
+		FlowType:     "DEPOSIT",
+		BeforeAmount: before,
+		FlowAmount:   creditAmount,
+		AfterAmount:  after,
+		BusinessNo:   businessNo,
+		Remark:       remark,
+		CreatedAt:    now,
+		WalletID:     wallet.ID,
+		Currency:     wallet.Currency,
+		Description:  remark,
+		Status:       "SUCCESS",
+	}
+	if err := tx.Create(flow).Error; err != nil {
+		return errx.BizErr("资金流水写入失败")
+	}
+	return nil
+}
+
+func lockWalletByUserAccount(tx *gorm.DB, userID int64, accountType, currency string) (*model.FbUserWallet, error) {
+	var wallet model.FbUserWallet
+	err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+		Where("user_id = ? AND account_type = ? AND currency = ?", userID, accountType, currency).
+		First(&wallet).Error
+	if err != nil {
+		return nil, errx.GORMErrMsg(err, "用户钱包不存在")
+	}
+	return &wallet, nil
+}
+
+func createWalletTx(tx *gorm.DB, userID int64, accountType, currency string) (*model.FbUserWallet, error) {
+	now := time.Now()
+	wallet := &model.FbUserWallet{
+		UserID:       userID,
+		AccountType:  accountType,
+		Currency:     currency,
+		Balance:      0,
+		FrozenAmount: 0,
+		Frozen:       false,
+		CreatedAt:    now,
+		UpdatedAt:    now,
+	}
+	if err := tx.Create(wallet).Error; err != nil {
+		return nil, errx.BizErr("创建钱包失败")
+	}
+	return wallet, nil
+}
+
 // DeleteByIds 按主键物理删除钱包（对齐 Java DELETE /fubang/fbuserwallets）
 func (d *FbUserWalletDal) DeleteByIds(ctx context.Context, ids []int64) error {
 	if len(ids) == 0 {

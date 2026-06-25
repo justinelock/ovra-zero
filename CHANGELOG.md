@@ -14,6 +14,7 @@
 - **团队管理写操作响应**：`PUT /member/team/changeParent`、`PUT /member/team/agentLevel` 改 `OkJsonCtx` 返回 `data`（`{userId,parentId}` / `{userId,agentLevel}`），修复 `httpx.Ok` 无 body 导致弹窗提交后不关闭（`team/*_handler.go`、`*-modal.vue`）
 
 ### 变更
+- **充值管理 2.4**：`GET /fund/recharge/list` 对接 `fb_deposits`（对齐 Java `selectPageWithUser`）；批准先入账款再改订单 SUCCESS，拒绝置 CANCELLED；前端批准 Popconfirm + 拒绝理由弹窗（`recharge.api`、`fb_deposit.go`、`views/biz/fund/recharge/`、`biz-api.md` 2.4～2.4.2）
 - **提现管理 2.3**：`GET /fund/withdraw/list` 对接 `fb_withdraws`（对齐 Java `selectPageWithUser`）；新增批准/拒绝接口与前端 Popconfirm、拒绝理由弹窗（`withdraw.api`、`fb_withdraw.go`、`views/biz/fund/withdraw/`、`biz-api.md` 2.3～2.3.2）
 - **账户流水 2.2**：`GET /fund/statement/list` 对接 `fb_account_flow_records`（对齐 Java `selectPageWithUser`）；新增 `GET /detail/{id}` 与详情弹窗（`statement.api`、`fb_report.go`、`views/biz/fund/statement/`、`biz-api.md` 2.2～2.2.1）
 - **钱包申请对齐 Java**：列表 `selectPageWithUser`（`created_at` 时间、`state`/`verified`/`userId` 等筛选）；流水改 `GET /flow/currentMonth?userId=` 当月全量；登录记录对齐 `selectPageWithUser`；前端详情弹窗与流水/登录抽屉（`wallet_apply.api`、`fb_wallet_apply.go`、`views/biz/fund/walletApply/`、`biz-api.md` 2.1～2.1.3）

@@ -1064,6 +1064,16 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Path:    "/list",
 					Handler: fundrecharge.PageSetHandler(serverCtx),
 				},
+				{
+					Method:  http.MethodPut,
+					Path:    "/approved/:id",
+					Handler: fundrecharge.ApprovedHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPut,
+					Path:    "/rejected",
+					Handler: fundrecharge.RejectedHandler(serverCtx),
+				},
 			}...,
 		),
 		rest.WithPrefix("/fund/recharge"),

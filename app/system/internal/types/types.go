@@ -1689,8 +1689,11 @@ type FundWithdrawRejectReq struct {
 }
 
 type FundRechargeQuery struct {
-	Keyword string `form:"keyword,optional"`
-	Status  string `form:"status,optional"`
+	Keyword  string `form:"keyword,optional"`  // 用户名/手机/姓名/订单号模糊
+	Status   string `form:"status,optional"`   // d.status
+	Username string `form:"username,optional"` // u.username LIKE
+	Mobile   string `form:"mobile,optional"`   // u.mobile LIKE
+	RealName string `form:"realName,optional"` // u.real_name LIKE
 }
 
 type PageSetFundRechargeReq struct {
@@ -1699,21 +1702,34 @@ type PageSetFundRechargeReq struct {
 }
 
 type FundRechargeItem struct {
-	Id             string `json:"id"`
-	UserName       string `json:"userName"`
-	PhoneNumber    string `json:"phoneNumber"`
-	RealName       string `json:"realName"`
-	RechargeAmount string `json:"rechargeAmount"`
-	Status         string `json:"status"`
-	RechargeImage  string `json:"rechargeImage"`
-	Remark         string `json:"remark"`
-	CreateTime     string `json:"createTime"`
-	UpdateTime     string `json:"updateTime"`
+	Id            string  `json:"id"`
+	UserId        string  `json:"userId"`
+	Username      string  `json:"username,optional"`
+	Mobile        string  `json:"mobile,optional"`
+	RealName      string  `json:"realName,optional"`
+	OrderNo       string  `json:"orderNo,optional"`
+	Amount        float64 `json:"amount,optional"`
+	Status        string  `json:"status,optional"`
+	PaymentMethod string  `json:"paymentMethod,optional"`
+	PaymentStatus string  `json:"paymentStatus,optional"`
+	PaymentNo     string  `json:"paymentNo,optional"`
+	PaymentTime   string  `json:"paymentTime,optional"`
+	Remark        string  `json:"remark,optional"`
+	Currency      string  `json:"currency,optional"`
+	TargetAccount string  `json:"targetAccount,optional"`
+	Screenshot    string  `json:"screenshot,optional"`
+	CreatedAt     string  `json:"createdAt,optional"`
+	UpdatedAt     string  `json:"updatedAt,optional"`
 }
 
 type PageSetFundRechargeResp struct {
 	Rows  []*FundRechargeItem `json:"rows"`
 	Total int64               `json:"total"`
+}
+
+type FundRechargeRejectReq struct {
+	Id     string `json:"id"`
+	Remark string `json:"remark"`
 }
 
 type TradeContractQuery struct {
