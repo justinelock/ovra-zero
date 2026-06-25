@@ -1073,6 +1073,82 @@ type MemberUserResetPwdReq struct {
 	Type     int64  `json:"type,optional"` // 1=登录密码 2=交易密码，默认 1
 }
 
+type MemberUserParentBrief struct {
+	Id       string `json:"id"`
+	Username string `json:"username,optional"`
+	RealName string `json:"realName,optional"`
+}
+
+type MemberUserInfoResp struct {
+	Id                     string                 `json:"id"`
+	Username               string                 `json:"username"`
+	Email                  string                 `json:"email,optional"`
+	Mobile                 string                 `json:"mobile,optional"`
+	Phone                  string                 `json:"phone,optional"`
+	RealName               string                 `json:"realName,optional"`
+	IdCard                 string                 `json:"idCard,optional"`
+	VerificationStatus     string                 `json:"verificationStatus,optional"`
+	Verified               bool                   `json:"verified,optional"`
+	CreditScore            int64                  `json:"creditScore,optional"`
+	SecurityQuestion       string                 `json:"securityQuestion,optional"`
+	SecurityAnswer         string                 `json:"securityAnswer,optional"`
+	Role                   string                 `json:"role,optional"`
+	AccountLocked          bool                   `json:"accountLocked,optional"`
+	FailedAttempts         int64                  `json:"failedAttempts,optional"`
+	LastLogin              string                 `json:"lastLogin,optional"`
+	ParentId               string                 `json:"parentId,optional"`
+	Parent                 *MemberUserParentBrief `json:"parent,optional"`
+	Level                  int64                  `json:"level,optional"`
+	AgentLevel             int64                  `json:"agentLevel,optional"`
+	InviteCode             string                 `json:"inviteCode,optional"`
+	CommissionRate         float64                `json:"commissionRate,optional"`
+	TotalCommission        float64                `json:"totalCommission,optional"`
+	TeamSize               int64                  `json:"teamSize,optional"`
+	Status                 string                 `json:"status,optional"`
+	ContractControl        int64                  `json:"contractControl,optional"`
+	IsOnline               string                 `json:"isOnline,optional"`
+	Remark                 string                 `json:"remark,optional"`
+	Flag                   int64                  `json:"flag,optional"`
+	IsTest                 bool                   `json:"isTest,optional"`
+	HasPassword            bool                   `json:"hasPassword,optional"`
+	HasPayPassword         bool                   `json:"hasPayPassword,optional"`
+	PayPasswordUpdatedAt   string                 `json:"payPasswordUpdatedAt,optional"`
+	PayPasswordErrorCount  int64                  `json:"payPasswordErrorCount,optional"`
+	PayPasswordLockedUntil string                 `json:"payPasswordLockedUntil,optional"`
+	Avatar                 string                 `json:"avatar,optional"`
+	TotalBalance           float64                `json:"totalBalance,optional"`
+	FundPositionAmount     float64                `json:"fundPositionAmount,optional"`
+	FundPositionDividend   float64                `json:"fundPositionDividend,optional"`
+	OnlineStatus           int64                  `json:"onlineStatus,optional"`
+	CreatedAt              string                 `json:"createdAt,optional"`
+	UpdatedAt              string                 `json:"updatedAt,optional"`
+}
+
+type MemberUserUpdateReq struct {
+	Id                 string  `json:"id"`
+	Username           string  `json:"username,optional"`
+	Password           string  `json:"password,optional"`
+	PayPassword        string  `json:"payPassword,optional"`
+	RealName           string  `json:"realName,optional"`
+	Mobile             string  `json:"mobile,optional"`
+	Email              string  `json:"email,optional"`
+	IdCard             string  `json:"idCard,optional"`
+	SecurityQuestion   string  `json:"securityQuestion,optional"`
+	SecurityAnswer     string  `json:"securityAnswer,optional"`
+	ParentId           string  `json:"parentId,optional"`
+	InviteCode         string  `json:"inviteCode,optional"`
+	CommissionRate     float64 `json:"commissionRate,optional"`
+	TotalCommission    float64 `json:"totalCommission,optional"`
+	CreditScore        int64   `json:"creditScore,optional"`
+	VerificationStatus string  `json:"verificationStatus,optional"`
+	AccountLocked      bool    `json:"accountLocked,optional"`
+	Status             string  `json:"status,optional"`
+	Verified           bool    `json:"verified,optional"`
+	ContractControl    int64   `json:"contractControl,optional"`
+	Remark             string  `json:"remark,optional"`
+	Avatar             string  `json:"avatar,optional"`
+}
+
 type MemberKycQuery struct {
 	Keyword    string `form:"keyword,optional"`    // 用户名/手机号/姓名/记录ID
 	AuthStatus string `form:"authStatus,optional"` // 认证状态

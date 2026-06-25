@@ -207,6 +207,63 @@ GET /member/user/list?pageNum=1&pageSize=10
 
 **行为**：明文密码经 MD5 后写入 `fb_users.password` 或 `pay_password`。
 
+#### 1.1.3 用户详情
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `GET` |
+| 路径 | `/member/user/{id}` |
+| 权限 | `member:list:list` |
+| 响应实体 | `MemberUserInfoResp`（在 `data` 内） |
+
+**路径参数**：`id` — 用户主键。
+
+**说明**：返回 `fb_users` 可展示字段（不含 `password`/`pay_password` 哈希）；含上级摘要 `parent`、USD 钱包汇总、投信持仓/分红、`onlineStatus`（Redis）。
+
+**`data` 字段**：
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| `id` | string | 用户 ID |
+| `username` | string | 用户名 |
+| `email` / `mobile` / `phone` | string | 联系方式 |
+| `realName` / `idCard` | string | 实名信息 |
+| `verificationStatus` / `verified` | string / bool | 实名认证 |
+| `creditScore` | int64 | 信用分 |
+| `securityQuestion` / `securityAnswer` | string | 密保 |
+| `role` | string | 用户角色 |
+| `accountLocked` / `failedAttempts` | bool / int64 | 锁定与登录失败次数 |
+| `lastLogin` | string | 最后登录时间 |
+| `parentId` | string | 上级代理 ID |
+| `parent` | object | `{ id, username, realName }` |
+| `level` / `agentLevel` | int64 | 代理等级 / 团队层级 |
+| `inviteCode` | string | 邀请码 |
+| `commissionRate` / `totalCommission` | float64 | 佣金 |
+| `teamSize` | int64 | 团队规模 |
+| `status` / `contractControl` | string / int64 | 账号状态 / 合约控制 |
+| `isOnline` | string | 库内在线标记 |
+| `remark` | string | 说明 |
+| `flag` / `isTest` | int64 / bool | 删除标记 / 测试号 |
+| `hasPassword` / `hasPayPassword` | bool | 是否已设登录/交易密码 |
+| `payPasswordUpdatedAt` 等 | string / int64 | 交易密码相关时间/次数 |
+| `avatar` | string | 头像（base64，可能较长） |
+| `totalBalance` | float64 | USD 钱包余额汇总 |
+| `fundPositionAmount` / `fundPositionDividend` | float64 | 投信持仓/分红 |
+| `onlineStatus` | int64 | Redis 在线状态 1/0 |
+| `createdAt` / `updatedAt` | string | 创建/更新时间 |
+
+#### 1.1.4 保存用户编辑
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `PUT` |
+| 路径 | `/member/user` |
+| 权限 | `member:list:list` |
+
+**请求体**（`MemberUserUpdateReq`）：与详情字段一致，另支持 `password`、`payPassword`（非空时 MD5 更新）、`avatar`（非空时更新 base64/data URL）。`username`、`realName`、`idCard`、`status` 必填；`username`、`idCard` 变更时服务端判重（唯一索引 `uk_username`、`id_id_card`），冲突返回业务错误。
+
+**业务错误**：`用户名已经存在` / `身份证号已经存在`
+
 ---
 
 ### 1.2 用户列表（活跃统计）

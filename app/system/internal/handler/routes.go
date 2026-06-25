@@ -844,6 +844,16 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: memberuser.PageSetHandler(serverCtx),
 				},
 				{
+					Method:  http.MethodGet,
+					Path:    "/:id",
+					Handler: memberuser.InfoHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPut,
+					Path:    "/",
+					Handler: memberuser.UpdateHandler(serverCtx),
+				},
+				{
 					Method:  http.MethodDelete,
 					Path:    "/:ids",
 					Handler: memberuser.DeleteHandler(serverCtx),

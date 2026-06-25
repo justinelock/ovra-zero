@@ -615,3 +615,286 @@ func (d *FbMemberDal) ResetUserPassword(ctx context.Context, id, plainPwd string
 func md5Hex(s string) string {
 	return utils.Md5(s)
 }
+
+// MemberUserInfoRow 用户详情查询行（GET /member/user/:id）
+type MemberUserInfoRow struct {
+	ID                     int64
+	Username               string
+	Email                  string
+	Mobile                 string
+	Phone                  string
+	RealName               string
+	IDCard                 string
+	VerificationStatus     string
+	Verified               bool
+	CreditScore            int32
+	SecurityQuestion       string
+	SecurityAnswer         string
+	Role                   string
+	AccountLocked          bool
+	FailedAttempts         int32
+	LastLogin              *time.Time
+	ParentID               int64
+	ParentUsername         string
+	ParentRealName         string
+	Level                  int32
+	AgentLevel             int32
+	InviteCode             string
+	CommissionRate         float64
+	TotalCommission        float64
+	TeamSize               int32
+	Status                 string
+	ContractControl        int32
+	IsOnline               string
+	Remark                 string
+	Flag                   int32
+	IsTest                 bool
+	HasPassword            bool
+	HasPayPassword         bool
+	PayPasswordUpdatedAt   *time.Time
+	PayPasswordErrorCount  int32
+	PayPasswordLockedUntil *time.Time
+	Avatar                 string
+	TotalBalance           float64
+	FundPositionAmount     float64
+	FundPositionDividend   float64
+	CreatedAt              time.Time
+	UpdatedAt              *time.Time
+}
+
+// GetUserInfo 按主键查用户完整详情（含上级、钱包/投信聚合；不 SELECT password/pay_password）
+func (d *FbMemberDal) GetUserInfo(ctx context.Context, id string) (*MemberUserInfoRow, error) {
+	if id == "" {
+		return nil, errx.BizErr("用户ID不能为空")
+	}
+	const infoSQL = `
+		SELECT u.id, u.username, u.email, u.mobile, u.phone, u.real_name, u.id_card,
+		  u.verification_status, u.verified, u.credit_score,
+		  u.security_question, u.security_answer, u.role, u.account_locked, u.failed_attempts,
+		  u.last_login, u.parent_id, pu.username AS parent_username, pu.real_name AS parent_real_name,
+		  u.level, u.agent_level, u.invite_code, u.commission_rate, u.total_commission, u.team_size,
+		  u.status, u.contract_control, u.is_online, u.remark, u.flag, u.is_test,
+		  (u.password IS NOT NULL AND u.password != '') AS has_password,
+		  (u.pay_password IS NOT NULL AND u.pay_password != '') AS has_pay_password,
+		  u.pay_password_updated_at, u.pay_password_error_count, u.pay_password_locked_until,
+		  u.avatar, u.created_at, u.updated_at,
+		  COALESCE(w.total_balance, 0) AS total_balance,
+		  COALESCE(p.position_amount, 0) AS fund_position_amount,
+		  COALESCE(p.position_dividend, 0) AS fund_position_dividend
+		FROM fb_users u
+		LEFT JOIN fb_users pu ON pu.id = u.parent_id
+		LEFT JOIN (
+		  SELECT user_id, SUM(balance) AS total_balance
+		  FROM fb_user_wallets WHERE currency = 'USD' AND balance > 0
+		  GROUP BY user_id
+		) w ON w.user_id = u.id
+		LEFT JOIN (
+		  SELECT fp.user_id,
+			COALESCE(SUM(fp.amount), 0) AS position_amount,
+			COALESCE(SUM(COALESCE(pl.profit_sum, 0)), 0) AS position_dividend
+		  FROM fb_fund_position fp
+		  LEFT JOIN (
+			SELECT position_id, SUM(profit_amount) AS profit_sum
+			FROM fb_fund_profit_log WHERE status = 1 GROUP BY position_id
+		  ) pl ON pl.position_id = fp.id
+		  WHERE fp.state = 'PENDING' AND fp.status = 1
+		  GROUP BY fp.user_id
+		) p ON p.user_id = u.id
+		WHERE u.id = ? AND u.flag = 0`
+	var row MemberUserInfoRow
+	if err := d.db.WithContext(ctx).Raw(infoSQL, id).Scan(&row).Error; err != nil {
+		return nil, errx.GORMErr(err)
+	}
+	if row.ID == 0 {
+		return nil, errx.BizErr("用户不存在或已删除")
+	}
+	return &row, nil
+}
+
+// MemberUserUpdate 编辑保存字段（对齐管理端用户编辑表单）
+type MemberUserUpdate struct {
+	Username           string
+	Password           string
+	PayPassword        string
+	RealName           string
+	Mobile             string
+	Email              string
+	IDCard             string
+	SecurityQuestion   string
+	SecurityAnswer     string
+	ParentID           string
+	InviteCode         string
+	CommissionRate     float64
+	TotalCommission    float64
+	CreditScore        int64
+	VerificationStatus string
+	AccountLocked      bool
+	Status             string
+	Verified           bool
+	ContractControl    int64
+	Remark             string
+	Avatar             string
+}
+
+// memberUserUniqueFields 判重时读取当前用户名与身份证号
+type memberUserUniqueFields struct {
+	Username string
+	IDCard   string
+}
+
+// GetUserUniqueFields 按 id 读取用户名、身份证号（编辑判重用）
+func (d *FbMemberDal) GetUserUniqueFields(ctx context.Context, id string) (*memberUserUniqueFields, error) {
+	if id == "" {
+		return nil, errx.BizErr("用户ID不能为空")
+	}
+	var cnt int64
+	if err := d.db.WithContext(ctx).Table("fb_users").
+		Where("id = ?", id).Where("flag = 0").
+		Count(&cnt).Error; err != nil {
+		return nil, errx.GORMErr(err)
+	}
+	if cnt == 0 {
+		return nil, errx.BizErr("用户不存在或已删除")
+	}
+	var row memberUserUniqueFields
+	if err := d.db.WithContext(ctx).Table("fb_users").
+		Select("username", "id_card").
+		Where("id = ?", id).
+		Where("flag = 0").
+		Scan(&row).Error; err != nil {
+		return nil, errx.GORMErr(err)
+	}
+	return &row, nil
+}
+
+// ExistsUsernameExcept 除指定用户外是否已有相同用户名
+func (d *FbMemberDal) ExistsUsernameExcept(ctx context.Context, userID, username string) (bool, error) {
+	username = strings.TrimSpace(username)
+	if username == "" {
+		return false, nil
+	}
+	var count int64
+	err := d.db.WithContext(ctx).Table("fb_users").
+		Where("username = ?", username).
+		Where("id != ?", userID).
+		Count(&count).Error
+	if err != nil {
+		return false, errx.GORMErr(err)
+	}
+	return count > 0, nil
+}
+
+// ExistsIDCardExcept 除指定用户外是否已有相同身份证号
+func (d *FbMemberDal) ExistsIDCardExcept(ctx context.Context, userID, idCard string) (bool, error) {
+	idCard = strings.TrimSpace(idCard)
+	if idCard == "" {
+		return false, nil
+	}
+	var count int64
+	err := d.db.WithContext(ctx).Table("fb_users").
+		Where("id_card = ?", idCard).
+		Where("id != ?", userID).
+		Count(&count).Error
+	if err != nil {
+		return false, errx.GORMErr(err)
+	}
+	return count > 0, nil
+}
+
+// UpdateUser 更新用户编辑表单字段；密码非空时 MD5 入库
+func (d *FbMemberDal) UpdateUser(ctx context.Context, id string, upd MemberUserUpdate) error {
+	if id == "" {
+		return errx.BizErr("用户ID不能为空")
+	}
+	if strings.TrimSpace(upd.Username) == "" {
+		return errx.BizErr("用户名不能为空")
+	}
+	if strings.TrimSpace(upd.RealName) == "" {
+		return errx.BizErr("真实姓名不能为空")
+	}
+	if strings.TrimSpace(upd.IDCard) == "" {
+		return errx.BizErr("身份证号不能为空")
+	}
+	if upd.Status == "" {
+		return errx.BizErr("用户状态不能为空")
+	}
+	if upd.ContractControl != 0 && upd.ContractControl != 1 && upd.ContractControl != 2 && upd.ContractControl != 3 {
+		return errx.BizErr("合约控制取值无效")
+	}
+	contractControl := upd.ContractControl
+	if contractControl == 0 {
+		contractControl = 3
+	}
+	// 用户名/身份证号变更时判重（对齐 uk_username、id_id_card）
+	current, err := d.GetUserUniqueFields(ctx, id)
+	if err != nil {
+		return err
+	}
+	username := strings.TrimSpace(upd.Username)
+	idCard := strings.TrimSpace(upd.IDCard)
+	if username != strings.TrimSpace(current.Username) {
+		exists, err := d.ExistsUsernameExcept(ctx, id, username)
+		if err != nil {
+			return err
+		}
+		if exists {
+			return errx.BizErr("用户名已经存在")
+		}
+	}
+	if idCard != strings.TrimSpace(current.IDCard) {
+		exists, err := d.ExistsIDCardExcept(ctx, id, idCard)
+		if err != nil {
+			return err
+		}
+		if exists {
+			return errx.BizErr("身份证号已经存在")
+		}
+	}
+	updates := map[string]any{
+		"updated_at":          time.Now(),
+		"username":            username,
+		"real_name":           upd.RealName,
+		"mobile":              upd.Mobile,
+		"email":               upd.Email,
+		"id_card":             idCard,
+		"security_question":   upd.SecurityQuestion,
+		"security_answer":     upd.SecurityAnswer,
+		"invite_code":         upd.InviteCode,
+		"commission_rate":     upd.CommissionRate,
+		"total_commission":    upd.TotalCommission,
+		"credit_score":        upd.CreditScore,
+		"verification_status": upd.VerificationStatus,
+		"account_locked":      upd.AccountLocked,
+		"status":              upd.Status,
+		"verified":            upd.Verified,
+		"contract_control":    contractControl,
+		"remark":              upd.Remark,
+	}
+	// 头像 base64：非空时更新（裁剪后为 data URL 或纯 base64 原样入库）
+	if av := strings.TrimSpace(upd.Avatar); av != "" {
+		updates["avatar"] = av
+	}
+	// 上级代理：空字符串表示清空
+	if upd.ParentID == "" {
+		updates["parent_id"] = nil
+	} else {
+		updates["parent_id"] = upd.ParentID
+	}
+	if pwd := strings.TrimSpace(upd.Password); pwd != "" {
+		updates["password"] = md5Hex(pwd)
+	}
+	if payPwd := strings.TrimSpace(upd.PayPassword); payPwd != "" {
+		updates["pay_password"] = md5Hex(payPwd)
+	}
+	res := d.db.WithContext(ctx).Table("fb_users").
+		Where("id = ?", id).
+		Where("flag = 0").
+		Updates(updates)
+	if res.Error != nil {
+		return errx.GORMErr(res.Error)
+	}
+	if res.RowsAffected == 0 {
+		return errx.BizErr("用户不存在或已删除")
+	}
+	return nil
+}
