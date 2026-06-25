@@ -13,6 +13,19 @@
 | 鉴权 | 需登录 Token；中间件：`Auth`、`Sign` |
 | 分页参数 | 所有列表接口继承 `PageReq`：`pageNum`、`pageSize`、`params[beginTime]`、`params[endTime]`（见下节默认值） |
 
+### API 命名约定
+
+| 层级 | 约定 |
+| --- | --- |
+| URL 前缀 | `/member/*`、`/fund/*`、`/trade/*` 等业务域 |
+| 列表分页 | `GET …/list` + `PageReq`（`pageNum`、`pageSize`） |
+| 统计 | `GET …/stats`，返回标量汇总（在 `data` 内） |
+| 写操作 | 动词路径，camelCase（如 `addOrSubtract`、`openOrClose`） |
+| Handler | goctl `@handler`：`PageSet`、`Stats`、`Flow` 等动词短语 |
+| Logic | `{资源}Logic` + 动词方法（如 `StatsLogic.Stats`） |
+| 契约类型 | `Member*Item` / `*Resp` / `*Req` |
+| DAL | `Fb*Dal` 对应 `fb_*` 表；多表聚合可用 `FbMemberDal` |
+
 ### 分页请求默认参数
 
 所有**列表分页** `GET` 请求，默认携带查询参数：
@@ -162,6 +175,38 @@ GET /member/user/list?pageNum=1&pageSize=10
 
 ```
 
+#### 1.1.1 删除用户
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `DELETE` |
+| 路径 | `/member/user/{ids}` |
+| 权限 | `member:list:list` |
+| API 定义 | `desc/system/api/member/user.api` |
+
+**路径参数**：`ids` — 用户 id，多个用英文逗号分隔（如 `653` 或 `653,654`）。
+
+**行为**：逻辑删除，设置 `fb_users.flag = 1`（仅 `flag=0` 的用户可删）。
+
+#### 1.1.2 重置密码
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `PUT` |
+| 路径 | `/member/user/resetPwd` |
+| 权限 | `member:list:list` |
+| API 定义 | `desc/system/api/member/user.api` |
+
+**请求体**（`MemberUserResetPwdReq`）：
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| `id` | string | 用户 id |
+| `password` | string | 新密码（5～20 位）；空则默认 `123456` |
+| `type` | int64 | `1`=登录密码（默认），`2`=交易密码 |
+
+**行为**：明文密码经 MD5 后写入 `fb_users.password` 或 `pay_password`。
+
 ---
 
 ### 1.2 用户列表（活跃统计）
@@ -169,12 +214,12 @@ GET /member/user/list?pageNum=1&pageSize=10
 | 项 | 值 |
 | --- | --- |
 | 方法 | `GET` |
-| 路径 | `/member/user/stats` |
+| 路径 | `GET /member/user/stats` |
 | 权限 | `member:list:list` |
 | API 定义 | `desc/system/api/member/user.api` |
 | 响应实体 | `MemberUserStatsResp`（在 `data` 内） |
 
-**查询参数**：无业务筛选（全局 Redis 统计，对齐 Java `online-statistics`）；**无分页参数**。
+**查询参数**：无业务筛选（全局 Redis 统计，与列表 keyword 等无关）；**无分页参数**。
 
 **`data` 字段**：
 
@@ -184,16 +229,16 @@ GET /member/user/list?pageNum=1&pageSize=10
 | `todayLogins` | int64 | Redis `login:today` Set 大小（今日登录用户） |
 | `totalActiveSessions` | int64 | Redis `fb:presence:active` 近 **5 分钟**内有鉴权请求的活跃用户数；前端 Tag「活跃用户:{totalActiveSessions}」 |
 
-**响应示例**（待补充）：
+**响应示例**：
 
 ```json
 {
   "code": 200,
   "msg": "操作成功",
   "data": {
-    "totalOnlineUsers": "355",
-    "todayLogins": "399",
-    "totalActiveSessions": "2"
+    "totalOnlineUsers": 355,
+    "todayLogins": 399,
+    "totalActiveSessions": 2
   }
 }
 ```
@@ -279,8 +324,8 @@ GET /member/user/list?pageNum=1&pageSize=10
 | 参数 | 类型 | 说明 |
 | --- | --- | --- |
 | `userId` | string | 用户 id（`w.user_id`，抽屉必传） |
-| `keyword` | string | 用户名/手机号/真实姓名模糊（对齐 Java） |
-| `accountType` | string | 账户类型（Java `type` → `w.account_type`） |
+| `keyword` | string | 用户名/手机号/真实姓名模糊 |
+| `accountType` | string | 账户类型，映射 `w.account_type` |
 | `status` | string | 用户状态 `u.status` |
 | `verified` | string | 认证状态 `u.verified` |
 | `username` | string | 用户名模糊 |
@@ -345,7 +390,6 @@ GET /member/user/list?pageNum=1&pageSize=10
 | 路径 | `/member/wallet/addOrSubtract` |
 | 权限 | `member:wallet:list`（待细化为 update 权限） |
 | API 定义 | `desc/system/api/member/wallet.api` |
-| 对齐 Java | `PUT /fubang/fbuserwallets/addOrSubtract` |
 
 **请求体**（`MemberWalletAddOrSubtractReq`）：
 

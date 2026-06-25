@@ -843,6 +843,16 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Path:    "/list",
 					Handler: memberuser.PageSetHandler(serverCtx),
 				},
+				{
+					Method:  http.MethodDelete,
+					Path:    "/:ids",
+					Handler: memberuser.DeleteHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPut,
+					Path:    "/resetPwd",
+					Handler: memberuser.ResetPwdHandler(serverCtx),
+				},
 			}...,
 		),
 		rest.WithPrefix("/member/user"),

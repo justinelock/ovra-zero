@@ -251,7 +251,7 @@ curl -s 'http://127.0.0.1:8092/member/user/stats' \
   -H "Authorization: Bearer <access_token>"
 ```
 
-在线/活跃数据需与 fubang 业务**共用同一 Redis** 才有非零统计。
+在线/活跃统计需与业务 App **共用同一 Redis** 实例，联调时才有非零数据。
 
 ---
 

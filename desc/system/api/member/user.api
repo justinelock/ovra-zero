@@ -41,11 +41,17 @@ type (
         Rows  []*MemberUserItem `json:"rows"`
         Total int64             `json:"total"`
     }
-    // 活跃统计（data 内）；Redis 全局统计，与列表筛选无关，对齐 Java online-statistics
+    // 活跃统计（data 内）；Redis 全局统计，与列表筛选无关
     MemberUserStatsResp {
         TotalOnlineUsers    int64 `json:"totalOnlineUsers"`    // KEYS online:user:*
         TodayLogins         int64 `json:"todayLogins"`         // SCARD login:today
         TotalActiveSessions int64 `json:"totalActiveSessions"` // ZSET fb:presence:active 近 5 分钟
+    }
+    // 重置登录/交易密码；password 明文入参，服务端 MD5 入库
+    MemberUserResetPwdReq {
+        Id       string `json:"id"`                 // fb_users.id
+        Password string `json:"password"`           // 新密码；空则默认 123456
+        Type     int64  `json:"type,optional"`     // 1=登录密码 2=交易密码，默认 1
     }
 )
 
@@ -61,4 +67,10 @@ service System {
 
     @handler PageSet
     get /list (PageSetMemberUserReq) returns (PageSetMemberUserResp)
+
+    @handler Delete
+    delete /:ids (IdsReq)
+
+    @handler ResetPwd
+    put /resetPwd (MemberUserResetPwdReq)
 }

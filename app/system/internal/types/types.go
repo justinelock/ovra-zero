@@ -1067,6 +1067,12 @@ type MemberUserStatsResp struct {
 	TotalActiveSessions int64 `json:"totalActiveSessions"` // ZSET fb:presence:active 近 5 分钟
 }
 
+type MemberUserResetPwdReq struct {
+	Id       string `json:"id"`            // fb_users.id
+	Password string `json:"password"`      // 新密码；空则默认 123456
+	Type     int64  `json:"type,optional"` // 1=登录密码 2=交易密码，默认 1
+}
+
 type MemberKycQuery struct {
 	Keyword    string `form:"keyword,optional"`    // 用户名/手机号/姓名/记录ID
 	AuthStatus string `form:"authStatus,optional"` // 认证状态

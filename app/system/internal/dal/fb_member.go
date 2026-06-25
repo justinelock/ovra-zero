@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"ovra/toolkit/errx"
+	"ovra/toolkit/utils"
 
 	"gorm.io/gorm"
 )
@@ -554,4 +555,63 @@ func FormatFbTimeVal(t time.Time) string {
 
 func IDStr(id int64) string {
 	return fmt.Sprintf("%d", id)
+}
+
+// SoftDeleteUsers 逻辑删除：fb_users.flag=1（仅未删用户）
+func (d *FbMemberDal) SoftDeleteUsers(ctx context.Context, ids []string) error {
+	if d == nil || d.db == nil || len(ids) == 0 {
+		return nil
+	}
+	now := time.Now()
+	res := d.db.WithContext(ctx).Table("fb_users").
+		Where("id IN ?", ids).
+		Where("flag = 0").
+		Updates(map[string]any{
+			"flag":       1,
+			"updated_at": now,
+		})
+	if res.Error != nil {
+		return errx.GORMErr(res.Error)
+	}
+	return nil
+}
+
+// ResetUserPassword 重置登录/交易密码；明文入参，MD5 后写入 fb_users
+func (d *FbMemberDal) ResetUserPassword(ctx context.Context, id, plainPwd string, pwdType int64) error {
+	if id == "" {
+		return errx.BizErr("用户ID不能为空")
+	}
+	if pwdType == 0 {
+		pwdType = 1
+	}
+	if plainPwd == "" {
+		plainPwd = "123456"
+	}
+	if len(plainPwd) < 5 || len(plainPwd) > 20 {
+		return errx.BizErr("密码长度为5 - 20")
+	}
+	updates := map[string]any{"updated_at": time.Now()}
+	switch pwdType {
+	case 1:
+		updates["password"] = md5Hex(plainPwd)
+	case 2:
+		updates["pay_password"] = md5Hex(plainPwd)
+	default:
+		return errx.BizErr("密码类型无效")
+	}
+	res := d.db.WithContext(ctx).Table("fb_users").
+		Where("id = ?", id).
+		Where("flag = 0").
+		Updates(updates)
+	if res.Error != nil {
+		return errx.GORMErr(res.Error)
+	}
+	if res.RowsAffected == 0 {
+		return errx.BizErr("用户不存在或已删除")
+	}
+	return nil
+}
+
+func md5Hex(s string) string {
+	return utils.Md5(s)
 }

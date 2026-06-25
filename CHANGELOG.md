@@ -6,6 +6,7 @@
 ## [未发布]
 
 ### 新增
+- **业务用户删除/重置密码**：`DELETE /member/user/{ids}` 逻辑删、`PUT /member/user/resetPwd` MD5 更新密码（`member/user.api`、`fb_member.go`、`views/member/list/`）
 - **钱包加减款接口**：新增 `PUT /member/wallet/addOrSubtract`，按 Java `addOrSubtract` 实现加款/减款、流水写入与 flowType 校验（`desc/system/api/member/wallet.api`、`dal/fb_user_wallet.go`、`logic/member/wallet/add_or_subtract_logic.go`）
 - **用户管理接口对接 fb_* 表**：9 个 member 列表/统计/流水接口接入真实查询；新增 `FbMemberDal` 封装多表 JOIN 与聚合（`app/system/internal/dal/fb_member.go`、`app/system/internal/logic/member/`）
 - **报表流水**：新增 `GET /member/report/flow/{userId}` 及前端抽屉展示（`desc/system/api/member/report.api`、`views/member/report/report-flow-drawer.vue`）
@@ -23,6 +24,8 @@
 - **用户管理 API 类型注释**：在 `desc/system/api/member/*.api` 补充类型/字段说明，`make api-system` 同步至 `types.go`；新增 `types/member_doc.go` 说明生成约定（勿手改 types.go）
 
 ### 文档
+- **1.2 活跃统计**：`docs/biz-api.md` 修正 `MemberUserStatsResp` 示例数值类型为 int64
+- **命名约定**：`docs/biz-api.md` 增加 API 命名约定章节
 - **接口代码跟读指南**：新增 `docs/read-api-flow.md`（onboarding：契约 → 路由 → Handler → Logic → DAL，以 `/member/user/list` 为例）；`local-dev.md`、`biz-api.md` 增加交叉链接
 - **业务 API 文档**：汇总用户管理～K线管理 22 个列表/统计接口，每接口预留响应 JSON 占位（`docs/biz-api.md`）
 
