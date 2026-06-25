@@ -1,50 +1,61 @@
 syntax = "v1"
 
 info(
-    desc: "业务用户团队管理（占位接口，待接业务表）"
+    desc: "业务用户团队管理（对接 fb_users 团队树）"
     author: "ovra"
 )
 
 import "../base.api"
 
 type (
+    // 团队列表/统计共用筛选
     MemberTeamQuery {
-        Keyword string `form:"keyword,optional"`
-        Status  string `form:"status,optional"`
+        Keyword string `form:"keyword,optional"` // 用户名/手机号/用户ID
+        Status  string `form:"status,optional"`  // fb_users.status
     }
     PageSetMemberTeamReq {
         PageReq
         MemberTeamQuery
     }
-    MemberTeamStatsResp {
-        Level1Count  int64  `json:"level1Count"`
-        Level2Count  int64  `json:"level2Count"`
-        Level3Count  int64  `json:"level3Count"`
-        Level4Count  int64  `json:"level4Count"`
-        Level5Count  int64  `json:"level5Count"`
-        TotalMembers int64  `json:"totalMembers"`
-        TotalBalance string `json:"totalBalance"`
+    // 上级代理；来自 parent_id 关联的 fb_users 行
+    MemberTeamAgent {
+        Id       string `json:"id"`
+        Username string `json:"username"`
+        RealName string `json:"realName,optional"`
     }
+    // 团队代理统计（data 内返回）；按 fb_users.level 1～5 分层计数，契约见 docs/biz-api.md 1.7
+    MemberTeamStatsResp {
+        TotalMembers     int64   `json:"totalMembers"`
+        Level1Members    int64   `json:"level1Members"`    // level=1 用户数
+        Level2Members    int64   `json:"level2Members"`
+        Level3Members    int64   `json:"level3Members"`
+        Level4Members    int64   `json:"level4Members"`
+        Level5Members    int64   `json:"level5Members"`
+        TotalTeamBalance float64 `json:"totalTeamBalance"` // 筛选范围内钱包余额总和
+    }
+    // 团队列表行；level1Members 为直属下级数，level2～5 待子树聚合增强
     MemberTeamItem {
-        Id              string `json:"id"`
-        UserName        string `json:"userName"`
-        Balance         string `json:"balance"`
-        RealName        string `json:"realName"`
-        ParentAgent     string `json:"parentAgent"`
-        AgentLevel1     string `json:"agentLevel1"`
-        AgentLevel2     string `json:"agentLevel2"`
-        AgentLevel3     string `json:"agentLevel3"`
-        AgentLevel4     string `json:"agentLevel4"`
-        AgentLevel5     string `json:"agentLevel5"`
-        AgentTier       string `json:"agentTier"`
-        SubTeamCount    string `json:"subTeamCount"`
-        SubTeamBalance  string `json:"subTeamBalance"`
-        Status          string `json:"status"`
-        RegisterTime    string `json:"registerTime"`
+        Id               string           `json:"id"`
+        Username         string           `json:"username,optional"`
+        Agent            *MemberTeamAgent `json:"agent,optional"`
+        RealName         string           `json:"realName,optional"`
+        Level            int64            `json:"level,optional"`
+        Status           string           `json:"status,optional"`
+        TeamSize         int64            `json:"teamSize,optional"`      // fb_users.team_size
+        Level1Members    int64            `json:"level1Members,optional"` // 直属下级数
+        Level2Members    int64            `json:"level2Members,optional"`
+        Level3Members    int64            `json:"level3Members,optional"`
+        Level4Members    int64            `json:"level4Members,optional"`
+        Level5Members    int64            `json:"level5Members,optional"`
+        AgentLevel       int64            `json:"agentLevel,optional"`
+        WalletCount      int64            `json:"walletCount,optional"`
+        Balance          float64          `json:"balance,optional"`          // 个人钱包余额
+        TotalTeamBalance float64          `json:"totalTeamBalance,optional"` // 下级团队余额（预留）
+        CreatedAt        string           `json:"createdAt,optional"`
     }
     PageSetMemberTeamResp {
         Rows  []*MemberTeamItem `json:"rows"`
-        Total int64              `json:"total"`
+        Total int64             `json:"total"`
     }
 )
 

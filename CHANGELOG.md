@@ -5,8 +5,16 @@
 
 ## [未发布]
 
+### 新增
+- **用户管理接口对接 fb_* 表**：9 个 member 列表/统计/流水接口接入真实查询；新增 `FbMemberDal` 封装多表 JOIN 与聚合（`app/system/internal/dal/fb_member.go`、`app/system/internal/logic/member/`）
+- **报表流水**：新增 `GET /member/report/flow/{userId}` 及前端抽屉展示（`desc/system/api/member/report.api`、`views/member/report/report-flow-drawer.vue`）
+- **gentool fb_* 表**：`gen/system/gen.yaml` 增加 8 张业务表代码生成（`app/system/internal/dal/model/fb_*.gen.go`）
+
+### 变更
+- **用户管理契约对齐**：`docs/biz-api.md` 1.1～1.8 字段表与响应 JSON 一致；前端 `api/member`、`views/member` 列字段改为 `username`、`createdAt`、`level1Members` 等（`ruoyi-plus-vben5/apps/web-antd/src/api/member/`、`views/member/`）
+
 ### 维护
-- **业务占位代码注释**：为 fund/trade/invest 等 21 个 Logic、前端 API/列表页/data 补全步骤级注释，对齐 `.cursor/rules/code-comments-changelog.mdc`（`app/system/internal/logic/`、`ruoyi-plus-vben5/apps/web-antd/src/views/biz/`、`src/api/biz/`）
+- **用户管理 API 类型注释**：在 `desc/system/api/member/*.api` 补充类型/字段说明，`make api-system` 同步至 `types.go`；新增 `types/member_doc.go` 说明生成约定（勿手改 types.go）：为 fund/trade/invest 等 21 个 Logic、前端 API/列表页/data 补全步骤级注释，对齐 `.cursor/rules/code-comments-changelog.mdc`（`app/system/internal/logic/`、`ruoyi-plus-vben5/apps/web-antd/src/views/biz/`、`src/api/biz/`）
 
 ### 文档
 - **业务 API 文档**：列表分页 GET 默认参数补充为 `pageNum=1&pageSize=10`（`docs/biz-api.md`）

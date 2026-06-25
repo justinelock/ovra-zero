@@ -1,41 +1,51 @@
 syntax = "v1"
 
 info(
-    desc: "业务用户列表（占位接口，待接业务表）"
+    desc: "业务用户列表与活跃统计（对接 fb_users 等表）"
     author: "ovra"
 )
 
 import "../base.api"
 
 type (
+    // 用户列表筛选；keyword 匹配 username/mobile/id，authStatus 对应 fb_users.verification_status，deleted 对应 flag
     MemberUserQuery {
-        Keyword    string `form:"keyword,optional"`
-        AuthStatus string `form:"authStatus,optional"`
-        Deleted    string `form:"deleted,optional"`
+        Keyword    string `form:"keyword,optional"`    // 用户名/手机号/用户ID
+        AuthStatus string `form:"authStatus,optional"` // 认证状态 verification_status
+        Deleted    string `form:"deleted,optional"`    // 0 正常 / 1 已删（fb_users.flag）
     }
+    // 分页列表请求；时间范围见 PageReq.params[beginTime/endTime]
     PageSetMemberUserReq {
         PageReq
         MemberUserQuery
     }
+    // 列表行；余额来自 fb_user_wallets 汇总，投信来自 fb_fund_position 汇总，契约见 docs/biz-api.md 1.1
     MemberUserItem {
-        Id              string `json:"id"`
-        UserName        string `json:"userName"`
-        TotalBalance    string `json:"totalBalance"`
-        InvestPosition  string `json:"investPosition"`
-        InvestDividend  string `json:"investDividend"`
-        RealName        string `json:"realName"`
-        OnlineStatus    string `json:"onlineStatus"`
-        Status          string `json:"status"`
-        InviteCode      string `json:"inviteCode"`
-        CreateTime      string `json:"createTime"`
-        LastLoginTime   string `json:"lastLoginTime"`
+        Id                   string  `json:"id"`
+        Username             string  `json:"username"`
+        RealName             string  `json:"realName,optional"`
+        IdCard               string  `json:"idCard,optional"`
+        AgentLevel           int64   `json:"agentLevel,optional"`           // fb_users.agent_level
+        InviteCode           string  `json:"inviteCode,optional"`
+        CommissionRate       float64 `json:"commissionRate,optional"`
+        TotalCommission      float64 `json:"totalCommission,optional"`
+        TotalBalance         float64 `json:"totalBalance,optional"`         // SUM(fb_user_wallets.balance)
+        FundPositionAmount   float64 `json:"fundPositionAmount,optional"`   // SUM(fb_fund_position.amount)
+        FundPositionDividend float64 `json:"fundPositionDividend,optional"` // SUM(fb_fund_position.profit)
+        Status               string  `json:"status,optional"`               // ACTIVE 等
+        OnlineStatus         int64   `json:"onlineStatus,optional"`         // 1 在线 / 0 离线（is_online）
+        LastLogin            string  `json:"lastLogin,optional"`
+        CreatedAt            string  `json:"createdAt,optional"`            // 注册时间
     }
     PageSetMemberUserResp {
         Rows  []*MemberUserItem `json:"rows"`
         Total int64             `json:"total"`
     }
+    // 活跃统计（data 内返回）；筛选条件与列表相同，无分页
     MemberUserStatsResp {
-        TotalActiveSessions int64 `json:"totalActiveSessions"`
+        TotalOnlineUsers    int64 `json:"totalOnlineUsers"`    // is_online=1 用户数
+        TodayLogins         int64 `json:"todayLogins"`         // 当日成功登录次数
+        TotalActiveSessions int64 `json:"totalActiveSessions"` // 近30分钟成功登录去重设备数
     }
 )
 

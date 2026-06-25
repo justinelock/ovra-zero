@@ -6,13 +6,14 @@ package team
 import (
 	"context"
 
+	"ovra/app/system/internal/dal"
 	"ovra/app/system/internal/svc"
 	"ovra/app/system/internal/types"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-// StatsLogic 团队代理统计（占位，待接 member 团队表）
+// StatsLogic 团队代理统计
 type StatsLogic struct {
 	logx.Logger
 	ctx    context.Context
@@ -27,18 +28,23 @@ func NewStatsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *StatsLogic 
 	}
 }
 
-// Stats 聚合各级代理人数与团队总余额
-// 1. 业务表尚未接入，返回零值供前端统计卡片联调
-// 2. 后续按 keyword/status 聚合 level1～level5、totalMembers、totalBalance
+// Stats 按 fb_users.level 1～5 分层计数并汇总团队钱包余额
 func (l *StatsLogic) Stats(req *types.MemberTeamQuery) (resp *types.MemberTeamStatsResp, err error) {
-	_ = req
+	f := dal.MemberListFilter{
+		Keyword: req.Keyword,
+		Status:  req.Status,
+	}
+	levels, totalMembers, totalBalance, err := l.svcCtx.Dal.FbMemberDal.TeamStats(l.ctx, f)
+	if err != nil {
+		return nil, err
+	}
 	return &types.MemberTeamStatsResp{
-		Level1Count:  0,
-		Level2Count:  0,
-		Level3Count:  0,
-		Level4Count:  0,
-		Level5Count:  0,
-		TotalMembers: 0,
-		TotalBalance: "0.00",
+		TotalMembers:     totalMembers,
+		Level1Members:    levels[1],
+		Level2Members:    levels[2],
+		Level3Members:    levels[3],
+		Level4Members:    levels[4],
+		Level5Members:    levels[5],
+		TotalTeamBalance: totalBalance,
 	}, nil
 }

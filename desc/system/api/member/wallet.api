@@ -1,37 +1,40 @@
 syntax = "v1"
 
 info(
-    desc: "业务用户钱包列表（占位接口，待接业务表）"
+    desc: "业务用户钱包列表（对接 fb_user_wallets）"
     author: "ovra"
 )
 
 import "../base.api"
 
 type (
+    // 钱包筛选；frozenStatus 对应 fb_user_wallets.frozen
     MemberWalletQuery {
-        Keyword      string `form:"keyword,optional"`
-        AccountType  string `form:"accountType,optional"`
-        Currency     string `form:"currency,optional"`
-        FrozenStatus string `form:"frozenStatus,optional"`
+        Keyword      string `form:"keyword,optional"`      // 用户名/手机号/钱包ID
+        AccountType  string `form:"accountType,optional"`  // main / sub
+        Currency     string `form:"currency,optional"`     // USD / CNY
+        FrozenStatus string `form:"frozenStatus,optional"` // 1 冻结 / 0 正常
     }
     PageSetMemberWalletReq {
         PageReq
         MemberWalletQuery
     }
+    // 钱包列表行；用户信息来自 JOIN fb_users，契约见 docs/biz-api.md 1.4
     MemberWalletItem {
-        Id            string `json:"id"`
-        UserName      string `json:"userName"`
-        PhoneNumber   string `json:"phoneNumber"`
-        RealName      string `json:"realName"`
-        AccountType   string `json:"accountType"`
-        Balance       string `json:"balance"`
-        FrozenAmount  string `json:"frozenAmount"`
-        Frozen        string `json:"frozen"`
-        Version       string `json:"version"`
-        Currency      string `json:"currency"`
-        LotteryCount  string `json:"lotteryCount"`
-        CreateTime    string `json:"createTime"`
-        UpdateTime    string `json:"updateTime"`
+        Id           string  `json:"id"`
+        UserId       string  `json:"userId"`
+        Username     string  `json:"username,optional"`
+        Mobile       string  `json:"mobile,optional"`
+        RealName     string  `json:"realName,optional"`
+        AccountType  string  `json:"accountType,optional"`
+        Balance      float64 `json:"balance,optional"`
+        FrozenAmount float64 `json:"frozenAmount,optional"`
+        Frozen       bool    `json:"frozen,optional"`
+        Version      string  `json:"version,optional"`     // 乐观锁版本
+        Currency     string  `json:"currency,optional"`
+        DrawTicket   int64   `json:"drawTicket,optional"`  // 抽奖券数量
+        CreatedAt    string  `json:"createdAt,optional"`
+        UpdatedAt    string  `json:"updatedAt,optional"`
     }
     PageSetMemberWalletResp {
         Rows  []*MemberWalletItem `json:"rows"`

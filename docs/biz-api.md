@@ -116,16 +116,20 @@ GET /member/user/list?pageNum=1&pageSize=10
 | 字段 | 类型 | 说明 |
 | --- | --- | --- |
 | `id` | string | 主键 |
-| `userName` | string | 用户名 |
-| `totalBalance` | string | 总余额 |
-| `investPosition` | string | 投信持仓 |
-| `investDividend` | string | 投信分红 |
+| `username` | string | 用户名 |
 | `realName` | string | 真实姓名 |
-| `onlineStatus` | string | 在线状态 |
-| `status` | string | 账号状态 |
+| `idCard` | string | 身份证号 |
+| `agentLevel` | int64 | 代理层级 |
 | `inviteCode` | string | 邀请码 |
-| `createTime` | string | 注册时间 |
-| `lastLoginTime` | string | 最后登录时间 |
+| `commissionRate` | float64 | 佣金比例 |
+| `totalCommission` | float64 | 累计佣金 |
+| `totalBalance` | float64 | 总余额 |
+| `fundPositionAmount` | float64 | 投信持仓 |
+| `fundPositionDividend` | float64 | 投信分红 |
+| `status` | string | 账号状态 |
+| `onlineStatus` | int64 | 在线状态（1 在线 / 0 离线） |
+| `lastLogin` | string | 最后登录时间 |
+| `createdAt` | string | 注册时间 |
 
 **响应示例**（待补充）：
 
@@ -175,7 +179,9 @@ GET /member/user/list?pageNum=1&pageSize=10
 
 | 字段 | 类型 | 说明 |
 | --- | --- | --- |
-| `totalActiveSessions` | int64 | 活跃会话数；前端标题 Tag「活跃用户:{totalActiveSessions}」 |
+| `totalOnlineUsers` | int64 | 当前在线用户数 |
+| `todayLogins` | int64 | 今日登录次数 |
+| `totalActiveSessions` | int64 | 近 30 分钟活跃设备会话数；前端标题 Tag「活跃用户:{totalActiveSessions}」 |
 
 **响应示例**（待补充）：
 
@@ -215,16 +221,18 @@ GET /member/user/list?pageNum=1&pageSize=10
 | 字段 | 类型 | 说明 |
 | --- | --- | --- |
 | `id` | string | 主键 |
-| `userName` | string | 用户名 |
+| `userId` | string | 用户 ID |
+| `username` | string | 用户名 |
+| `mobile` | string | 手机号 |
 | `realName` | string | 真实姓名 |
-| `phoneNumber` | string | 手机号 |
 | `idCardNo` | string | 身份证号 |
 | `idCardFront` | string | 身份证正面 |
 | `idCardBack` | string | 身份证反面 |
-| `authStatus` | string | 认证状态 |
+| `status` | string | 认证状态 |
 | `rejectReason` | string | 驳回原因 |
-| `submitTime` | string | 提交时间 |
-| `authTime` | string | 认证时间 |
+| `verifiedAt` | string | 认证时间 |
+| `createdAt` | string | 提交时间 |
+| `updatedAt` | string | 更新时间 |
 
 **响应示例**（待补充）：
 
@@ -279,18 +287,19 @@ GET /member/user/list?pageNum=1&pageSize=10
 | 字段 | 类型 | 说明 |
 | --- | --- | --- |
 | `id` | string | 主键 |
-| `userName` | string | 用户名 |
-| `phoneNumber` | string | 手机号 |
+| `userId` | string | 用户 ID |
+| `username` | string | 用户名 |
+| `mobile` | string | 手机号 |
 | `realName` | string | 真实姓名 |
 | `accountType` | string | 账户类型 |
-| `balance` | string | 余额 |
-| `frozenAmount` | string | 冻结金额 |
-| `frozen` | string | 是否冻结 |
+| `balance` | float64 | 余额 |
+| `frozenAmount` | float64 | 冻结金额 |
+| `frozen` | bool | 是否冻结 |
 | `version` | string | 乐观锁版本 |
 | `currency` | string | 币种 |
-| `lotteryCount` | string | 抽奖次数 |
-| `createTime` | string | 创建时间 |
-| `updateTime` | string | 更新时间 |
+| `drawTicket` | int64 | 抽奖券数量 |
+| `createdAt` | string | 创建时间 |
+| `updatedAt` | string | 更新时间 |
 
 **响应示例**（待补充）：
 
@@ -344,19 +353,21 @@ GET /member/user/list?pageNum=1&pageSize=10
 | 字段 | 类型 | 说明 |
 | --- | --- | --- |
 | `id` | string | 主键 |
-| `userName` | string | 用户名 |
+| `userId` | string | 用户 ID |
+| `username` | string | 用户名 |
+| `mobile` | string | 手机号 |
 | `realName` | string | 真实姓名 |
-| `level` | string | 等级 |
-| `balance` | string | 余额 |
-| `totalRecharge` | string | 累计充值 |
-| `totalWithdraw` | string | 累计提现 |
-| `rechargeDiff` | string | 充提差 |
-| `totalProfit` | string | 累计盈亏 |
-| `parentInfo` | string | 上级信息 |
-| `teamCount` | string | 团队人数 |
-| `createTime` | string | 注册时间 |
-| `lastLoginTime` | string | 最后登录 |
+| `level` | int64 | 等级 |
+| `amount` | float64 | 账户余额 |
+| `rechargeAmount` | float64 | 累计充值 |
+| `withdrawAmount` | float64 | 累计提现 |
+| `rechargeDiff` | float64 | 充提差 |
+| `totalProfit` | float64 | 累计盈亏 |
+| `teamCount` | int64 | 团队人数 |
+| `registerTime` | string | 注册时间 |
+| `lastLogin` | string | 最后登录 |
 | `loginIp` | string | 登录 IP |
+| `parentUser` | object | 上级用户 `{ id, username }` |
 
 **响应示例**（待补充）：
 
@@ -391,12 +402,42 @@ GET /member/user/list?pageNum=1&pageSize=10
 }
 ```
 
-用户报表: 操作-查看流水记录 ({realName}的流水记录)
-### TODO 需要补充
-| 项 | 值                                   |
-| --- |-------------------------------------|
-| 方法 | `GET`                               |
-| 路径 | `/member/report/flow/{userId}`|
+### 1.5.1 用户报表流水
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `GET` |
+| 路径 | `/member/report/flow/{userId}` |
+| 权限 | `member:report:list` |
+| API 定义 | `desc/system/api/member/report.api` |
+| 行实体 | `MemberReportFlowItem` |
+
+**路径参数**：`userId` — 业务用户 ID。
+
+**`rows[]` 字段**：
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| `id` | string | 主键 |
+| `userId` | string | 用户 ID |
+| `username` | string | 用户名 |
+| `mobile` | string | 手机号 |
+| `realName` | string | 真实姓名 |
+| `accountType` | string | 账户类型 |
+| `flowType` | string | 流水类型 |
+| `beforeAmount` | float64 | 变动前余额 |
+| `flowAmount` | float64 | 变动金额 |
+| `afterAmount` | float64 | 变动后余额 |
+| `businessNo` | string | 业务单号 |
+| `remark` | string | 备注 |
+| `createdAt` | string | 创建时间 |
+| `walletId` | string | 钱包 ID |
+| `currency` | string | 币种 |
+| `description` | string | 描述 |
+| `status` | string | 状态 |
+| `updatedAt` | string | 更新时间 |
+
+**响应示例**：
 
 ```json
 {
@@ -452,16 +493,18 @@ GET /member/user/list?pageNum=1&pageSize=10
 | 字段 | 类型 | 说明 |
 | --- | --- | --- |
 | `id` | string | 主键 |
-| `userName` | string | 用户名 |
-| `balance` | string | 余额 |
+| `username` | string | 用户名 |
+| `agent` | object | 上级代理 `{ id, username, realName }` |
 | `realName` | string | 真实姓名 |
-| `parentAgent` | string | 上级代理 |
-| `agentLevel1` ~ `agentLevel5` | string | 各级代理 |
-| `agentTier` | string | 代理层级 |
-| `subTeamCount` | string | 下级团队人数 |
-| `subTeamBalance` | string | 下级团队余额 |
+| `level` | int64 | 用户等级 |
 | `status` | string | 状态 |
-| `registerTime` | string | 注册时间 |
+| `teamSize` | int64 | 团队规模 |
+| `level1Members` ~ `level5Members` | int64 | 各级成员数 |
+| `agentLevel` | int64 | 代理层级 |
+| `walletCount` | int64 | 钱包数量 |
+| `balance` | float64 | 个人余额 |
+| `totalTeamBalance` | float64 | 团队总余额 |
+| `createdAt` | string | 注册时间 |
 
 **响应示例**（待补充）：
 
@@ -516,13 +559,13 @@ GET /member/user/list?pageNum=1&pageSize=10
 
 | 字段 | 类型 | 说明 |
 | --- | --- | --- |
-| `level1Count` | int64 | 一级代理数 |
-| `level2Count` | int64 | 二级代理数 |
-| `level3Count` | int64 | 三级代理数 |
-| `level4Count` | int64 | 四级代理数 |
-| `level5Count` | int64 | 五级代理数 |
 | `totalMembers` | int64 | 成员总数 |
-| `totalBalance` | string | 团队总余额 |
+| `level1Members` | int64 | 一级代理数 |
+| `level2Members` | int64 | 二级代理数 |
+| `level3Members` | int64 | 三级代理数 |
+| `level4Members` | int64 | 四级代理数 |
+| `level5Members` | int64 | 五级代理数 |
+| `totalTeamBalance` | float64 | 团队总余额 |
 
 **响应示例**（待补充）：
 
@@ -573,12 +616,14 @@ GET /member/user/list?pageNum=1&pageSize=10
 | 字段 | 类型 | 说明 |
 | --- | --- | --- |
 | `id` | string | 主键 |
-| `userName` | string | 用户名 |
+| `userId` | string | 用户 ID |
+| `username` | string | 用户名 |
+| `realName` | string | 真实姓名 |
 | `deviceId` | string | 设备 ID |
 | `loginTime` | string | 登录时间 |
 | `loginIp` | string | 登录 IP |
 | `loginLocation` | string | 登录地点 |
-| `loginMethod` | string | 登录方式 |
+| `loginType` | string | 登录方式 |
 | `loginResult` | string | 登录结果 |
 | `failReason` | string | 失败原因 |
 | `riskLevel` | string | 风险等级 |

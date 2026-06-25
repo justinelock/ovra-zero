@@ -885,6 +885,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Path:    "/list",
 					Handler: memberreport.PageSetHandler(serverCtx),
 				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/flow/:userId",
+					Handler: memberreport.FlowHandler(serverCtx),
+				},
 			}...,
 		),
 		rest.WithPrefix("/member/report"),

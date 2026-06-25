@@ -1028,9 +1028,9 @@ type EncryptDemoResp struct {
 }
 
 type MemberUserQuery struct {
-	Keyword    string `form:"keyword,optional"`
-	AuthStatus string `form:"authStatus,optional"`
-	Deleted    string `form:"deleted,optional"`
+	Keyword    string `form:"keyword,optional"`    // 用户名/手机号/用户ID
+	AuthStatus string `form:"authStatus,optional"` // 认证状态 verification_status
+	Deleted    string `form:"deleted,optional"`    // 0 正常 / 1 已删（fb_users.flag）
 }
 
 type PageSetMemberUserReq struct {
@@ -1039,17 +1039,21 @@ type PageSetMemberUserReq struct {
 }
 
 type MemberUserItem struct {
-	Id             string `json:"id"`
-	UserName       string `json:"userName"`
-	TotalBalance   string `json:"totalBalance"`
-	InvestPosition string `json:"investPosition"`
-	InvestDividend string `json:"investDividend"`
-	RealName       string `json:"realName"`
-	OnlineStatus   string `json:"onlineStatus"`
-	Status         string `json:"status"`
-	InviteCode     string `json:"inviteCode"`
-	CreateTime     string `json:"createTime"`
-	LastLoginTime  string `json:"lastLoginTime"`
+	Id                   string  `json:"id"`
+	Username             string  `json:"username"`
+	RealName             string  `json:"realName,optional"`
+	IdCard               string  `json:"idCard,optional"`
+	AgentLevel           int64   `json:"agentLevel,optional"` // fb_users.agent_level
+	InviteCode           string  `json:"inviteCode,optional"`
+	CommissionRate       float64 `json:"commissionRate,optional"`
+	TotalCommission      float64 `json:"totalCommission,optional"`
+	TotalBalance         float64 `json:"totalBalance,optional"`         // SUM(fb_user_wallets.balance)
+	FundPositionAmount   float64 `json:"fundPositionAmount,optional"`   // SUM(fb_fund_position.amount)
+	FundPositionDividend float64 `json:"fundPositionDividend,optional"` // SUM(fb_fund_position.profit)
+	Status               string  `json:"status,optional"`               // ACTIVE 等
+	OnlineStatus         int64   `json:"onlineStatus,optional"`         // 1 在线 / 0 离线（is_online）
+	LastLogin            string  `json:"lastLogin,optional"`
+	CreatedAt            string  `json:"createdAt,optional"` // 注册时间
 }
 
 type PageSetMemberUserResp struct {
@@ -1058,12 +1062,14 @@ type PageSetMemberUserResp struct {
 }
 
 type MemberUserStatsResp struct {
-	TotalActiveSessions int64 `json:"totalActiveSessions"`
+	TotalOnlineUsers    int64 `json:"totalOnlineUsers"`    // is_online=1 用户数
+	TodayLogins         int64 `json:"todayLogins"`         // 当日成功登录次数
+	TotalActiveSessions int64 `json:"totalActiveSessions"` // 近30分钟成功登录去重设备数
 }
 
 type MemberKycQuery struct {
-	Keyword    string `form:"keyword,optional"`
-	AuthStatus string `form:"authStatus,optional"`
+	Keyword    string `form:"keyword,optional"`    // 用户名/手机号/姓名/记录ID
+	AuthStatus string `form:"authStatus,optional"` // 认证状态
 }
 
 type PageSetMemberKycReq struct {
@@ -1073,16 +1079,18 @@ type PageSetMemberKycReq struct {
 
 type MemberKycItem struct {
 	Id           string `json:"id"`
-	UserName     string `json:"userName"`
-	RealName     string `json:"realName"`
-	PhoneNumber  string `json:"phoneNumber"`
-	IdCardNo     string `json:"idCardNo"`
-	IdCardFront  string `json:"idCardFront"`
-	IdCardBack   string `json:"idCardBack"`
-	AuthStatus   string `json:"authStatus"`
-	RejectReason string `json:"rejectReason"`
-	SubmitTime   string `json:"submitTime"`
-	AuthTime     string `json:"authTime"`
+	UserId       string `json:"userId"`
+	Username     string `json:"username,optional"`
+	Mobile       string `json:"mobile,optional"`
+	RealName     string `json:"realName,optional"`
+	IdCardNo     string `json:"idCardNo,optional"`
+	IdCardFront  string `json:"idCardFront,optional"` // 证件正面 URL
+	IdCardBack   string `json:"idCardBack,optional"`  // 证件反面 URL
+	Status       string `json:"status,optional"`      // VERIFIED / PENDING / REJECTED
+	RejectReason string `json:"rejectReason,optional"`
+	VerifiedAt   string `json:"verifiedAt,optional"` // 认证通过时间
+	CreatedAt    string `json:"createdAt,optional"`  // 提交时间
+	UpdatedAt    string `json:"updatedAt,optional"`
 }
 
 type PageSetMemberKycResp struct {
@@ -1091,10 +1099,10 @@ type PageSetMemberKycResp struct {
 }
 
 type MemberWalletQuery struct {
-	Keyword      string `form:"keyword,optional"`
-	AccountType  string `form:"accountType,optional"`
-	Currency     string `form:"currency,optional"`
-	FrozenStatus string `form:"frozenStatus,optional"`
+	Keyword      string `form:"keyword,optional"`      // 用户名/手机号/钱包ID
+	AccountType  string `form:"accountType,optional"`  // main / sub
+	Currency     string `form:"currency,optional"`     // USD / CNY
+	FrozenStatus string `form:"frozenStatus,optional"` // 1 冻结 / 0 正常
 }
 
 type PageSetMemberWalletReq struct {
@@ -1103,19 +1111,20 @@ type PageSetMemberWalletReq struct {
 }
 
 type MemberWalletItem struct {
-	Id           string `json:"id"`
-	UserName     string `json:"userName"`
-	PhoneNumber  string `json:"phoneNumber"`
-	RealName     string `json:"realName"`
-	AccountType  string `json:"accountType"`
-	Balance      string `json:"balance"`
-	FrozenAmount string `json:"frozenAmount"`
-	Frozen       string `json:"frozen"`
-	Version      string `json:"version"`
-	Currency     string `json:"currency"`
-	LotteryCount string `json:"lotteryCount"`
-	CreateTime   string `json:"createTime"`
-	UpdateTime   string `json:"updateTime"`
+	Id           string  `json:"id"`
+	UserId       string  `json:"userId"`
+	Username     string  `json:"username,optional"`
+	Mobile       string  `json:"mobile,optional"`
+	RealName     string  `json:"realName,optional"`
+	AccountType  string  `json:"accountType,optional"`
+	Balance      float64 `json:"balance,optional"`
+	FrozenAmount float64 `json:"frozenAmount,optional"`
+	Frozen       bool    `json:"frozen,optional"`
+	Version      string  `json:"version,optional"` // 乐观锁版本
+	Currency     string  `json:"currency,optional"`
+	DrawTicket   int64   `json:"drawTicket,optional"` // 抽奖券数量
+	CreatedAt    string  `json:"createdAt,optional"`
+	UpdatedAt    string  `json:"updatedAt,optional"`
 }
 
 type PageSetMemberWalletResp struct {
@@ -1124,8 +1133,8 @@ type PageSetMemberWalletResp struct {
 }
 
 type MemberReportQuery struct {
-	Keyword string `form:"keyword,optional"`
-	Level   string `form:"level,optional"`
+	Keyword string `form:"keyword,optional"` // 用户名/手机号/用户ID
+	Level   string `form:"level,optional"`   // 用户等级 0～5
 }
 
 type PageSetMemberReportReq struct {
@@ -1133,21 +1142,28 @@ type PageSetMemberReportReq struct {
 	MemberReportQuery
 }
 
+type MemberReportParentUser struct {
+	Id       string `json:"id"`
+	Username string `json:"username"`
+}
+
 type MemberReportItem struct {
-	Id            string `json:"id"`
-	UserName      string `json:"userName"`
-	RealName      string `json:"realName"`
-	Level         string `json:"level"`
-	Balance       string `json:"balance"`
-	TotalRecharge string `json:"totalRecharge"`
-	TotalWithdraw string `json:"totalWithdraw"`
-	RechargeDiff  string `json:"rechargeDiff"`
-	TotalProfit   string `json:"totalProfit"`
-	ParentInfo    string `json:"parentInfo"`
-	TeamCount     string `json:"teamCount"`
-	CreateTime    string `json:"createTime"`
-	LastLoginTime string `json:"lastLoginTime"`
-	LoginIp       string `json:"loginIp"`
+	Id             string                  `json:"id"`
+	UserId         string                  `json:"userId"`
+	Username       string                  `json:"username,optional"`
+	Mobile         string                  `json:"mobile,optional"`
+	RealName       string                  `json:"realName,optional"`
+	Level          int64                   `json:"level,optional"`
+	Amount         float64                 `json:"amount,optional"`         // 钱包余额汇总
+	RechargeAmount float64                 `json:"rechargeAmount,optional"` // 成功充值汇总
+	WithdrawAmount float64                 `json:"withdrawAmount,optional"` // 成功提现汇总
+	RechargeDiff   float64                 `json:"rechargeDiff,optional"`   // 充提差
+	TotalProfit    float64                 `json:"totalProfit,optional"`    // 累计盈亏（预留）
+	TeamCount      int64                   `json:"teamCount,optional"`      // fb_users.team_size
+	RegisterTime   string                  `json:"registerTime,optional"`
+	LastLogin      string                  `json:"lastLogin,optional"`
+	LoginIp        string                  `json:"loginIp,optional"` // 最近登录 IP
+	ParentUser     *MemberReportParentUser `json:"parentUser,optional"`
 }
 
 type PageSetMemberReportResp struct {
@@ -1155,9 +1171,40 @@ type PageSetMemberReportResp struct {
 	Total int64               `json:"total"`
 }
 
+type PageSetMemberReportFlowReq struct {
+	PageReq
+	UserId string `path:"userId"`
+}
+
+type MemberReportFlowItem struct {
+	Id           string  `json:"id"`
+	UserId       string  `json:"userId"`
+	Username     string  `json:"username,optional"`
+	Mobile       string  `json:"mobile,optional"`
+	RealName     string  `json:"realName,optional"`
+	AccountType  string  `json:"accountType,optional"`
+	FlowType     string  `json:"flowType,optional"` // CONTRACT_BUY 等
+	BeforeAmount float64 `json:"beforeAmount,optional"`
+	FlowAmount   float64 `json:"flowAmount,optional"`
+	AfterAmount  float64 `json:"afterAmount,optional"`
+	BusinessNo   string  `json:"businessNo,optional"`
+	Remark       string  `json:"remark,optional"`
+	CreatedAt    string  `json:"createdAt,optional"`
+	WalletId     string  `json:"walletId,optional"`
+	Currency     string  `json:"currency,optional"`
+	Description  string  `json:"description,optional"`
+	Status       string  `json:"status,optional"` // SUCCESS 等
+	UpdatedAt    string  `json:"updatedAt,optional"`
+}
+
+type PageSetMemberReportFlowResp struct {
+	Rows  []*MemberReportFlowItem `json:"rows"`
+	Total int64                   `json:"total"`
+}
+
 type MemberTeamQuery struct {
-	Keyword string `form:"keyword,optional"`
-	Status  string `form:"status,optional"`
+	Keyword string `form:"keyword,optional"` // 用户名/手机号/用户ID
+	Status  string `form:"status,optional"`  // fb_users.status
 }
 
 type PageSetMemberTeamReq struct {
@@ -1165,32 +1212,40 @@ type PageSetMemberTeamReq struct {
 	MemberTeamQuery
 }
 
+type MemberTeamAgent struct {
+	Id       string `json:"id"`
+	Username string `json:"username"`
+	RealName string `json:"realName,optional"`
+}
+
 type MemberTeamStatsResp struct {
-	Level1Count  int64  `json:"level1Count"`
-	Level2Count  int64  `json:"level2Count"`
-	Level3Count  int64  `json:"level3Count"`
-	Level4Count  int64  `json:"level4Count"`
-	Level5Count  int64  `json:"level5Count"`
-	TotalMembers int64  `json:"totalMembers"`
-	TotalBalance string `json:"totalBalance"`
+	TotalMembers     int64   `json:"totalMembers"`
+	Level1Members    int64   `json:"level1Members"` // level=1 用户数
+	Level2Members    int64   `json:"level2Members"`
+	Level3Members    int64   `json:"level3Members"`
+	Level4Members    int64   `json:"level4Members"`
+	Level5Members    int64   `json:"level5Members"`
+	TotalTeamBalance float64 `json:"totalTeamBalance"` // 筛选范围内钱包余额总和
 }
 
 type MemberTeamItem struct {
-	Id             string `json:"id"`
-	UserName       string `json:"userName"`
-	Balance        string `json:"balance"`
-	RealName       string `json:"realName"`
-	ParentAgent    string `json:"parentAgent"`
-	AgentLevel1    string `json:"agentLevel1"`
-	AgentLevel2    string `json:"agentLevel2"`
-	AgentLevel3    string `json:"agentLevel3"`
-	AgentLevel4    string `json:"agentLevel4"`
-	AgentLevel5    string `json:"agentLevel5"`
-	AgentTier      string `json:"agentTier"`
-	SubTeamCount   string `json:"subTeamCount"`
-	SubTeamBalance string `json:"subTeamBalance"`
-	Status         string `json:"status"`
-	RegisterTime   string `json:"registerTime"`
+	Id               string           `json:"id"`
+	Username         string           `json:"username,optional"`
+	Agent            *MemberTeamAgent `json:"agent,optional"`
+	RealName         string           `json:"realName,optional"`
+	Level            int64            `json:"level,optional"`
+	Status           string           `json:"status,optional"`
+	TeamSize         int64            `json:"teamSize,optional"`      // fb_users.team_size
+	Level1Members    int64            `json:"level1Members,optional"` // 直属下级数
+	Level2Members    int64            `json:"level2Members,optional"`
+	Level3Members    int64            `json:"level3Members,optional"`
+	Level4Members    int64            `json:"level4Members,optional"`
+	Level5Members    int64            `json:"level5Members,optional"`
+	AgentLevel       int64            `json:"agentLevel,optional"`
+	WalletCount      int64            `json:"walletCount,optional"`
+	Balance          float64          `json:"balance,optional"`          // 个人钱包余额
+	TotalTeamBalance float64          `json:"totalTeamBalance,optional"` // 下级团队余额（预留）
+	CreatedAt        string           `json:"createdAt,optional"`
 }
 
 type PageSetMemberTeamResp struct {
@@ -1199,12 +1254,12 @@ type PageSetMemberTeamResp struct {
 }
 
 type MemberLoginLogQuery struct {
-	Keyword     string `form:"keyword,optional"`
-	LoginResult string `form:"loginResult,optional"`
-	LoginMethod string `form:"loginMethod,optional"`
-	RiskLevel   string `form:"riskLevel,optional"`
-	IpType      string `form:"ipType,optional"`
-	TimeRange   string `form:"timeRange,optional"`
+	Keyword     string `form:"keyword,optional"`     // 用户名/姓名/设备ID/IP
+	LoginResult string `form:"loginResult,optional"` // SUCCESS / FAIL
+	LoginMethod string `form:"loginMethod,optional"` // 对应 fb_device_login_log.login_type
+	RiskLevel   string `form:"riskLevel,optional"`   // LOW / MEDIUM / HIGH
+	IpType      string `form:"ipType,optional"`      // 预留筛选
+	TimeRange   string `form:"timeRange,optional"`   // 预留快捷时间
 	FailReason  string `form:"failReason,optional"`
 	DeviceType  string `form:"deviceType,optional"`
 	Browser     string `form:"browser,optional"`
@@ -1217,16 +1272,18 @@ type PageSetMemberLoginLogReq struct {
 
 type MemberLoginLogItem struct {
 	Id            string `json:"id"`
-	UserName      string `json:"userName"`
-	DeviceId      string `json:"deviceId"`
-	LoginTime     string `json:"loginTime"`
-	LoginIp       string `json:"loginIp"`
-	LoginLocation string `json:"loginLocation"`
-	LoginMethod   string `json:"loginMethod"`
-	LoginResult   string `json:"loginResult"`
-	FailReason    string `json:"failReason"`
-	RiskLevel     string `json:"riskLevel"`
-	RiskDetail    string `json:"riskDetail"`
+	UserId        string `json:"userId"`
+	Username      string `json:"username,optional"`
+	RealName      string `json:"realName,optional"`
+	DeviceId      string `json:"deviceId,optional"`
+	LoginTime     string `json:"loginTime,optional"`
+	LoginIp       string `json:"loginIp,optional"`
+	LoginLocation string `json:"loginLocation,optional"`
+	LoginType     string `json:"loginType,optional"` // PASSWORD 等（非 loginMethod）
+	LoginResult   string `json:"loginResult,optional"`
+	FailReason    string `json:"failReason,optional"`
+	RiskLevel     string `json:"riskLevel,optional"`
+	RiskDetail    string `json:"riskDetail,optional"`
 }
 
 type PageSetMemberLoginLogResp struct {

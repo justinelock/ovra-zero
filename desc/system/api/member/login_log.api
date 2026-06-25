@@ -1,20 +1,21 @@
 syntax = "v1"
 
 info(
-    desc: "业务用户登录记录（占位接口，待接业务表）"
+    desc: "业务用户登录记录（对接 fb_device_login_log）"
     author: "ovra"
 )
 
 import "../base.api"
 
 type (
+    // 登录记录筛选；loginMethod 查询参数映射库字段 login_type
     MemberLoginLogQuery {
-        Keyword     string `form:"keyword,optional"`
-        LoginResult string `form:"loginResult,optional"`
-        LoginMethod string `form:"loginMethod,optional"`
-        RiskLevel   string `form:"riskLevel,optional"`
-        IpType      string `form:"ipType,optional"`
-        TimeRange   string `form:"timeRange,optional"`
+        Keyword     string `form:"keyword,optional"`     // 用户名/姓名/设备ID/IP
+        LoginResult string `form:"loginResult,optional"` // SUCCESS / FAIL
+        LoginMethod string `form:"loginMethod,optional"` // 对应 fb_device_login_log.login_type
+        RiskLevel   string `form:"riskLevel,optional"`   // LOW / MEDIUM / HIGH
+        IpType      string `form:"ipType,optional"`      // 预留筛选
+        TimeRange   string `form:"timeRange,optional"`   // 预留快捷时间
         FailReason  string `form:"failReason,optional"`
         DeviceType  string `form:"deviceType,optional"`
         Browser     string `form:"browser,optional"`
@@ -23,18 +24,21 @@ type (
         PageReq
         MemberLoginLogQuery
     }
+    // 登录日志行；username/realName 来自 JOIN fb_users，契约见 docs/biz-api.md 1.8
     MemberLoginLogItem {
-        Id           string `json:"id"`
-        UserName     string `json:"userName"`
-        DeviceId     string `json:"deviceId"`
-        LoginTime    string `json:"loginTime"`
-        LoginIp      string `json:"loginIp"`
-        LoginLocation string `json:"loginLocation"`
-        LoginMethod  string `json:"loginMethod"`
-        LoginResult  string `json:"loginResult"`
-        FailReason   string `json:"failReason"`
-        RiskLevel    string `json:"riskLevel"`
-        RiskDetail   string `json:"riskDetail"`
+        Id            string `json:"id"`
+        UserId        string `json:"userId"`
+        Username      string `json:"username,optional"`
+        RealName      string `json:"realName,optional"`
+        DeviceId      string `json:"deviceId,optional"`
+        LoginTime     string `json:"loginTime,optional"`
+        LoginIp       string `json:"loginIp,optional"`
+        LoginLocation string `json:"loginLocation,optional"`
+        LoginType     string `json:"loginType,optional"`     // PASSWORD 等（非 loginMethod）
+        LoginResult   string `json:"loginResult,optional"`
+        FailReason    string `json:"failReason,optional"`
+        RiskLevel     string `json:"riskLevel,optional"`
+        RiskDetail    string `json:"riskDetail,optional"`
     }
     PageSetMemberLoginLogResp {
         Rows  []*MemberLoginLogItem `json:"rows"`

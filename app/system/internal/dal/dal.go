@@ -21,6 +21,7 @@ type Dal struct {
 	SysDictDatumDal *SysDictDatumDal
 	SysDictTypeDal  *SysDictTypeDal
 	SysNoticeDal    *SysNoticeDal
+	FbMemberDal     *FbMemberDal
 }
 
 func NewDal(db *gorm.DB, query *query.Query, c config.Config) *Dal {
@@ -38,5 +39,6 @@ func NewDal(db *gorm.DB, query *query.Query, c config.Config) *Dal {
 		SysDictDatumDal: NewSysDictDatumDal(db, query),
 		SysDictTypeDal:  NewSysDictTypeDal(db, query),
 		SysNoticeDal:    NewSysNoticeDal(db, query),
+		FbMemberDal:     NewFbMemberDal(db),
 	}
 }

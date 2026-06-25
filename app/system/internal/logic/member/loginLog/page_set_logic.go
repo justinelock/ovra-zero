@@ -6,13 +6,14 @@ package loginLog
 import (
 	"context"
 
+	"ovra/app/system/internal/dal"
 	"ovra/app/system/internal/svc"
 	"ovra/app/system/internal/types"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-// PageSetLogic 登录记录分页查询（占位，待接 member 登录日志表）
+// PageSetLogic 登录记录分页
 type PageSetLogic struct {
 	logx.Logger
 	ctx    context.Context
@@ -27,13 +28,36 @@ func NewPageSetLogic(ctx context.Context, svcCtx *svc.ServiceContext) *PageSetLo
 	}
 }
 
-// PageSet 分页查询登录记录
-// 1. 业务表尚未接入，返回空分页供前端 VxeGrid 联调
-// 2. 后续按 keyword/loginResult/loginMethod/riskLevel 等 及时间范围查询
+// PageSet 分页查询 fb_device_login_log
 func (l *PageSetLogic) PageSet(req *types.PageSetMemberLoginLogReq) (resp *types.PageSetMemberLoginLogResp, err error) {
-	_ = req
-	return &types.PageSetMemberLoginLogResp{
-		Rows:  []*types.MemberLoginLogItem{},
-		Total: 0,
-	}, nil
+	f := dal.MemberListFilter{
+		Keyword:   req.Keyword,
+		BeginTime: req.BeginTime,
+		EndTime:   req.EndTime,
+		PageNum:   req.PageNum,
+		PageSize:  req.PageSize,
+	}
+	rows, total, err := l.svcCtx.Dal.FbMemberDal.PageLoginLogs(l.ctx, f, req.LoginResult, req.LoginMethod, req.RiskLevel)
+	if err != nil {
+		return nil, err
+	}
+	items := make([]*types.MemberLoginLogItem, 0, len(rows))
+	for _, r := range rows {
+		items = append(items, &types.MemberLoginLogItem{
+			Id:            dal.IDStr(r.ID),
+			UserId:        dal.IDStr(r.UserID),
+			Username:      r.Username,
+			RealName:      r.RealName,
+			DeviceId:      r.DeviceID,
+			LoginTime:     dal.FormatFbTimeVal(r.LoginTime),
+			LoginIp:       r.LoginIP,
+			LoginLocation: r.LoginLocation,
+			LoginType:     r.LoginType,
+			LoginResult:   r.LoginResult,
+			FailReason:    r.FailReason,
+			RiskLevel:     r.RiskLevel,
+			RiskDetail:    r.RiskDetail,
+		})
+	}
+	return &types.PageSetMemberLoginLogResp{Rows: items, Total: total}, nil
 }

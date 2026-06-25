@@ -6,13 +6,14 @@ package user
 import (
 	"context"
 
+	"ovra/app/system/internal/dal"
 	"ovra/app/system/internal/svc"
 	"ovra/app/system/internal/types"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-// PageSetLogic 业务用户分页查询（占位，待接 biz 用户表）
+// PageSetLogic 业务用户列表分页查询
 type PageSetLogic struct {
 	logx.Logger
 	ctx    context.Context
@@ -28,13 +29,42 @@ func NewPageSetLogic(ctx context.Context, svcCtx *svc.ServiceContext) *PageSetLo
 }
 
 // PageSet 分页查询业务用户
-// 1. 业务表尚未接入，返回空分页供前端 VxeGrid 联调
-// 2. 后续按 keyword/authStatus/时间范围/deleted 及时间范围查询
+// 1. 从 fb_users 联表钱包/投信持仓聚合余额与持仓
+// 2. 按 keyword/authStatus/deleted/注册时间筛选并映射为 MemberUserItem
 func (l *PageSetLogic) PageSet(req *types.PageSetMemberUserReq) (resp *types.PageSetMemberUserResp, err error) {
-	// 2. 后续按 keyword/authStatus/时间范围/deleted 查询 biz 用户表
-	_ = req
-	return &types.PageSetMemberUserResp{
-		Rows:  []*types.MemberUserItem{},
-		Total: 0,
-	}, nil
+	f := dal.MemberListFilter{
+		Keyword:    req.Keyword,
+		AuthStatus: req.AuthStatus,
+		Deleted:    req.Deleted,
+		BeginTime:  req.BeginTime,
+		EndTime:    req.EndTime,
+		PageNum:    req.PageNum,
+		PageSize:   req.PageSize,
+	}
+	rows, total, err := l.svcCtx.Dal.FbMemberDal.PageUsers(l.ctx, f)
+	if err != nil {
+		return nil, err
+	}
+	items := make([]*types.MemberUserItem, 0, len(rows))
+	for _, r := range rows {
+		online := dal.ParseOnlineStatus(r.IsOnline)
+		items = append(items, &types.MemberUserItem{
+			Id:                   dal.IDStr(r.ID),
+			Username:             r.Username,
+			RealName:             r.RealName,
+			IdCard:               r.IDCard,
+			AgentLevel:           int64(r.AgentLevel),
+			InviteCode:           r.InviteCode,
+			CommissionRate:       r.CommissionRate,
+			TotalCommission:      r.TotalCommission,
+			TotalBalance:         r.TotalBalance,
+			FundPositionAmount:   r.FundPositionAmount,
+			FundPositionDividend: r.FundPositionDividend,
+			Status:               r.Status,
+			OnlineStatus:         online,
+			LastLogin:            dal.FormatFbTime(r.LastLogin),
+			CreatedAt:            dal.FormatFbTimeVal(r.CreatedAt),
+		})
+	}
+	return &types.PageSetMemberUserResp{Rows: items, Total: total}, nil
 }

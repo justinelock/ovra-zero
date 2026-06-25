@@ -6,13 +6,14 @@ package wallet
 import (
 	"context"
 
+	"ovra/app/system/internal/dal"
 	"ovra/app/system/internal/svc"
 	"ovra/app/system/internal/types"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-// PageSetLogic 用户钱包分页查询（占位，待接 member 钱包表）
+// PageSetLogic 用户钱包列表分页
 type PageSetLogic struct {
 	logx.Logger
 	ctx    context.Context
@@ -27,13 +28,37 @@ func NewPageSetLogic(ctx context.Context, svcCtx *svc.ServiceContext) *PageSetLo
 	}
 }
 
-// PageSet 分页查询用户钱包
-// 1. 业务表尚未接入，返回空分页供前端 VxeGrid 联调
-// 2. 后续按 keyword/accountType/currency/frozenStatus 及时间范围查询
+// PageSet 分页查询 fb_user_wallets 并联用户信息
 func (l *PageSetLogic) PageSet(req *types.PageSetMemberWalletReq) (resp *types.PageSetMemberWalletResp, err error) {
-	_ = req
-	return &types.PageSetMemberWalletResp{
-		Rows:  []*types.MemberWalletItem{},
-		Total: 0,
-	}, nil
+	f := dal.MemberListFilter{
+		Keyword:   req.Keyword,
+		BeginTime: req.BeginTime,
+		EndTime:   req.EndTime,
+		PageNum:   req.PageNum,
+		PageSize:  req.PageSize,
+	}
+	rows, total, err := l.svcCtx.Dal.FbMemberDal.PageWallets(l.ctx, f, req.AccountType, req.Currency, req.FrozenStatus)
+	if err != nil {
+		return nil, err
+	}
+	items := make([]*types.MemberWalletItem, 0, len(rows))
+	for _, r := range rows {
+		items = append(items, &types.MemberWalletItem{
+			Id:           dal.IDStr(r.ID),
+			UserId:       dal.IDStr(r.UserID),
+			Username:     r.Username,
+			Mobile:       r.Mobile,
+			RealName:     r.RealName,
+			AccountType:  r.AccountType,
+			Balance:      r.Balance,
+			FrozenAmount: r.FrozenAmount,
+			Frozen:       r.Frozen,
+			Version:      dal.IDStr(r.Version),
+			Currency:     r.Currency,
+			DrawTicket:   int64(r.DrawTicket),
+			CreatedAt:    dal.FormatFbTimeVal(r.CreatedAt),
+			UpdatedAt:    dal.FormatFbTimeVal(r.UpdatedAt),
+		})
+	}
+	return &types.PageSetMemberWalletResp{Rows: items, Total: total}, nil
 }
