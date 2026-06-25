@@ -28,9 +28,7 @@ func NewPageSetLogic(ctx context.Context, svcCtx *svc.ServiceContext) *PageSetLo
 	}
 }
 
-// PageSet 分页查询业务用户
-// 1. 从 fb_users 联表钱包/投信持仓聚合余额与持仓
-// 2. 按 keyword/authStatus/deleted/注册时间筛选并映射为 MemberUserItem
+// PageSet 分页查询业务用户（fb_users 聚合 + Redis onlineStatus）
 func (l *PageSetLogic) PageSet(req *types.PageSetMemberUserReq) (resp *types.PageSetMemberUserResp, err error) {
 	f := dal.MemberListFilter{
 		Keyword:    req.Keyword,
@@ -41,13 +39,21 @@ func (l *PageSetLogic) PageSet(req *types.PageSetMemberUserReq) (resp *types.Pag
 		PageNum:    req.PageNum,
 		PageSize:   req.PageSize,
 	}
+	// fb_users 联表 USD 钱包与投信持仓（分红来自 profit_log）
 	rows, total, err := l.svcCtx.Dal.FbMemberDal.PageUsers(l.ctx, f)
 	if err != nil {
 		return nil, err
 	}
+	userIDs := make([]int64, 0, len(rows))
+	for _, r := range rows {
+		userIDs = append(userIDs, r.ID)
+	}
+	// token 在线（online:user）或近 5 分钟 presence 活跃 → onlineStatus
+	onlineMap := l.svcCtx.Dal.FbUserRedisDal.BatchOnlineStatus(l.ctx, userIDs)
+
 	items := make([]*types.MemberUserItem, 0, len(rows))
 	for _, r := range rows {
-		online := dal.ParseOnlineStatus(r.IsOnline)
+		online := onlineMap[r.ID]
 		items = append(items, &types.MemberUserItem{
 			Id:                   dal.IDStr(r.ID),
 			Username:             r.Username,

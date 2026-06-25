@@ -10,16 +10,24 @@ alwaysApply: true
 ## 1. 详细注释（步骤级优先）
 
 - **必须**：在新增/改动的函数、复杂逻辑块、非显而易见的分支上写注释。
-- **优先**：步骤级注释——用 `// 1.` `// 2.` 或 `// Step 1:` 标出主流程；Go 用块注释说明入参/出参/副作用。
-- **说明什么**：业务意图、前置条件、边界情况、与前后端/配置的对应关系；不要复述代码字面意思。
+- **方法外**：可写一行或多行**总结**（业务意图、与 Java/前端的对应关系），不要在外部罗列 `1. 2. 3.` 全流程。
+- **方法内**：步骤说明写在**对应代码行旁**，读者读到该行即懂；可用简短句，不必编号堆在函数开头。
+- **说明什么**：业务意图、前置条件、边界情况；不要复述代码字面意思。
 - **何时可省略**：getter/setter、纯透传、与周围代码完全同模式的重复片段。
 
 ```go
 // 按主键 id 查询租户详情（非 tenant_id 业务编号）
-// 1. 解析路径参数 id
-// 2. 按 sys_tenant.id 查询
-// 3. 未找到返回「数据不存在」
-func (l *InfoLogic) Info(req *types.IdReq) (*types.TenantBase, error) { ... }
+func (l *InfoLogic) Info(req *types.IdReq) (*types.TenantBase, error) {
+	// 按 sys_tenant.id 查询
+	row, err := l.svcCtx.Dal.SysTenantDal.SelectById(l.ctx, req.Id)
+	if err != nil {
+		return nil, err
+	}
+	if row == nil {
+		return nil, errx.New("数据不存在")
+	}
+	return mapTenant(row), nil
+}
 ```
 
 ```ts

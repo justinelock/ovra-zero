@@ -3,7 +3,6 @@ package dal
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 
@@ -52,19 +51,29 @@ type memberUserRow struct {
 	FundPositionDividend float64
 }
 
-// PageUsers 分页查询业务用户列表（含钱包余额与投信持仓聚合）
+// PageUsers 分页查询业务用户列表（含 USD 钱包与投信持仓聚合）
 func (d *FbMemberDal) PageUsers(ctx context.Context, f MemberListFilter) (rows []memberUserRow, total int64, err error) {
 	where, args := d.userWhere(f)
 	base := `
-FROM fb_users u
-LEFT JOIN (
-  SELECT user_id, SUM(balance) AS total_balance FROM fb_user_wallets GROUP BY user_id
-) w ON w.user_id = u.id
-LEFT JOIN (
-  SELECT user_id, SUM(amount) AS position_amount, SUM(profit) AS position_dividend
-  FROM fb_fund_position WHERE status = 1 GROUP BY user_id
-) p ON p.user_id = u.id
-WHERE ` + where
+		FROM fb_users u
+		LEFT JOIN (
+		  SELECT user_id, SUM(balance) AS total_balance
+		  FROM fb_user_wallets WHERE currency = 'USD' AND balance > 0
+		  GROUP BY user_id
+		) w ON w.user_id = u.id
+		LEFT JOIN (
+		  SELECT fp.user_id,
+			COALESCE(SUM(fp.amount), 0) AS position_amount,
+			COALESCE(SUM(COALESCE(pl.profit_sum, 0)), 0) AS position_dividend
+		  FROM fb_fund_position fp
+		  LEFT JOIN (
+			SELECT position_id, SUM(profit_amount) AS profit_sum
+			FROM fb_fund_profit_log WHERE status = 1 GROUP BY position_id
+		  ) pl ON pl.position_id = fp.id
+		  WHERE fp.state = 'PENDING' AND fp.status = 1
+		  GROUP BY fp.user_id
+		) p ON p.user_id = u.id
+		WHERE ` + where
 
 	countSQL := "SELECT COUNT(*) " + base
 	if err = d.db.WithContext(ctx).Raw(countSQL, args...).Scan(&total).Error; err != nil {
@@ -78,49 +87,18 @@ WHERE ` + where
 	if f.PageSize <= 0 {
 		f.PageSize = 10
 	}
+	// 不 SELECT password / pay_password
 	listSQL := `SELECT u.id, u.username, u.real_name, u.id_card, u.agent_level, u.invite_code,
-  u.commission_rate, u.total_commission, u.status, u.is_online, u.last_login, u.created_at,
-  COALESCE(w.total_balance, 0) AS total_balance,
-  COALESCE(p.position_amount, 0) AS fund_position_amount,
-  COALESCE(p.position_dividend, 0) AS fund_position_dividend ` + base +
+		  u.commission_rate, u.total_commission, u.status, u.is_online, u.last_login, u.created_at,
+		  COALESCE(w.total_balance, 0) AS total_balance,
+		  COALESCE(p.position_amount, 0) AS fund_position_amount,
+		  COALESCE(p.position_dividend, 0) AS fund_position_dividend ` + base +
 		" ORDER BY u.created_at DESC LIMIT ? OFFSET ?"
 	listArgs := append(append([]any{}, args...), f.PageSize, offset)
 	if err = d.db.WithContext(ctx).Raw(listSQL, listArgs...).Scan(&rows).Error; err != nil {
 		return nil, 0, errx.GORMErr(err)
 	}
 	return rows, total, nil
-}
-
-// UserStats 用户列表顶部统计
-func (d *FbMemberDal) UserStats(ctx context.Context, f MemberListFilter) (online, todayLogins, activeSessions int64, err error) {
-	where, args := d.userWhere(f)
-	var onlineCnt int64
-	if err = d.db.WithContext(ctx).Raw(
-		"SELECT COUNT(*) FROM fb_users u WHERE "+where+" AND u.is_online = '1'", args...,
-	).Scan(&onlineCnt).Error; err != nil {
-		return 0, 0, 0, errx.GORMErr(err)
-	}
-	today := time.Now().Format("2006-01-02")
-	var todayCnt int64
-	if err = d.db.WithContext(ctx).Raw(`
-SELECT COUNT(*) FROM fb_device_login_log l
-INNER JOIN fb_users u ON u.id = l.user_id
-WHERE `+where+` AND l.login_result = 'SUCCESS' AND l.login_time >= ? AND l.login_time < ? + INTERVAL 1 DAY`,
-		append(args, today, today)...,
-	).Scan(&todayCnt).Error; err != nil {
-		return 0, 0, 0, errx.GORMErr(err)
-	}
-	// 活跃会话：近 30 分钟内有成功登录记录的去重设备数
-	var sessionCnt int64
-	if err = d.db.WithContext(ctx).Raw(`
-SELECT COUNT(DISTINCT l.device_id) FROM fb_device_login_log l
-INNER JOIN fb_users u ON u.id = l.user_id
-WHERE `+where+` AND l.login_result = 'SUCCESS' AND l.login_time >= NOW() - INTERVAL 30 MINUTE`,
-		args...,
-	).Scan(&sessionCnt).Error; err != nil {
-		return 0, 0, 0, errx.GORMErr(err)
-	}
-	return onlineCnt, todayCnt, sessionCnt, nil
 }
 
 type memberKycRow struct {
@@ -167,7 +145,7 @@ func (d *FbMemberDal) PageKyc(ctx context.Context, f MemberListFilter) (rows []m
 	}
 	offset := (f.PageNum - 1) * f.PageSize
 	listSQL := `SELECT v.id, v.user_id, u.username, u.mobile, v.real_name, v.id_card_no,
-  v.id_card_front, v.id_card_back, v.status, v.reject_reason, v.verified_at, v.created_at, v.updated_at ` +
+  		v.id_card_front, v.id_card_back, v.status, v.reject_reason, v.verified_at, v.created_at, v.updated_at ` +
 		base + " ORDER BY v.created_at DESC LIMIT ? OFFSET ?"
 	listArgs := append(append([]any{}, args...), f.PageSize, offset)
 	if err = d.db.WithContext(ctx).Raw(listSQL, listArgs...).Scan(&rows).Error; err != nil {
@@ -229,7 +207,7 @@ func (d *FbMemberDal) PageWallets(ctx context.Context, f MemberListFilter, accou
 	}
 	offset := (f.PageNum - 1) * f.PageSize
 	listSQL := `SELECT w.id, w.user_id, u.username, u.mobile, u.real_name, w.account_type,
-  w.balance, w.frozen_amount, w.frozen, w.version, w.currency, w.draw_ticket, w.created_at, w.updated_at ` +
+  		w.balance, w.frozen_amount, w.frozen, w.version, w.currency, w.draw_ticket, w.created_at, w.updated_at ` +
 		base + " ORDER BY w.created_at DESC LIMIT ? OFFSET ?"
 	listArgs := append(append([]any{}, args...), f.PageSize, offset)
 	if err = d.db.WithContext(ctx).Raw(listSQL, listArgs...).Scan(&rows).Error; err != nil {
@@ -266,30 +244,30 @@ func (d *FbMemberDal) PageReports(ctx context.Context, f MemberListFilter) (rows
 		args = append(args, f.Level)
 	}
 	base := `
-FROM fb_users u
-LEFT JOIN fb_users p ON p.id = u.parent_id
-LEFT JOIN (SELECT user_id, SUM(balance) AS bal FROM fb_user_wallets GROUP BY user_id) w ON w.user_id = u.id
-LEFT JOIN (SELECT user_id, SUM(amount) AS amt FROM fb_deposits WHERE status = 'SUCCESS' GROUP BY user_id) dep ON dep.user_id = u.id
-LEFT JOIN (SELECT user_id, SUM(amount) AS amt FROM fb_withdraws WHERE status = 'SUCCESS' GROUP BY user_id) wd ON wd.user_id = u.id
-LEFT JOIN (
-  SELECT user_id, login_ip FROM fb_device_login_log l1
-  WHERE l1.id = (SELECT MAX(l2.id) FROM fb_device_login_log l2 WHERE l2.user_id = l1.user_id)
-) ll ON ll.user_id = u.id
-WHERE ` + where
+		FROM fb_users u
+		LEFT JOIN fb_users p ON p.id = u.parent_id
+		LEFT JOIN (SELECT user_id, SUM(balance) AS bal FROM fb_user_wallets GROUP BY user_id) w ON w.user_id = u.id
+		LEFT JOIN (SELECT user_id, SUM(amount) AS amt FROM fb_deposits WHERE status = 'SUCCESS' GROUP BY user_id) dep ON dep.user_id = u.id
+		LEFT JOIN (SELECT user_id, SUM(amount) AS amt FROM fb_withdraws WHERE status = 'SUCCESS' GROUP BY user_id) wd ON wd.user_id = u.id
+		LEFT JOIN (
+		  SELECT user_id, login_ip FROM fb_device_login_log l1
+		  WHERE l1.id = (SELECT MAX(l2.id) FROM fb_device_login_log l2 WHERE l2.user_id = l1.user_id)
+		) ll ON ll.user_id = u.id
+		WHERE ` + where
 
 	if err = d.db.WithContext(ctx).Raw("SELECT COUNT(*) "+base, args...).Scan(&total).Error; err != nil {
 		return nil, 0, errx.GORMErr(err)
 	}
 	offset := (f.PageNum - 1) * f.PageSize
 	listSQL := `SELECT u.id, u.id AS user_id, u.username, u.mobile, u.real_name, u.level,
-  COALESCE(w.bal, 0) AS amount,
-  COALESCE(dep.amt, 0) AS recharge_amount,
-  COALESCE(wd.amt, 0) AS withdraw_amount,
-  COALESCE(dep.amt, 0) - COALESCE(wd.amt, 0) AS recharge_diff,
-  0 AS total_profit,
-  u.team_size AS team_count,
-  u.created_at AS register_time, u.last_login, COALESCE(ll.login_ip, '') AS login_ip,
-  COALESCE(u.parent_id, 0) AS parent_id, COALESCE(p.username, '') AS parent_username ` +
+		  COALESCE(w.bal, 0) AS amount,
+		  COALESCE(dep.amt, 0) AS recharge_amount,
+		  COALESCE(wd.amt, 0) AS withdraw_amount,
+		  COALESCE(dep.amt, 0) - COALESCE(wd.amt, 0) AS recharge_diff,
+		  0 AS total_profit,
+		  u.team_size AS team_count,
+		  u.created_at AS register_time, u.last_login, COALESCE(ll.login_ip, '') AS login_ip,
+		  COALESCE(u.parent_id, 0) AS parent_id, COALESCE(p.username, '') AS parent_username ` +
 		base + " ORDER BY u.created_at DESC LIMIT ? OFFSET ?"
 	listArgs := append(append([]any{}, args...), f.PageSize, offset)
 	if err = d.db.WithContext(ctx).Raw(listSQL, listArgs...).Scan(&rows).Error; err != nil {
@@ -338,8 +316,8 @@ func (d *FbMemberDal) PageReportFlow(ctx context.Context, userID string, f Membe
 	}
 	offset := (f.PageNum - 1) * f.PageSize
 	listSQL := `SELECT f.id, f.user_id, u.username, u.mobile, u.real_name, f.account_type, f.flow_type,
-  f.before_amount, f.flow_amount, f.after_amount, f.business_no, f.remark, f.created_at,
-  COALESCE(f.wallet_id, 0) AS wallet_id, f.currency, f.description, f.status, f.updated_at ` +
+		  f.before_amount, f.flow_amount, f.after_amount, f.business_no, f.remark, f.created_at,
+		  COALESCE(f.wallet_id, 0) AS wallet_id, f.currency, f.description, f.status, f.updated_at ` +
 		base + " ORDER BY f.created_at DESC LIMIT ? OFFSET ?"
 	listArgs := append(append([]any{}, args...), f.PageSize, offset)
 	if err = d.db.WithContext(ctx).Raw(listSQL, listArgs...).Scan(&rows).Error; err != nil {
@@ -374,21 +352,21 @@ func (d *FbMemberDal) PageTeams(ctx context.Context, f MemberListFilter) (rows [
 		args = append(args, f.Status)
 	}
 	base := `
-FROM fb_users u
-LEFT JOIN fb_users p ON p.id = u.parent_id
-LEFT JOIN (SELECT user_id, SUM(balance) AS bal FROM fb_user_wallets GROUP BY user_id) w ON w.user_id = u.id
-LEFT JOIN (SELECT parent_id, COUNT(*) AS cnt FROM fb_users WHERE flag = 0 AND parent_id IS NOT NULL GROUP BY parent_id) c1 ON c1.parent_id = u.id
-LEFT JOIN (SELECT user_id, COUNT(*) AS cnt FROM fb_user_wallets GROUP BY user_id) wc ON wc.user_id = u.id
-WHERE ` + where
+		FROM fb_users u
+		LEFT JOIN fb_users p ON p.id = u.parent_id
+		LEFT JOIN (SELECT user_id, SUM(balance) AS bal FROM fb_user_wallets GROUP BY user_id) w ON w.user_id = u.id
+		LEFT JOIN (SELECT parent_id, COUNT(*) AS cnt FROM fb_users WHERE flag = 0 AND parent_id IS NOT NULL GROUP BY parent_id) c1 ON c1.parent_id = u.id
+		LEFT JOIN (SELECT user_id, COUNT(*) AS cnt FROM fb_user_wallets GROUP BY user_id) wc ON wc.user_id = u.id
+		WHERE ` + where
 
 	if err = d.db.WithContext(ctx).Raw("SELECT COUNT(*) "+base, args...).Scan(&total).Error; err != nil {
 		return nil, 0, errx.GORMErr(err)
 	}
 	offset := (f.PageNum - 1) * f.PageSize
 	listSQL := `SELECT u.id, u.username, u.real_name, u.level, u.status, u.team_size, u.agent_level,
-  COALESCE(w.bal, 0) AS balance, 0 AS total_team_balance, u.created_at,
-  COALESCE(u.parent_id, 0) AS parent_id, COALESCE(p.username, '') AS parent_username, COALESCE(p.real_name, '') AS parent_real_name,
-  COALESCE(c1.cnt, 0) AS level1_members, COALESCE(wc.cnt, 0) AS wallet_count ` +
+		  COALESCE(w.bal, 0) AS balance, 0 AS total_team_balance, u.created_at,
+		  COALESCE(u.parent_id, 0) AS parent_id, COALESCE(p.username, '') AS parent_username, COALESCE(p.real_name, '') AS parent_real_name,
+		  COALESCE(c1.cnt, 0) AS level1_members, COALESCE(wc.cnt, 0) AS wallet_count ` +
 		base + " ORDER BY u.created_at DESC LIMIT ? OFFSET ?"
 	listArgs := append(append([]any{}, args...), f.PageSize, offset)
 	if err = d.db.WithContext(ctx).Raw(listSQL, listArgs...).Scan(&rows).Error; err != nil {
@@ -421,8 +399,8 @@ func (d *FbMemberDal) TeamStats(ctx context.Context, f MemberListFilter) (levels
 		}
 	}
 	if err = d.db.WithContext(ctx).Raw(`
-SELECT COALESCE(SUM(w.balance), 0) FROM fb_user_wallets w
-INNER JOIN fb_users u ON u.id = w.user_id WHERE `+where, args...,
+		SELECT COALESCE(SUM(w.balance), 0) FROM fb_user_wallets w
+		INNER JOIN fb_users u ON u.id = w.user_id WHERE `+where, args...,
 	).Scan(&totalBalance).Error; err != nil {
 		return levels, 0, 0, errx.GORMErr(err)
 	}
@@ -481,7 +459,7 @@ func (d *FbMemberDal) PageLoginLogs(ctx context.Context, f MemberListFilter, log
 	}
 	offset := (f.PageNum - 1) * f.PageSize
 	listSQL := `SELECT l.id, l.user_id, u.username, u.real_name, l.device_id, l.login_time,
-  l.login_ip, l.login_location, l.login_type, l.login_result, l.fail_reason, l.risk_level, l.risk_detail ` +
+  		l.login_ip, l.login_location, l.login_type, l.login_result, l.fail_reason, l.risk_level, l.risk_detail ` +
 		base + " ORDER BY l.login_time DESC LIMIT ? OFFSET ?"
 	listArgs := append(append([]any{}, args...), f.PageSize, offset)
 	if err = d.db.WithContext(ctx).Raw(listSQL, listArgs...).Scan(&rows).Error; err != nil {
@@ -498,10 +476,11 @@ func (d *FbMemberDal) userWhere(f MemberListFilter) (string, []any) {
 	} else {
 		where = append(where, "u.flag = 0")
 	}
+	// keyword 精确匹配（对齐 Java FbUsersServiceImpl.getWrapper）
 	if f.Keyword != "" {
-		where = append(where, "(u.username LIKE ? OR u.mobile LIKE ? OR u.real_name LIKE ? OR CAST(u.id AS CHAR) LIKE ?)")
-		kw := "%" + f.Keyword + "%"
-		args = append(args, kw, kw, kw, kw)
+		where = append(where, "(u.username = ? OR u.mobile = ? OR u.real_name = ? OR u.id_card = ? OR CAST(u.id AS CHAR) = ?)")
+		kw := f.Keyword
+		args = append(args, kw, kw, kw, kw, kw)
 	}
 	if f.AuthStatus != "" {
 		where = append(where, "u.verification_status = ?")
@@ -531,11 +510,6 @@ func FormatFbTimeVal(t time.Time) string {
 		return ""
 	}
 	return t.Format("2006-01-02 15:04:05")
-}
-
-func ParseOnlineStatus(s string) int64 {
-	n, _ := strconv.ParseInt(s, 10, 64)
-	return n
 }
 
 func IDStr(id int64) string {

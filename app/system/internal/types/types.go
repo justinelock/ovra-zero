@@ -1047,11 +1047,11 @@ type MemberUserItem struct {
 	InviteCode           string  `json:"inviteCode,optional"`
 	CommissionRate       float64 `json:"commissionRate,optional"`
 	TotalCommission      float64 `json:"totalCommission,optional"`
-	TotalBalance         float64 `json:"totalBalance,optional"`         // SUM(fb_user_wallets.balance)
-	FundPositionAmount   float64 `json:"fundPositionAmount,optional"`   // SUM(fb_fund_position.amount)
-	FundPositionDividend float64 `json:"fundPositionDividend,optional"` // SUM(fb_fund_position.profit)
+	TotalBalance         float64 `json:"totalBalance,optional"`         // SUM(USD wallet balance>0)
+	FundPositionAmount   float64 `json:"fundPositionAmount,optional"`   // PENDING 投信本金
+	FundPositionDividend float64 `json:"fundPositionDividend,optional"` // fb_fund_profit_log.status=1
 	Status               string  `json:"status,optional"`               // ACTIVE 等
-	OnlineStatus         int64   `json:"onlineStatus,optional"`         // 1 在线 / 0 离线（is_online）
+	OnlineStatus         int64   `json:"onlineStatus,optional"`         // Redis online:user 或 presence 5 分钟
 	LastLogin            string  `json:"lastLogin,optional"`
 	CreatedAt            string  `json:"createdAt,optional"` // 注册时间
 }
@@ -1062,9 +1062,9 @@ type PageSetMemberUserResp struct {
 }
 
 type MemberUserStatsResp struct {
-	TotalOnlineUsers    int64 `json:"totalOnlineUsers"`    // is_online=1 用户数
-	TodayLogins         int64 `json:"todayLogins"`         // 当日成功登录次数
-	TotalActiveSessions int64 `json:"totalActiveSessions"` // 近30分钟成功登录去重设备数
+	TotalOnlineUsers    int64 `json:"totalOnlineUsers"`    // KEYS online:user:*
+	TodayLogins         int64 `json:"todayLogins"`         // SCARD login:today
+	TotalActiveSessions int64 `json:"totalActiveSessions"` // ZSET fb:presence:active 近 5 分钟
 }
 
 type MemberKycQuery struct {

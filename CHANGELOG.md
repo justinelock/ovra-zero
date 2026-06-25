@@ -11,13 +11,16 @@
 - **gentool fb_* 表**：`gen/system/gen.yaml` 增加 8 张业务表代码生成（`app/system/internal/dal/model/fb_*.gen.go`）
 
 ### 变更
+- **用户列表/活跃统计对齐 Java**：USD 钱包余额、profit_log 投信分红、keyword 精确匹配；`onlineStatus` 与 stats 三项改 Redis 全局（`fb_user_redis.go`、`fb_member.go`、`member/user/*_logic.go`）
+- **前端 Vite 代理**：统一 `/api` → Traefik `28080`；网关补全 `/member` 等业务 PathPrefix（`vite.config.ts`、`bin/traefik/dynamic.yaml`）
 - **用户管理契约对齐**：`docs/biz-api.md` 1.1～1.8 字段表与响应 JSON 一致；前端 `api/member`、`views/member` 列字段改为 `username`、`createdAt`、`level1Members` 等（`ruoyi-plus-vben5/apps/web-antd/src/api/member/`、`views/member/`）
 
 ### 维护
-- **用户管理 API 类型注释**：在 `desc/system/api/member/*.api` 补充类型/字段说明，`make api-system` 同步至 `types.go`；新增 `types/member_doc.go` 说明生成约定（勿手改 types.go）：为 fund/trade/invest 等 21 个 Logic、前端 API/列表页/data 补全步骤级注释，对齐 `.cursor/rules/code-comments-changelog.mdc`（`app/system/internal/logic/`、`ruoyi-plus-vben5/apps/web-antd/src/views/biz/`、`src/api/biz/`）
+- **注释规范**：步骤说明写在对应代码行旁，函数外保留一行或多行总结；更新 `.cursor/rules/code-comments-changelog.mdc` 示例（`member/user/*_logic.go`、`fb_user_redis.go`、`views/member/list/index.vue`）
+- **用户管理 API 类型注释**：在 `desc/system/api/member/*.api` 补充类型/字段说明，`make api-system` 同步至 `types.go`；新增 `types/member_doc.go` 说明生成约定（勿手改 types.go）
 
 ### 文档
-- **业务 API 文档**：列表分页 GET 默认参数补充为 `pageNum=1&pageSize=10`（`docs/biz-api.md`）
+- **接口代码跟读指南**：新增 `docs/read-api-flow.md`（onboarding：契约 → 路由 → Handler → Logic → DAL，以 `/member/user/list` 为例）；`local-dev.md`、`biz-api.md` 增加交叉链接
 - **业务 API 文档**：汇总用户管理～K线管理 22 个列表/统计接口，每接口预留响应 JSON 占位（`docs/biz-api.md`）
 
 ### 新增

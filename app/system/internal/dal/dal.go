@@ -4,6 +4,7 @@ import (
 	"ovra/app/system/internal/config"
 	"ovra/app/system/internal/dal/query"
 
+	"github.com/zeromicro/go-zero/core/stores/redis"
 	"gorm.io/gorm"
 )
 
@@ -22,9 +23,10 @@ type Dal struct {
 	SysDictTypeDal  *SysDictTypeDal
 	SysNoticeDal    *SysNoticeDal
 	FbMemberDal     *FbMemberDal
+	FbUserRedisDal  *FbUserRedisDal
 }
 
-func NewDal(db *gorm.DB, query *query.Query, c config.Config) *Dal {
+func NewDal(db *gorm.DB, query *query.Query, c config.Config, rds *redis.Redis) *Dal {
 	return &Dal{
 		Db:              db,
 		Query:           query,
@@ -39,6 +41,7 @@ func NewDal(db *gorm.DB, query *query.Query, c config.Config) *Dal {
 		SysDictDatumDal: NewSysDictDatumDal(db, query),
 		SysDictTypeDal:  NewSysDictTypeDal(db, query),
 		SysNoticeDal:    NewSysNoticeDal(db, query),
-		FbMemberDal:     NewFbMemberDal(db),
+		FbMemberDal:    NewFbMemberDal(db),
+		FbUserRedisDal: NewFbUserRedisDal(rds),
 	}
 }

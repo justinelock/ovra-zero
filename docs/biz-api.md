@@ -1,6 +1,6 @@
 # 业务 API 接口文档
 
-本文档汇总**用户管理 → K线管理**各业务子页的列表/统计接口。当前后端均为**占位实现**（返回空列表或零值统计），字段定义以 `desc/system/api/` 下 `.api` 文件为准。
+本文档汇总**用户管理 → K线管理**各业务子页的列表/统计接口。字段定义以 `desc/system/api/` 下 `.api` 文件为准；**如何从契约跟读到 Handler/Logic/DAL** 见 [read-api-flow.md](./read-api-flow.md)。
 
 > **维护说明**：每个接口下方预留「响应示例」代码块，后续补充含真实字段值的完整 JSON。
 
@@ -123,11 +123,11 @@ GET /member/user/list?pageNum=1&pageSize=10
 | `inviteCode` | string | 邀请码 |
 | `commissionRate` | float64 | 佣金比例 |
 | `totalCommission` | float64 | 累计佣金 |
-| `totalBalance` | float64 | 总余额 |
-| `fundPositionAmount` | float64 | 投信持仓 |
-| `fundPositionDividend` | float64 | 投信分红 |
+| `totalBalance` | float64 | 总余额（USD 钱包 `balance>0` 汇总） |
+| `fundPositionAmount` | float64 | 投信持仓（`fb_fund_position` PENDING 本金） |
+| `fundPositionDividend` | float64 | 投信分红（`fb_fund_profit_log.status=1` 汇总） |
 | `status` | string | 账号状态 |
-| `onlineStatus` | int64 | 在线状态（1 在线 / 0 离线） |
+| `onlineStatus` | int64 | 在线状态（1=Redis token 在线或近 5 分钟 presence 活跃 / 0 离线） |
 | `lastLogin` | string | 最后登录时间 |
 | `createdAt` | string | 注册时间 |
 
@@ -173,15 +173,15 @@ GET /member/user/list?pageNum=1&pageSize=10
 | API 定义 | `desc/system/api/member/user.api` |
 | 响应实体 | `MemberUserStatsResp`（在 `data` 内） |
 
-**查询参数**：与用户列表相同（`keyword`、`authStatus`、`deleted`、`params[beginTime]`、`params[endTime]`），**无分页参数**。
+**查询参数**：无业务筛选（全局 Redis 统计，对齐 Java `online-statistics`）；**无分页参数**。
 
 **`data` 字段**：
 
 | 字段 | 类型 | 说明 |
 | --- | --- | --- |
-| `totalOnlineUsers` | int64 | 当前在线用户数 |
-| `todayLogins` | int64 | 今日登录次数 |
-| `totalActiveSessions` | int64 | 近 30 分钟活跃设备会话数；前端标题 Tag「活跃用户:{totalActiveSessions}」 |
+| `totalOnlineUsers` | int64 | Redis `online:user:*` 有效会话用户数 |
+| `todayLogins` | int64 | Redis `login:today` Set 大小（今日登录用户） |
+| `totalActiveSessions` | int64 | Redis `fb:presence:active` 近 **5 分钟**内有鉴权请求的活跃用户数；前端 Tag「活跃用户:{totalActiveSessions}」 |
 
 **响应示例**（待补充）：
 

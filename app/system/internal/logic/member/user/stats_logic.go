@@ -6,14 +6,13 @@ package user
 import (
 	"context"
 
-	"ovra/app/system/internal/dal"
 	"ovra/app/system/internal/svc"
 	"ovra/app/system/internal/types"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-// StatsLogic 业务用户活跃统计
+// StatsLogic 业务用户活跃统计（Redis 全局，对齐 Java online-statistics）
 type StatsLogic struct {
 	logx.Logger
 	ctx    context.Context
@@ -28,17 +27,10 @@ func NewStatsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *StatsLogic 
 	}
 }
 
-// Stats 统计在线用户、今日登录与近 30 分钟活跃设备会话
-func (l *StatsLogic) Stats(req *types.MemberUserQuery) (resp *types.MemberUserStatsResp, err error) {
-	f := dal.MemberListFilter{
-		Keyword:    req.Keyword,
-		AuthStatus: req.AuthStatus,
-		Deleted:    req.Deleted,
-	}
-	online, today, sessions, err := l.svcCtx.Dal.FbMemberDal.UserStats(l.ctx, f)
-	if err != nil {
-		return nil, err
-	}
+// Stats 返回 Redis 全局在线/今日登录/近 5 分钟活跃用户数（忽略列表筛选参数）
+func (l *StatsLogic) Stats(_ *types.MemberUserQuery) (resp *types.MemberUserStatsResp, err error) {
+	// KEYS online:user:* / SCARD login:today / ZSET fb:presence:active（5 分钟窗口）
+	online, today, sessions := l.svcCtx.Dal.FbUserRedisDal.OnlineStatistics(l.ctx)
 	return &types.MemberUserStatsResp{
 		TotalOnlineUsers:    online,
 		TodayLogins:         today,

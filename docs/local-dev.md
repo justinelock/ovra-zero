@@ -41,7 +41,7 @@ etc/{ENV}/demo.yaml
 | system | 8092 | 9092 | 4002 |
 | demo | 8099 | 9099 | 4009 |
 
-Traefik 网关（可选）：`http://127.0.0.1:28080`
+Traefik 网关（前端 `/api` 代理目标）：`http://127.0.0.1:28080`
 
 ## 一、初始化项目
 
@@ -191,7 +191,7 @@ make build-all
 make back-all
 ```
 
-### 启动 Traefik 网关（可选）
+### 启动 Traefik 网关（前端联调必启）
 
 Traefik 配置：
 
@@ -268,9 +268,20 @@ open http://127.0.0.1:28090
 | --- | --- |
 | `/auth/*` | `http://127.0.0.1:8091` |
 | `/system/*`、`/monitor/*`、`/resource/*` | `http://127.0.0.1:8092` |
+| `/member/*`、`/fund/*`、`/trade/*`、`/invest/*`、`/product/*`、`/notify/*`、`/kline/*` | `http://127.0.0.1:8092` |
 | `/demo/*` | `http://127.0.0.1:8099` |
 
-前端若走网关，将 `vite.config.ts` 中 `/api` 代理目标改为 `http://127.0.0.1:28080`（并 `rewrite` 去掉 `/api` 前缀）。
+路由规则定义在 `bin/traefik/dynamic.yaml` 的 `router-system`。新增 system 服务上的 API 前缀时，须同步更新该文件并重启 Traefik。
+
+验证业务接口（需 system 与 Traefik 已启动）：
+
+```sh
+curl -s -o /dev/null -w "%{http_code}\n" \
+  'http://127.0.0.1:28080/member/user/list?pageNum=1&pageSize=10'
+# 期望 200 或 401，不应为 404
+```
+
+前端 `vite.config.ts` 将 `/api` 代理到 `http://127.0.0.1:28080`（`rewrite` 去掉 `/api` 前缀）。
 
 ### 关于 Makefile 的 run 命令
 
@@ -318,27 +329,7 @@ curl http://127.0.0.1:8091/auth/code
 
 ### 代理配置
 
-`apps/web-antd/vite.config.ts` 需将 `/api` 代理到 Ovra-Zero 各服务（**不要**指向默认的 `localhost:8080`，那是 RuoYi 单体版端口）：
-
-| 前端路径前缀 | 代理目标 |
-| --- | --- |
-| `/api/auth` | `http://127.0.0.1:8091` |
-| `/api/system` | `http://127.0.0.1:8092` |
-| `/api/monitor` | `http://127.0.0.1:8092` |
-| `/api/resource` | `http://127.0.0.1:8092` |
-| `/api/demo` | `http://127.0.0.1:8099` |
-
-### 网关 vs 直连：项目默认用哪种？
-
-| 场景 | 默认方式 | 说明 |
-| --- | --- | --- |
-| **本地开发** | **直连各服务端口** | auth `8091`、system `8092`、demo `8099`，Vite 按路径分别代理 |
-| **本地统一入口（可选）** | Traefik `28080` | `make traefik-run`，路由见 `bin/traefik/dynamic.yaml` |
-| **k3d / Helm 部署** | Traefik Ingress | 集群内统一入口，见 `deploy/helm/ovra-zero` |
-
-README 中 Traefik 列在本地启动**第 5 步且标注可选**。本地开发**优先直连**各微服务端口；网关只是把多个服务合成一个地址，**不影响** RSA 加解密等业务逻辑。
-
-使用 Traefik 时，前端 `vite.config.ts` 可简化为单条代理：
+前端**统一经 Traefik 网关**转发，不直连各微服务端口。`apps/web-antd/vite.config.ts` 默认：
 
 ```ts
 '/api': {
@@ -349,7 +340,24 @@ README 中 Traefik 列在本地启动**第 5 步且标注可选**。本地开发
 },
 ```
 
-需先启动：`system` → `auth` → `make traefik-run`。
+**不要**指向 RuoYi 单体版默认的 `localhost:8080`。
+
+### 启动顺序（前端联调）
+
+1. 启动 **etcd**
+2. 启动 **system**（8092）→ **auth**（8091）
+3. 启动 **Traefik**：`make traefik-run`（28080）
+4. 启动前端：`pnpm dev:antd`（5666）
+
+网关路由表见上文「启动 Traefik 网关 → 路由表」。若 `/api/member/*` 返回 404，检查 `bin/traefik/dynamic.yaml` 是否包含对应 `PathPrefix`，并重启 Traefik。
+
+### 网关 vs 直连
+
+| 场景 | 方式 |
+| --- | --- |
+| **本地前端开发（本项目默认）** | Vite `/api` → Traefik `28080` → 各服务 |
+| **调试单个服务（curl/Postman）** | 可直连 `8091` / `8092`，与前端代理无关 |
+| **k3d / Helm 部署** | Ingress 统一入口，见 `deploy/helm/ovra-zero` |
 
 ### RSA 加解密如何与后端一致
 
@@ -425,6 +433,7 @@ VITE_GLOB_WEBSOCKET_ENABLE=false
 
 | 现象 | 原因 | 处理 |
 | --- | --- | --- |
+| `/api/member/*` 404 | Traefik 未启动，或 `dynamic.yaml` 缺少 `/member` 等 PathPrefix | `make traefik-run`；确认 `bin/traefik/dynamic.yaml` 后重启网关 |
 | `502 Bad Gateway`（`/api/auth/login`） | Vite 代理目标不可达（如指向 `8080` 但后端未启动） | 修正 `vite.config.ts` 代理地址，确保 auth/system 已启动 |
 | 请求加密密钥解密失败 | 前后端 RSA 密钥不一致 | 对齐 `.env.development` 与 `common.yaml` 的密钥，或关闭加密 |
 | `/api/resource/sse` 404、`sse重连失败` | 后端未实现 SSE | `.env.development` 设 `VITE_GLOB_SSE_ENABLE=false` 并重启前端 |
@@ -432,6 +441,7 @@ VITE_GLOB_WEBSOCKET_ENABLE=false
 
 ## 相关文档
 
+- [接口代码跟读指南](./read-api-flow.md)（从 HTTP 到 Logic/DAL 的 onboarding 清单，以用户列表为例）
 - [业务 API 接口文档](./biz-api.md)（用户管理～K线管理，含响应 JSON 占位）
 - [项目 README](../README.md)
 - [Helm / k3d 部署](../deploy/helm/ovra-zero/README.md)
