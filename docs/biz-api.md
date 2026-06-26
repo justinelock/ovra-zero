@@ -418,6 +418,28 @@ GET /member/user/list?pageNum=1&pageSize=10
 
 ---
 
+### 1.3.1 实名认证-审核
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `PUT` |
+| 路径 | `/member/kyc/verify` |
+| 权限 | `member:kyc:list` |
+| Java 对照 | `PUT /fubang/fbidentityverify/verify` |
+| API 定义 | `desc/system/api/member/kyc.api` |
+
+**请求体**：
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| `id` | string | 认证主键 `fb_identity_verify.id` |
+| `state` | string | `VERIFIED` 通过，`REJECTED` 拒绝（`APPROVED` 视为通过） |
+| `remark` | string | `REJECTED` 时必填，写入 `reject_reason` |
+
+**说明**：仅 `PENDING` 可审；通过时 `status=VERIFIED` 并同步 `fb_users.verified=1`、`real_name`、`id_card`。
+
+---
+
 ### 1.4 钱包管理
 
 | 项 | 值 |
@@ -1380,6 +1402,28 @@ GET /member/user/list?pageNum=1&pageSize=10
   }]
 }
 ```
+
+---
+
+### 2.1.4 钱包申请-审核
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `PUT` |
+| 路径 | `/fund/walletApply/verify` |
+| 权限 | `fund:walletApply:list` |
+| Java 对照 | `PUT /fubang/fbaccountapplication/verify` |
+| API 定义 | `desc/system/api/fund/wallet_apply.api` |
+
+**请求体**：
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| `id` | string | 申请主键 `fb_account_application.id` |
+| `state` | string | `APPROVED` 通过，`REJECTED` 拒绝 |
+| `remark` | string | 必填且至少 5 字，写入 `reject_reason`（通过/拒绝均写） |
+
+**说明**：仅 `PENDING` 可审；通过时先补建 `main/USD`（非主账户申请），再按账户类型默认币种开通钱包，并更新 `status/state=APPROVED`、`audit_time`、`audit_user_id`。
 
 ---
 

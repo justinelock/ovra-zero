@@ -142,6 +142,12 @@ type (
         Rows  []*FundWalletApplyLoginLogItem `json:"rows"`
         Total int64                          `json:"total"`
     }
+    // 钱包申请审核；对齐 Java PUT /verify，state=APPROVED|REJECTED，remark 必填且至少 5 字
+    FundWalletApplyVerifyReq {
+        Id     string `json:"id"`
+        State  string `json:"state"`
+        Remark string `json:"remark"`
+    }
 )
 
 @server(
@@ -162,4 +168,7 @@ service System {
 
     @handler LoginLog
     get /loginLog/:userId (PageSetFundWalletApplyLoginLogReq) returns (PageSetFundWalletApplyLoginLogResp)
+
+    @handler Verify
+    put /verify (FundWalletApplyVerifyReq)
 }

@@ -179,6 +179,71 @@ func (d *FbMemberDal) PageKyc(ctx context.Context, q KycPageQuery) (rows []membe
 	return rows, total, nil
 }
 
+// VerifyKyc 实名认证审核（仅 PENDING 可审；对齐 Java updateVerify）
+func (d *FbMemberDal) VerifyKyc(ctx context.Context, id int64, state, remark string) error {
+	state = strings.ToUpper(strings.TrimSpace(state))
+	if state == "" {
+		return errx.BizErr("审核状态不能为空")
+	}
+	passed := state == VerifyStatusVerified || state == VerifyStatusApproved
+	rejected := state == VerifyStatusRejected
+	if !passed && !rejected {
+		return errx.BizErr("认证状态不正确")
+	}
+	if rejected && strings.TrimSpace(remark) == "" {
+		return errx.BizErr("拒绝时请填写拒绝原因")
+	}
+	return d.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var row memberKycRow
+		err := tx.Raw(`
+			SELECT id, user_id, real_name, id_card_no, status
+			FROM fb_identity_verify WHERE id = ? FOR UPDATE`, id).Scan(&row).Error
+		if err != nil {
+			return errx.GORMErr(err)
+		}
+		if row.ID == 0 {
+			return errx.BizErr("认证记录不存在")
+		}
+		if !strings.EqualFold(strings.TrimSpace(row.Status), VerifyStatusPending) {
+			return errx.BizErr("认证状态不正确")
+		}
+		now := time.Now()
+		if passed {
+			if err := tx.Exec(`
+				UPDATE fb_identity_verify
+				SET status = ?, reject_reason = NULL, verified_at = ?, updated_at = ?
+				WHERE id = ?`,
+				VerifyStatusVerified, now, now, id).Error; err != nil {
+				return errx.GORMErr(err)
+			}
+			// 同步用户实名信息
+			if err := tx.Exec(`
+				UPDATE fb_users
+				SET verified = 1, verification_status = ?, real_name = ?, id_card = ?, updated_at = ?
+				WHERE id = ? AND flag = 0`,
+				VerifyStatusVerified, row.RealName, row.IDCardNo, now, row.UserID).Error; err != nil {
+				return errx.GORMErr(err)
+			}
+			return nil
+		}
+		if err := tx.Exec(`
+			UPDATE fb_identity_verify
+			SET status = ?, reject_reason = ?, verified_at = ?, updated_at = ?
+			WHERE id = ?`,
+			VerifyStatusRejected, strings.TrimSpace(remark), now, now, id).Error; err != nil {
+			return errx.GORMErr(err)
+		}
+		if err := tx.Exec(`
+			UPDATE fb_users
+			SET verification_status = ?, updated_at = ?
+			WHERE id = ? AND flag = 0`,
+			VerifyStatusRejected, now, row.UserID).Error; err != nil {
+			return errx.GORMErr(err)
+		}
+		return nil
+	})
+}
+
 type memberWalletRow struct {
 	ID           int64
 	UserID       int64

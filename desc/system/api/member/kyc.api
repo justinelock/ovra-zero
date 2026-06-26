@@ -40,6 +40,12 @@ type (
         Rows  []*MemberKycItem `json:"rows"`
         Total int64            `json:"total"`
     }
+    // 实名认证审核；对齐 Java PUT /verify，state=VERIFIED|REJECTED（APPROVED 视为通过）
+    MemberKycVerifyReq {
+        Id     string `json:"id"`
+        State  string `json:"state"`
+        Remark string `json:"remark,optional"` // REJECTED 时必填
+    }
 )
 
 @server(
@@ -51,4 +57,7 @@ type (
 service System {
     @handler PageSet
     get /list (PageSetMemberKycReq) returns (PageSetMemberKycResp)
+
+    @handler Verify
+    put /verify (MemberKycVerifyReq)
 }

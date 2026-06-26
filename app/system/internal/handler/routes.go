@@ -886,6 +886,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Path:    "/list",
 					Handler: memberkyc.PageSetHandler(serverCtx),
 				},
+				{
+					Method:  http.MethodPut,
+					Path:    "/verify",
+					Handler: memberkyc.VerifyHandler(serverCtx),
+				},
 			}...,
 		),
 		rest.WithPrefix("/member/kyc"),
@@ -1010,6 +1015,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodGet,
 					Path:    "/loginLog/:userId",
 					Handler: fundwalletApply.LoginLogHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPut,
+					Path:    "/verify",
+					Handler: fundwalletApply.VerifyHandler(serverCtx),
 				},
 			}...,
 		),

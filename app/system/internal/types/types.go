@@ -1183,6 +1183,12 @@ type PageSetMemberKycResp struct {
 	Total int64            `json:"total"`
 }
 
+type MemberKycVerifyReq struct {
+	Id     string `json:"id"`
+	State  string `json:"state"`
+	Remark string `json:"remark,optional"` // REJECTED 时必填
+}
+
 type MemberWalletQuery struct {
 	Keyword      string `form:"keyword,optional"`      // 用户名/手机号/真实姓名模糊
 	UserId       string `form:"userId,optional"`       // w.user_id 精确
@@ -1598,6 +1604,12 @@ type FundWalletApplyLoginLogItem struct {
 type PageSetFundWalletApplyLoginLogResp struct {
 	Rows  []*FundWalletApplyLoginLogItem `json:"rows"`
 	Total int64                          `json:"total"`
+}
+
+type FundWalletApplyVerifyReq struct {
+	Id     string `json:"id"`
+	State  string `json:"state"`
+	Remark string `json:"remark"`
 }
 
 type FundStatementQuery struct {

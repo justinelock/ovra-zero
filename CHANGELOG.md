@@ -6,6 +6,9 @@
 ## [未发布]
 
 ### 新增
+- **实名认证审核**：`PUT /member/kyc/verify` 通过/拒绝待审记录并同步 `fb_users`；前端审核弹窗（证件照+拒绝原因），全量页保留详情、分析页快捷列表仅「审核」（`kyc.api`、`fb_member.go`、`kyc-audit-modal.vue`、`shortcut-kyc-table.vue`）
+- **钱包申请审核**：`PUT /fund/walletApply/verify` 通过时按账户类型开通默认币种钱包；前端审核弹窗（通过/拒绝+审核意见），全量页保留详情/流水/登录、分析页快捷列表仅「审核」（`wallet_apply.api`、`fb_wallet_apply.go`、`wallet-apply-audit-modal.vue`、`shortcut-wallet-table.vue`）
+- **分析页快捷列表**：四卡下方纵向堆叠实名认证/钱包申请/充值/提现精简表格，时间维度与顶部今日/本周/本月联动，操作复用各业务页（`dashboard/analytics/analytics-shortcut-lists.vue`、`shortcut-*-table.vue`）
 - **分析页仪表盘统计**：`GET /dashboard/statistics?type=0|1|2` 对接实名/钱包/充值/提现四卡数据，对齐 Java `DashboardController.getStatistics`（`dashboard.api`、`fb_dashboard_stats.go`、`analytics/index.vue`、`biz-api.md` 九）
 - **App 品牌资源 / App 版本管理**：`GET /app/brand/active`、`PUT /app/brand`、品牌图上传；`GET /app/version/active`、`PUT /app/version`；`GET /app/release/upload/options`、`PUT /app/release/upload` 对接 `app_branding_config`、`app_release_versions`（`app/*.api`、`app_config.go`、`appBrand/main`、`appVersion/main`、`biz-api.md` 八）
 - **市场新闻 6.1**：`GET /notify/news/list` 对接 `fb_market_news`；新增详情/增改；前端列表、新增/编辑弹窗（`news.api`、`fb_market_news.go`、`notify-news-modal.vue`、`biz-api.md` 6.1）
@@ -16,6 +19,7 @@
 - **合约订单结算日志**：`GET /trade/contract/detail/{id}` 对接 `fb_crypto_contract_orders_detail`；已结算行操作列「日志」弹窗展示结算步骤（`contract.api`、`fb_contract_order.go`、`contract-settlement-log-modal.vue`、`biz-api.md` 3.1.1.5）
 
 ### 变更
+- **实名/钱包审核接口**：契约对齐 Java `PUT /verify`，请求体改用 `state`（实名 `VERIFIED`/`REJECTED`，钱包 `APPROVED`/`REJECTED`）；钱包通过时补建 `main/USD` 并按账户类型默认币种开钱包，审核意见至少 5 字（`kyc.api`、`wallet_apply.api`、`fb_wallet_apply.go`、前端审核弹窗）
 - **分析页概览卡片**：充值成功金额 `$ 0.00` 绿色加粗；提现成功金额 `-$ 4,600` 红色加粗（`analysis-overview.vue`、`dashboard/analytics/index.vue`）
 - **分析页概览卡片**：`AnalysisOverview` 支持 `compact`，分析页四卡内边距与字号缩小（约默认高度 3/4）（`analysis-overview.vue`、`dashboard/analytics/index.vue`）
 - **分析页工具栏**：今日/本周/本月切换改为 `size="small"`，与「在线用户」Tag 视觉对齐（`dashboard/analytics/index.vue`）
@@ -29,6 +33,8 @@
 - **biz-api.md**：补齐团队管理 1.6.1～1.6.4（详情/下级团队/更换上级/代理层级）请求响应与错误文案；总览表增加报表流水；团队列表补注册时间筛选参数
 
 ### 修复
+- **实名认证审核弹窗**：审核结果并入 Descriptions 表格（与用户ID/姓名/身份证号同表），通过/拒绝单行、拒绝原因在下方，对齐参考图（`kyc-audit-modal.vue`）
+- **分析页快捷列表无数据**：去掉与「今日/本周/本月」叠加的时间筛选（待办常跨日），挂载后主动 `query` 加载（`use-analytics-shortcut-grid.ts`、`shortcut-*-table.vue`）
 - **App 版本/品牌页控件不渲染**：`a-input`/`a-select`/`a-switch` 等未从 `antdv-next` 导入（项目仅全局注册 Button），改为显式 `import` 并使用 `Input`/`Select`/`Switch` 等组件（`appVersion/main/index.vue`、`appBrand/main/index.vue`）
 - **App 品牌页表单布局**：标签列固定 140px 右对齐，对齐 Java `label-width`（`appBrand/main/index.vue`）
 - **App 品牌保存响应**：`PUT /app/brand` 返回含 bump 后 `revision` 的 `AppBrandingItem`；查询 `revision` 空值兜底为 `0`（`brand.api`、`save_logic.go`、`appBrand/main/index.vue`）

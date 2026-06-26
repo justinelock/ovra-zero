@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"ovra/toolkit/errx"
+
+	"gorm.io/gorm"
 )
 
 type walletApplyListRow struct {
@@ -438,6 +440,105 @@ func PickCommonLoginIP(logs []walletApplyLoginRow) (commonIP, commonArea, lastLo
 	// Java commonLoginArea 同样按 IP 聚合，此处保持一致
 	commonArea = commonIP
 	return commonIP, commonArea, lastLogin
+}
+
+// defaultCurrenciesForAccountType 账户类型默认币种（对齐 Java AccountType.getDefaultCurrencies）
+func defaultCurrenciesForAccountType(accountType string) []string {
+	switch strings.ToLower(strings.TrimSpace(accountType)) {
+	case "stock_cn":
+		return []string{"CNY"}
+	case "stock_hk":
+		return []string{"HKD"}
+	case "main", "stock_us", "future", "fund", "forex":
+		return []string{"USD"}
+	default:
+		return []string{"USD"}
+	}
+}
+
+// ensureWalletTx 钱包不存在时创建（幂等）
+func ensureWalletTx(tx *gorm.DB, userID int64, accountType, currency string) error {
+	var cnt int64
+	if err := tx.Raw(`
+		SELECT COUNT(*) FROM fb_user_wallets
+		WHERE user_id = ? AND account_type = ? AND currency = ?`,
+		userID, accountType, currency).Scan(&cnt).Error; err != nil {
+		return errx.GORMErr(err)
+	}
+	if cnt > 0 {
+		return nil
+	}
+	_, err := createWalletTx(tx, userID, accountType, currency)
+	return err
+}
+
+// VerifyWalletApplication 钱包申请审核（对齐 Java updateVerify）
+func (d *FbMemberDal) VerifyWalletApplication(ctx context.Context, id int64, state, remark string, auditUserID int64) error {
+	state = strings.ToUpper(strings.TrimSpace(state))
+	remark = strings.TrimSpace(remark)
+	if state == "" || remark == "" {
+		return errx.BizErr("参数不完整")
+	}
+	if len(remark) < 5 {
+		return errx.BizErr("审核意见至少5个字符")
+	}
+	approved := state == VerifyStatusApproved
+	rejected := state == VerifyStatusRejected
+	if !approved && !rejected {
+		return errx.BizErr("申请状态不正确")
+	}
+	return d.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var app walletApplyAppRow
+		err := tx.Raw(`
+			SELECT id, user_id, account_type, status,
+				COALESCE(risk_assessment_score, 0) AS risk_assessment_score,
+				reject_reason, apply_time, audit_time, remark
+			FROM fb_account_application WHERE id = ? FOR UPDATE`, id).Scan(&app).Error
+		if err != nil {
+			return errx.GORMErr(err)
+		}
+		if app.ID == 0 {
+			return errx.BizErr("申请记录不存在")
+		}
+		if !strings.EqualFold(strings.TrimSpace(app.Status), VerifyStatusPending) {
+			return errx.BizErr("申请状态不正确")
+		}
+		now := time.Now()
+		if approved {
+			accountType := strings.ToLower(strings.TrimSpace(app.AccountType))
+			// 子账户开通前先补建主账户 USD 钱包
+			if accountType != "" && accountType != "main" {
+				if err := ensureWalletTx(tx, app.UserID, "main", "USD"); err != nil {
+					return err
+				}
+			}
+			for _, currency := range defaultCurrenciesForAccountType(app.AccountType) {
+				if err := ensureWalletTx(tx, app.UserID, app.AccountType, currency); err != nil {
+					return err
+				}
+			}
+			if err := tx.Exec(`
+				UPDATE fb_account_application
+				SET status = ?, state = ?, reject_reason = ?,
+					audit_time = ?, audit_user_id = ?, updated_at = ?
+				WHERE id = ?`,
+				VerifyStatusApproved, VerifyStatusApproved, remark,
+				now, auditUserID, now, id).Error; err != nil {
+				return errx.GORMErr(err)
+			}
+			return nil
+		}
+		if err := tx.Exec(`
+			UPDATE fb_account_application
+			SET status = ?, state = ?, reject_reason = ?,
+				audit_time = ?, audit_user_id = ?, updated_at = ?
+			WHERE id = ?`,
+			VerifyStatusRejected, VerifyStatusRejected, remark,
+			now, auditUserID, now, id).Error; err != nil {
+			return errx.GORMErr(err)
+		}
+		return nil
+	})
 }
 
 // ParseWalletApplyID 解析申请主键
