@@ -6,6 +6,7 @@
 ## [未发布]
 
 ### 新增
+- **产品配置 5.1**：`GET /product/config/list` 对接 `fb_fund_product`；新增详情/增删改；前端列表与编辑弹窗（`config.api`、`fb_fund_product.go`、`product-config-modal.vue`、`biz-api.md` 5.1）
 - **投信列表 4.2**：`GET /invest/list/list` 对接 `fb_fund`；新增详情/增删改与海报 base64 落盘；前端列表、编辑弹窗与海报上传（`list.api`、`fb_fund.go`、`invest-fund-modal.vue`、`biz-api.md` 4.2）
 - **投信持仓修改收益**：`POST /invest/position/profit/before` 查询修改前收益；`PUT /invest/position/profit` 覆盖 `fb_fund_profit_log`；操作列「修改收益」弹窗（`position.api`、`fb_fund_position.go`、`position-update-profit-modal.vue`、`biz-api.md` 4.1.2）
 - **投信持仓 4.1 / 4.1.1**：`GET /invest/position/list` 对接 `fb_fund_position`；`GET /invest/position/order/list` 收益订单抽屉（`position.api`、`fb_fund_position.go`、`position-profit-order-drawer.vue`、`biz-api.md` 4.1～4.1.1）
@@ -17,6 +18,7 @@
 - **biz-api.md**：补齐团队管理 1.6.1～1.6.4（详情/下级团队/更换上级/代理层级）请求响应与错误文案；总览表增加报表流水；团队列表补注册时间筛选参数
 
 ### 修复
+- **投信列表/产品配置写操作响应**：新增/编辑/删除改 `OkJsonCtx` 返回 `{code,msg}`，修复 `httpx.Ok` 无 body 导致 `postWithMsg` 判定失败、无成功提示且弹窗不关闭（`invest/list/*_handler.go`、`product/config/*_handler.go`）
 - **更换上级**：仅更新 `parent_id`，不再走 `UpdateUser` 误触「用户名不能为空」；上级用户名前后端必填（`fb_team.go`、`team-change-parent-modal.vue`）
 - **团队管理弹窗刷新**：关闭代理层级/更换上级弹窗后 `reload` 携带查询区当前筛选（`keyword` 等），不再空参 `query()`（`views/member/team/index.vue`）
 - **团队管理写操作响应**：`PUT /member/team/changeParent`、`PUT /member/team/agentLevel` 改 `OkJsonCtx` 返回 `data`（`{userId,parentId}` / `{userId,agentLevel}`），修复 `httpx.Ok` 无 body 导致弹窗提交后不关闭（`team/*_handler.go`、`*-modal.vue`）

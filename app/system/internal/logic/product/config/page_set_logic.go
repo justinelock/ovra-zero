@@ -6,13 +6,14 @@ package config
 import (
 	"context"
 
+	"ovra/app/system/internal/dal"
 	"ovra/app/system/internal/svc"
 	"ovra/app/system/internal/types"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-// PageSetLogic 产品配置分页查询（占位，待接 product 配置表）
+// PageSetLogic 产品配置分页（对齐 Java FbFundProductServiceImpl.getPageData）
 type PageSetLogic struct {
 	logx.Logger
 	ctx    context.Context
@@ -27,13 +28,26 @@ func NewPageSetLogic(ctx context.Context, svcCtx *svc.ServiceContext) *PageSetLo
 	}
 }
 
-// PageSet 分页查询产品配置
-// 1. 业务表尚未接入，返回空分页供前端 VxeGrid 联调
-// 2. 后续按 keyword/productType/status 及时间范围查询
 func (l *PageSetLogic) PageSet(req *types.PageSetProductConfigReq) (resp *types.PageSetProductConfigResp, err error) {
-	_ = req
-	return &types.PageSetProductConfigResp{
-		Rows:  []*types.ProductConfigItem{},
-		Total: 0,
-	}, nil
+	rows, total, err := l.svcCtx.Dal.FbMemberDal.PageFundProducts(l.ctx, dal.FundProductPageQuery{
+		Keyword:    req.Keyword,
+		Code:       req.Code,
+		Name:       req.Name,
+		Type:       req.Type,
+		Status:     req.Status,
+		BeginTime:  req.BeginTime,
+		EndTime:    req.EndTime,
+		OrderField: req.OrderField,
+		Order:      req.Order,
+		PageNum:    req.PageNum,
+		PageSize:   req.PageSize,
+	})
+	if err != nil {
+		return nil, err
+	}
+	items := make([]*types.ProductConfigItem, 0, len(rows))
+	for _, r := range rows {
+		items = append(items, mapProductToItem(r))
+	}
+	return &types.PageSetProductConfigResp{Rows: items, Total: total}, nil
 }

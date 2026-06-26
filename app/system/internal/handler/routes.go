@@ -1218,6 +1218,26 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Path:    "/list",
 					Handler: productconfig.PageSetHandler(serverCtx),
 				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/:id",
+					Handler: productconfig.InfoHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/",
+					Handler: productconfig.AddHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPut,
+					Path:    "/",
+					Handler: productconfig.UpdateHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodDelete,
+					Path:    "/:ids",
+					Handler: productconfig.DeleteHandler(serverCtx),
+				},
 			}...,
 		),
 		rest.WithPrefix("/product/config"),

@@ -116,6 +116,10 @@ GET /member/user/list?pageNum=1&pageSize=10
 | 投信管理 | 投信修改 | PUT | `/invest/list` | `invest:list:list` |
 | 投信管理 | 投信删除 | DELETE | `/invest/list/{ids}` | `invest:list:list` |
 | 产品管理 | 产品配置 | GET | `/product/config/list` | `product:config:list` |
+| 产品管理 | 产品配置详情 | GET | `/product/config/{id}` | `product:config:list` |
+| 产品管理 | 产品配置新增 | POST | `/product/config` | `product:config:list` |
+| 产品管理 | 产品配置修改 | PUT | `/product/config` | `product:config:list` |
+| 产品管理 | 产品配置删除 | DELETE | `/product/config/{ids}` | `product:config:list` |
 | 产品管理 | 产品实时数据 | GET | `/product/realtime/list` | `product:realtime:list` |
 | 产品管理 | 产品历史数据 | GET | `/product/history/list` | `product:history:list` |
 | 通知管理 | 市场新闻 | GET | `/notify/news/list` | `notify:news:list` |
@@ -2241,6 +2245,10 @@ GET /member/user/list?pageNum=1&pageSize=10
 
 ### 5.1 产品配置
 
+对接表 `fb_fund_product`（对齐 Java `FbFundProductController`）。
+
+#### 5.1.1 分页列表
+
 | 项 | 值 |
 | --- | --- |
 | 方法 | `GET` |
@@ -2249,20 +2257,78 @@ GET /member/user/list?pageNum=1&pageSize=10
 | API 定义 | `desc/system/api/product/config.api` |
 | 行实体 | `ProductConfigItem` |
 
-**查询参数**：`keyword`、`productType`、`status`
+**查询参数**：`pageNum`、`pageSize`、`keyword`（code/name 模糊）、`type`（FOREX/STOCK/FUND 等）、`status`、`orderField`、`order`、`params[beginTime]`、`params[endTime]`
 
-**`rows[]` 字段**：`id`、`productCode`、`productAlias`、`symbol`、`productName`、`productType`、`market`、`odds`、`tradeTime`、`currencies`、`status`、`createTime`、`updateTime`
+**`rows[]` 字段**：`id`、`code`、`alias`、`tradePair`、`name`、`type`、`market`、`tradingHours`、`description`、`status`、`dividendRatio`、`currency`、`period`、`totalDividendRate`、`dailyDividendRate`、`dividendEndDate`、`dividendStrDate`、`isLocked`、`limitBuyCount`、`limitSellDays`、`limitBuyAmount`、`sort`、`odds`、`createTime`、`updateTime`
 
-**响应示例**（待补充）：
+**响应示例**：
 
 ```json
 {
   "code": 200,
   "msg": "操作成功",
-  "total": 0,
-  "rows": []
+  "total": 1,
+  "rows": [
+    {
+      "id": "110",
+      "code": "EOS",
+      "alias": "EOS",
+      "tradePair": "EOS/USDT",
+      "name": "EOS/美元",
+      "type": "FOREX",
+      "market": "FOREX_US",
+      "tradingHours": "24H",
+      "description": "USD",
+      "status": 1,
+      "dividendRatio": 0,
+      "currency": "USD",
+      "period": 1,
+      "totalDividendRate": 0,
+      "dailyDividendRate": 0,
+      "sort": 24,
+      "odds": 1,
+      "createTime": "2025-03-01 14:11:52",
+      "updateTime": "2026-06-07 16:53:12"
+    }
+  ]
 }
 ```
+
+#### 5.1.2 详情
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `GET` |
+| 路径 | `/product/config/{id}` |
+| 权限 | `product:config:list` |
+
+#### 5.1.3 新增
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `POST` |
+| 路径 | `/product/config` |
+| 权限 | `product:config:list` |
+| 请求体 | `ProductConfigSaveReq` |
+
+#### 5.1.4 修改
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `PUT` |
+| 路径 | `/product/config` |
+| 权限 | `product:config:list` |
+| 请求体 | `ProductConfigSaveReq`（`id` 必填；`code` 不可改） |
+
+#### 5.1.5 删除
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `DELETE` |
+| 路径 | `/product/config/{ids}` |
+| 权限 | `product:config:list` |
+
+**`ProductConfigSaveReq` 主要字段**：`code`、`name`、`type`、`market`、`status`、`currency`、`odds` 必填；`alias`、`tradePair`、`tradingHours` 可选。
 
 ---
 

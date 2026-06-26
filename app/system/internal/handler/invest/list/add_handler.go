@@ -25,7 +25,8 @@ func AddHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		if err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 		} else {
-			httpx.Ok(w)
+			// 须返回 {code,msg}，否则 postWithMsg 无法提示成功且弹窗不关闭
+			httpx.OkJsonCtx(r.Context(), w, nil)
 		}
 	}
 }

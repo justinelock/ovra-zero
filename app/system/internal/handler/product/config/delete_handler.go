@@ -1,13 +1,13 @@
 // Code scaffolded by goctl. Safe to edit.
 // goctl 1.10.0
 
-package list
+package config
 
 import (
 	"net/http"
 
 	"github.com/zeromicro/go-zero/rest/httpx"
-	"ovra/app/system/internal/logic/invest/list"
+	"ovra/app/system/internal/logic/product/config"
 	"ovra/app/system/internal/svc"
 	"ovra/app/system/internal/types"
 )
@@ -20,7 +20,7 @@ func DeleteHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		l := list.NewDeleteLogic(r.Context(), svcCtx)
+		l := config.NewDeleteLogic(r.Context(), svcCtx)
 		err := l.Delete(&req)
 		if err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)

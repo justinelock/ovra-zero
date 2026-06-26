@@ -2040,9 +2040,13 @@ type InvestListSaveReq struct {
 }
 
 type ProductConfigQuery struct {
-	Keyword     string `form:"keyword,optional"`
-	ProductType string `form:"productType,optional"`
-	Status      string `form:"status,optional"`
+	Keyword    string `form:"keyword,optional"` // code/name 模糊
+	Code       string `form:"code,optional"`
+	Name       string `form:"name,optional"`
+	Type       string `form:"type,optional"`       // STOCK/FOREX/FUND 等
+	Status     string `form:"status,optional"`     // 0 禁用 / 1 启用
+	OrderField string `form:"orderField,optional"` // sort/create_time/code
+	Order      string `form:"order,optional"`      // asc/desc
 }
 
 type PageSetProductConfigReq struct {
@@ -2051,24 +2055,52 @@ type PageSetProductConfigReq struct {
 }
 
 type ProductConfigItem struct {
-	Id           string `json:"id"`
-	ProductCode  string `json:"productCode"`
-	ProductAlias string `json:"productAlias"`
-	Symbol       string `json:"symbol"`
-	ProductName  string `json:"productName"`
-	ProductType  string `json:"productType"`
-	Market       string `json:"market"`
-	Odds         string `json:"odds"`
-	TradeTime    string `json:"tradeTime"`
-	Currencies   string `json:"currencies"`
-	Status       string `json:"status"`
-	CreateTime   string `json:"createTime"`
-	UpdateTime   string `json:"updateTime"`
+	Id                string  `json:"id"`
+	Code              string  `json:"code,optional"`
+	Alias             string  `json:"alias,optional"`
+	TradePair         string  `json:"tradePair,optional"`
+	Name              string  `json:"name,optional"`
+	Type              string  `json:"type,optional"`
+	Market            string  `json:"market,optional"`
+	TradingHours      string  `json:"tradingHours,optional"`
+	Description       string  `json:"description,optional"`
+	Status            int     `json:"status,optional"`
+	DividendRatio     float64 `json:"dividendRatio,optional"`
+	Currency          string  `json:"currency,optional"`
+	Period            int     `json:"period,optional"`
+	TotalDividendRate float64 `json:"totalDividendRate,optional"`
+	DailyDividendRate float64 `json:"dailyDividendRate,optional"`
+	DividendEndDate   string  `json:"dividendEndDate,optional"`
+	DividendStrDate   string  `json:"dividendStrDate,optional"`
+	IsLocked          int     `json:"isLocked,optional"`
+	LimitBuyCount     int     `json:"limitBuyCount,optional"`
+	LimitSellDays     int     `json:"limitSellDays,optional"`
+	LimitBuyAmount    int     `json:"limitBuyAmount,optional"`
+	Sort              int     `json:"sort,optional"`
+	Odds              float64 `json:"odds,optional"`
+	CreateTime        string  `json:"createTime,optional"`
+	UpdateTime        string  `json:"updateTime,optional"`
 }
 
 type PageSetProductConfigResp struct {
 	Rows  []*ProductConfigItem `json:"rows"`
 	Total int64                `json:"total"`
+}
+
+type ProductConfigSaveReq struct {
+	Id           string  `json:"id,optional"`
+	Code         string  `json:"code"`
+	Alias        string  `json:"alias,optional"`
+	TradePair    string  `json:"tradePair,optional"`
+	Name         string  `json:"name"`
+	Type         string  `json:"type"`
+	Market       string  `json:"market"`
+	TradingHours string  `json:"tradingHours,optional"`
+	Description  string  `json:"description,optional"`
+	Status       int     `json:"status"`
+	Currency     string  `json:"currency"`
+	Odds         float64 `json:"odds"`
+	Sort         int     `json:"sort,optional"`
 }
 
 type ProductRealtimeQuery struct {
