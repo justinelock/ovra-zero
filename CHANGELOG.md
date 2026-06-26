@@ -19,6 +19,7 @@
 - **合约订单结算日志**：`GET /trade/contract/detail/{id}` 对接 `fb_crypto_contract_orders_detail`；已结算行操作列「日志」弹窗展示结算步骤（`contract.api`、`fb_contract_order.go`、`contract-settlement-log-modal.vue`、`biz-api.md` 3.1.1.5）
 
 ### 变更
+- **分析页四卡图标**：改用 Iconify `mdi:account-check` / `mdi:wallet` / `mdi:cash-plus` / `mdi:cash-minus`（`dashboard/analytics/index.vue`）
 - **实名/钱包审核接口**：契约对齐 Java `PUT /verify`，请求体改用 `state`（实名 `VERIFIED`/`REJECTED`，钱包 `APPROVED`/`REJECTED`）；钱包通过时补建 `main/USD` 并按账户类型默认币种开钱包，审核意见至少 5 字（`kyc.api`、`wallet_apply.api`、`fb_wallet_apply.go`、前端审核弹窗）
 - **分析页概览卡片**：充值成功金额 `$ 0.00` 绿色加粗；提现成功金额 `-$ 4,600` 红色加粗（`analysis-overview.vue`、`dashboard/analytics/index.vue`）
 - **分析页概览卡片**：`AnalysisOverview` 支持 `compact`，分析页四卡内边距与字号缩小（约默认高度 3/4）（`analysis-overview.vue`、`dashboard/analytics/index.vue`）
@@ -33,6 +34,7 @@
 - **biz-api.md**：补齐团队管理 1.6.1～1.6.4（详情/下级团队/更换上级/代理层级）请求响应与错误文案；总览表增加报表流水；团队列表补注册时间筛选参数
 
 ### 修复
+- **分析页提现成功金额**：`totalValue` 为 0 时格式化为 `-$ 0.00`，与充值申请一致（`dashboard/analytics/index.vue`）
 - **实名认证审核弹窗**：审核结果并入 Descriptions 表格（与用户ID/姓名/身份证号同表），通过/拒绝单行、拒绝原因在下方，对齐参考图（`kyc-audit-modal.vue`）
 - **分析页快捷列表无数据**：去掉与「今日/本周/本月」叠加的时间筛选（待办常跨日），挂载后主动 `query` 加载（`use-analytics-shortcut-grid.ts`、`shortcut-*-table.vue`）
 - **App 版本/品牌页控件不渲染**：`a-input`/`a-select`/`a-switch` 等未从 `antdv-next` 导入（项目仅全局注册 Button），改为显式 `import` 并使用 `Input`/`Select`/`Switch` 等组件（`appVersion/main/index.vue`、`appBrand/main/index.vue`）
