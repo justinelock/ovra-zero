@@ -111,6 +111,10 @@ GET /member/user/list?pageNum=1&pageSize=10
 | 投信管理 | 修改前收益查询 | POST | `/invest/position/profit/before` | `invest:position:list` |
 | 投信管理 | 修改持仓收益 | PUT | `/invest/position/profit` | `invest:position:list` |
 | 投信管理 | 投信列表 | GET | `/invest/list/list` | `invest:list:list` |
+| 投信管理 | 投信详情 | GET | `/invest/list/{id}` | `invest:list:list` |
+| 投信管理 | 投信新增 | POST | `/invest/list` | `invest:list:list` |
+| 投信管理 | 投信修改 | PUT | `/invest/list` | `invest:list:list` |
+| 投信管理 | 投信删除 | DELETE | `/invest/list/{ids}` | `invest:list:list` |
 | 产品管理 | 产品配置 | GET | `/product/config/list` | `product:config:list` |
 | 产品管理 | 产品实时数据 | GET | `/product/realtime/list` | `product:realtime:list` |
 | 产品管理 | 产品历史数据 | GET | `/product/history/list` | `product:history:list` |
@@ -2130,6 +2134,10 @@ GET /member/user/list?pageNum=1&pageSize=10
 
 ### 4.2 投信列表
 
+对接表 `fb_fund`（对齐 Java `FbFundController` / `FundServiceImpl`）。
+
+#### 4.2.1 分页列表
+
 | 项 | 值 |
 | --- | --- |
 | 方法 | `GET` |
@@ -2138,20 +2146,94 @@ GET /member/user/list?pageNum=1&pageSize=10
 | API 定义 | `desc/system/api/invest/list.api` |
 | 行实体 | `InvestListItem` |
 
-**查询参数**：`keyword`、`status`、`soldOut`
+**查询参数**：`pageNum`、`pageSize`、`keyword`（code/name 模糊）、`name`、`code`、`status`、`soldOut`、`orderField`（`sort`/`create_time`/`code`/`name`）、`order`（`asc`/`desc`）、`params[beginTime]`、`params[endTime]`
 
-**`rows[]` 字段**：`id`、`investCode`、`investName`、`logo`、`productDesc`、`status`、`soldOut`、`sortOrder`、`yieldDisplay`、`yieldRate`、`investableAmount`、`minAddAmount`、`period`、`yieldType`、`expireDate`、`createTime`、`updateTime`
+**`rows[]` 字段**：`id`、`code`、`symbol`、`name`、`company`、`ev`、`price`、`currency`、`description`、`poster`、`status`、`soldOut`、`rateMin`、`rateMax`、`rate`、`minAmount`、`minAppendAmount`、`maxAmount`、`period`、`rateMode`、`latestAmountRaised`、`lastestFundingDate`、`sort`、`createTime`、`updateTime`
 
-**响应示例**（待补充）：
+**响应示例**：
 
 ```json
 {
   "code": 200,
   "msg": "操作成功",
-  "total": 0,
-  "rows": []
+  "total": 1,
+  "rows": [
+    {
+      "id": "2057058124767494146",
+      "code": "FUBON",
+      "symbol": "FUBON FINANCIAL",
+      "name": "FUBON",
+      "company": "FUBON FINANCIAL",
+      "ev": "430B",
+      "price": 0,
+      "currency": "USD",
+      "description": "限购200万份",
+      "poster": "/uploads/fund/8ff735124d854d8aa2e3c1e77fd79080_cishi.jpeg",
+      "status": 1,
+      "soldOut": 0,
+      "rateMin": 0.14,
+      "rateMax": 0.52,
+      "rate": 0.45,
+      "minAmount": 1000,
+      "minAppendAmount": 100,
+      "maxAmount": 10000,
+      "period": 30,
+      "rateMode": "FIXED",
+      "latestAmountRaised": 0,
+      "sort": 0,
+      "createTime": "2026-05-20 19:17:29",
+      "updateTime": "2026-05-20 19:17:29"
+    }
+  ]
 }
 ```
+
+#### 4.2.2 详情
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `GET` |
+| 路径 | `/invest/list/{id}` |
+| 权限 | `invest:list:list` |
+
+返回单条 `InvestListItem`（编辑弹窗回显）。
+
+#### 4.2.3 新增
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `POST` |
+| 路径 | `/invest/list` |
+| 权限 | `invest:list:list` |
+| 请求体 | `InvestListSaveReq`（`id` 不传） |
+
+#### 4.2.4 修改
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `PUT` |
+| 路径 | `/invest/list` |
+| 权限 | `invest:list:list` |
+| 请求体 | `InvestListSaveReq`（`id` 必填） |
+
+#### 4.2.5 删除
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `DELETE` |
+| 路径 | `/invest/list/{ids}` |
+| 权限 | `invest:list:list` |
+
+`ids` 为逗号分隔主键，支持批量。
+
+**`InvestListSaveReq` 主要字段**：`code`、`symbol`、`name`、`company`、`rate`、`minAmount`、`maxAmount`、`period`、`sort` 必填；`minAppendAmount` 默认 100；`poster` 支持 data URL / base64（落盘为 `/uploads/fund/...`）或已有 http(s)/相对路径原样入库；`soldOut`：0 进行中 / 1 已售罄。
+
+**海报规则**（对齐 Java `resolvePoster`）：
+
+- 空白 → 不入库 / 修改时清空
+- 已是 `http(s)://` 或 `/uploads/`、`/fund/` 相对路径 → 原样入库
+- 否则按 base64 写入 `FileUpload.Path/fund/`，入库 `/uploads/fund/{uuid}_{code}.ext`
+- 未配置 `FileUpload.Path` 时 base64 上传返回业务错误
 
 ---
 

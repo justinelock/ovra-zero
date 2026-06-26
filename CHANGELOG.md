@@ -6,6 +6,7 @@
 ## [未发布]
 
 ### 新增
+- **投信列表 4.2**：`GET /invest/list/list` 对接 `fb_fund`；新增详情/增删改与海报 base64 落盘；前端列表、编辑弹窗与海报上传（`list.api`、`fb_fund.go`、`invest-fund-modal.vue`、`biz-api.md` 4.2）
 - **投信持仓修改收益**：`POST /invest/position/profit/before` 查询修改前收益；`PUT /invest/position/profit` 覆盖 `fb_fund_profit_log`；操作列「修改收益」弹窗（`position.api`、`fb_fund_position.go`、`position-update-profit-modal.vue`、`biz-api.md` 4.1.2）
 - **投信持仓 4.1 / 4.1.1**：`GET /invest/position/list` 对接 `fb_fund_position`；`GET /invest/position/order/list` 收益订单抽屉（`position.api`、`fb_fund_position.go`、`position-profit-order-drawer.vue`、`biz-api.md` 4.1～4.1.1）
 - **合约订单结算日志**：`GET /trade/contract/detail/{id}` 对接 `fb_crypto_contract_orders_detail`；已结算行操作列「日志」弹窗展示结算步骤（`contract.api`、`fb_contract_order.go`、`contract-settlement-log-modal.vue`、`biz-api.md` 3.1.1.5）

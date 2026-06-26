@@ -6,13 +6,14 @@ package list
 import (
 	"context"
 
+	"ovra/app/system/internal/dal"
 	"ovra/app/system/internal/svc"
 	"ovra/app/system/internal/types"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-// PageSetLogic 投信列表分页查询（占位，待接 invest 产品表）
+// PageSetLogic 投信产品分页（对齐 Java FundServiceImpl.getPageData）
 type PageSetLogic struct {
 	logx.Logger
 	ctx    context.Context
@@ -27,13 +28,27 @@ func NewPageSetLogic(ctx context.Context, svcCtx *svc.ServiceContext) *PageSetLo
 	}
 }
 
-// PageSet 分页查询投信列表
-// 1. 业务表尚未接入，返回空分页供前端 VxeGrid 联调
-// 2. 后续按 keyword/status/soldOut 及时间范围查询
 func (l *PageSetLogic) PageSet(req *types.PageSetInvestListReq) (resp *types.PageSetInvestListResp, err error) {
-	_ = req
-	return &types.PageSetInvestListResp{
-		Rows:  []*types.InvestListItem{},
-		Total: 0,
-	}, nil
+	// 组装筛选条件，查 fb_fund 分页
+	rows, total, err := l.svcCtx.Dal.FbMemberDal.PageFunds(l.ctx, dal.FundPageQuery{
+		Keyword:    req.Keyword,
+		Name:       req.Name,
+		Code:       req.Code,
+		Status:     req.Status,
+		SoldOut:    req.SoldOut,
+		BeginTime:  req.BeginTime,
+		EndTime:    req.EndTime,
+		OrderField: req.OrderField,
+		Order:      req.Order,
+		PageNum:    req.PageNum,
+		PageSize:   req.PageSize,
+	})
+	if err != nil {
+		return nil, err
+	}
+	items := make([]*types.InvestListItem, 0, len(rows))
+	for _, r := range rows {
+		items = append(items, mapFundToItem(r))
+	}
+	return &types.PageSetInvestListResp{Rows: items, Total: total}, nil
 }

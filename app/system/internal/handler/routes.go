@@ -1184,6 +1184,26 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Path:    "/list",
 					Handler: investlist.PageSetHandler(serverCtx),
 				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/:id",
+					Handler: investlist.InfoHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/",
+					Handler: investlist.AddHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPut,
+					Path:    "/",
+					Handler: investlist.UpdateHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodDelete,
+					Path:    "/:ids",
+					Handler: investlist.DeleteHandler(serverCtx),
+				},
 			}...,
 		),
 		rest.WithPrefix("/invest/list"),

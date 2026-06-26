@@ -12,6 +12,9 @@ RpcConf:
   Etcd:
     Key: system.rpc
 
+FileUpload:
+  Path: ./uploads
+
 Tenant:
   IgnoreTables:
     - sys_tenant

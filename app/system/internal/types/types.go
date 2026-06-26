@@ -1966,9 +1966,13 @@ type InvestPositionUpdateProfitReq struct {
 }
 
 type InvestListQuery struct {
-	Keyword string `form:"keyword,optional"`
-	Status  string `form:"status,optional"`
-	SoldOut string `form:"soldOut,optional"`
+	Keyword    string `form:"keyword,optional"`    // code/name 模糊
+	Name       string `form:"name,optional"`       // 投信名称 LIKE
+	Code       string `form:"code,optional"`       // 投信代码 LIKE
+	Status     string `form:"status,optional"`     // 0 禁用 / 1 启用
+	SoldOut    string `form:"soldOut,optional"`    // 0 进行中 / 1 已售罄
+	OrderField string `form:"orderField,optional"` // sort/create_time/code/name
+	Order      string `form:"order,optional"`      // asc/desc
 }
 
 type PageSetInvestListReq struct {
@@ -1977,28 +1981,62 @@ type PageSetInvestListReq struct {
 }
 
 type InvestListItem struct {
-	Id               string `json:"id"`
-	InvestCode       string `json:"investCode"`
-	InvestName       string `json:"investName"`
-	Logo             string `json:"logo"`
-	ProductDesc      string `json:"productDesc"`
-	Status           string `json:"status"`
-	SoldOut          string `json:"soldOut"`
-	SortOrder        string `json:"sortOrder"`
-	YieldDisplay     string `json:"yieldDisplay"`
-	YieldRate        string `json:"yieldRate"`
-	InvestableAmount string `json:"investableAmount"`
-	MinAddAmount     string `json:"minAddAmount"`
-	Period           string `json:"period"`
-	YieldType        string `json:"yieldType"`
-	ExpireDate       string `json:"expireDate"`
-	CreateTime       string `json:"createTime"`
-	UpdateTime       string `json:"updateTime"`
+	Id                 string  `json:"id"`
+	Code               string  `json:"code,optional"`
+	Symbol             string  `json:"symbol,optional"`
+	Name               string  `json:"name,optional"`
+	Company            string  `json:"company,optional"`
+	Ev                 string  `json:"ev,optional"`
+	Price              float64 `json:"price,optional"`
+	Currency           string  `json:"currency,optional"`
+	Description        string  `json:"description,optional"`
+	Poster             string  `json:"poster,optional"`
+	Status             int     `json:"status,optional"`
+	SoldOut            int     `json:"soldOut,optional"`
+	RateMin            float64 `json:"rateMin,optional"`
+	RateMax            float64 `json:"rateMax,optional"`
+	Rate               float64 `json:"rate,optional"`
+	MinAmount          float64 `json:"minAmount,optional"`
+	MinAppendAmount    float64 `json:"minAppendAmount,optional"`
+	MaxAmount          float64 `json:"maxAmount,optional"`
+	Period             int     `json:"period,optional"`
+	RateMode           string  `json:"rateMode,optional"`
+	LatestAmountRaised float64 `json:"latestAmountRaised,optional"`
+	LastestFundingDate string  `json:"lastestFundingDate,optional"`
+	Sort               int     `json:"sort,optional"`
+	CreateTime         string  `json:"createTime,optional"`
+	UpdateTime         string  `json:"updateTime,optional"`
 }
 
 type PageSetInvestListResp struct {
 	Rows  []*InvestListItem `json:"rows"`
 	Total int64             `json:"total"`
+}
+
+type InvestListSaveReq struct {
+	Id                 string  `json:"id,optional"`
+	Code               string  `json:"code"`
+	Symbol             string  `json:"symbol"`
+	Name               string  `json:"name"`
+	Company            string  `json:"company"`
+	Ev                 string  `json:"ev,optional"`
+	Price              float64 `json:"price,optional"`
+	Currency           string  `json:"currency,optional"`
+	Description        string  `json:"description,optional"`
+	Poster             string  `json:"poster,optional"`
+	Status             int     `json:"status,optional"`
+	SoldOut            int     `json:"soldOut,optional"`
+	RateMin            float64 `json:"rateMin,optional"`
+	RateMax            float64 `json:"rateMax,optional"`
+	Rate               float64 `json:"rate"`
+	MinAmount          float64 `json:"minAmount"`
+	MinAppendAmount    float64 `json:"minAppendAmount,optional"`
+	MaxAmount          float64 `json:"maxAmount"`
+	Period             int     `json:"period"`
+	RateMode           string  `json:"rateMode,optional"`
+	LatestAmountRaised float64 `json:"latestAmountRaised,optional"`
+	LastestFundingDate string  `json:"lastestFundingDate,optional"`
+	Sort               int     `json:"sort"`
 }
 
 type ProductConfigQuery struct {
