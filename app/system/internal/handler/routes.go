@@ -1155,6 +1155,21 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Path:    "/list",
 					Handler: investposition.PageSetHandler(serverCtx),
 				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/order/list",
+					Handler: investposition.OrderPageSetHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/profit/before",
+					Handler: investposition.ProfitBeforeHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPut,
+					Path:    "/profit",
+					Handler: investposition.UpdateProfitHandler(serverCtx),
+				},
 			}...,
 		),
 		rest.WithPrefix("/invest/position"),

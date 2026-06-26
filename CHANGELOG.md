@@ -6,9 +6,12 @@
 ## [未发布]
 
 ### 新增
+- **投信持仓修改收益**：`POST /invest/position/profit/before` 查询修改前收益；`PUT /invest/position/profit` 覆盖 `fb_fund_profit_log`；操作列「修改收益」弹窗（`position.api`、`fb_fund_position.go`、`position-update-profit-modal.vue`、`biz-api.md` 4.1.2）
+- **投信持仓 4.1 / 4.1.1**：`GET /invest/position/list` 对接 `fb_fund_position`；`GET /invest/position/order/list` 收益订单抽屉（`position.api`、`fb_fund_position.go`、`position-profit-order-drawer.vue`、`biz-api.md` 4.1～4.1.1）
 - **合约订单结算日志**：`GET /trade/contract/detail/{id}` 对接 `fb_crypto_contract_orders_detail`；已结算行操作列「日志」弹窗展示结算步骤（`contract.api`、`fb_contract_order.go`、`contract-settlement-log-modal.vue`、`biz-api.md` 3.1.1.5）
 
 ### 维护
+- **投信持仓模块**：为 `fb_fund_position.go`、position logic 与前端弹窗/抽屉补全步骤级注释（对齐 `.cursor/rules/code-comments-changelog.mdc`）
 - **前端开发**：Vite `allowedHosts` 放行 ngrok 域名，支持隧道访问本地 dev（`apps/web-antd/vite.config.ts`）
 - **biz-api.md**：补齐团队管理 1.6.1～1.6.4（详情/下级团队/更换上级/代理层级）请求响应与错误文案；总览表增加报表流水；团队列表补注册时间筛选参数
 
@@ -18,6 +21,9 @@
 - **团队管理写操作响应**：`PUT /member/team/changeParent`、`PUT /member/team/agentLevel` 改 `OkJsonCtx` 返回 `data`（`{userId,parentId}` / `{userId,agentLevel}`），修复 `httpx.Ok` 无 body 导致弹窗提交后不关闭（`team/*_handler.go`、`*-modal.vue`）
 
 ### 变更
+- **投信收益订单抽屉**：改按 `userId` + `positionId` 查询 `fb_fund_profit_log`，替换原 `fb_fund_order` 数据源（`fb_fund_position.go`、`position-profit-order-drawer.vue`、`biz-api.md` 4.1.1）
+- **合约订单列表**：订单控单列 `controlType` 为 0/空显示「未控单」，3 显示「自然」（`views/biz/trade/contract/data.tsx`）
+- **合约订单列表**：实际收益列正数绿色、负数红色、零为默认色（`views/biz/trade/contract/data.tsx`）
 - **合约订单结算日志弹窗**：改用语义化分组 `Descriptions` 展示，对齐本项目详情弹窗样式（`contract-settlement-log-modal.vue`）
 - **合约订单操作**：赢/输/改方向/本页批量控单接口改用 `putWithMsg`，成功提示操作结果，失败沿用全局错误提示（`api/biz/trade/contract/index.ts`）
 - **表格操作列**：`ActionButton` / `TableActionSpace` 统一收紧按钮间距（水平内边距与项间距均为 4px）（`components/global/button.ts`、`table-action-space.vue`）

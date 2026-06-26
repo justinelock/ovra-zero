@@ -1883,9 +1883,9 @@ type PageSetTradeDealResp struct {
 }
 
 type InvestPositionQuery struct {
-	Keyword        string `form:"keyword,optional"`
-	InvestCode     string `form:"investCode,optional"`
-	PositionStatus string `form:"positionStatus,optional"`
+	Keyword  string `form:"keyword,optional"`  // 用户名/手机/姓名模糊
+	FundCode string `form:"fundCode,optional"` // p.fund_code
+	Status   string `form:"status,optional"`   // p.status：0 结束 / 1 进行中
 }
 
 type PageSetInvestPositionReq struct {
@@ -1894,26 +1894,75 @@ type PageSetInvestPositionReq struct {
 }
 
 type InvestPositionItem struct {
-	Id             string `json:"id"`
-	UserName       string `json:"userName"`
-	RealName       string `json:"realName"`
-	InvestCode     string `json:"investCode"`
-	PositionAmount string `json:"positionAmount"`
-	BuyDate        string `json:"buyDate"`
-	StartDate      string `json:"startDate"`
-	EndDate        string `json:"endDate"`
-	PeriodDays     string `json:"periodDays"`
-	FixedYieldRate string `json:"fixedYieldRate"`
-	PositionStatus string `json:"positionStatus"`
-	EndStatus      string `json:"endStatus"`
-	LastProfitDate string `json:"lastProfitDate"`
-	CreateTime     string `json:"createTime"`
-	UpdateTime     string `json:"updateTime"`
+	Id             string  `json:"id"`
+	UserId         string  `json:"userId,optional"`
+	Username       string  `json:"username,optional"`
+	Mobile         string  `json:"mobile,optional"`
+	RealName       string  `json:"realName,optional"`
+	FundCode       string  `json:"fundCode,optional"`
+	FundName       string  `json:"fundName,optional"`
+	Amount         float64 `json:"amount,optional"`
+	BuyDate        string  `json:"buyDate,optional"`
+	StartDate      string  `json:"startDate,optional"`
+	EndDate        string  `json:"endDate,optional"`
+	Period         int     `json:"period,optional"`
+	Rate           float64 `json:"rate,optional"`
+	Profit         float64 `json:"profit,optional"`
+	State          string  `json:"state,optional"`
+	Status         int     `json:"status,optional"`
+	LastProfitDate string  `json:"lastProfitDate,optional"`
+	CreateTime     string  `json:"createTime,optional"`
+	UpdateTime     string  `json:"updateTime,optional"`
 }
 
 type PageSetInvestPositionResp struct {
 	Rows  []*InvestPositionItem `json:"rows"`
 	Total int64                 `json:"total"`
+}
+
+type InvestPositionOrderQuery struct {
+	UserId     string `form:"userId"`     // 必填
+	PositionId string `form:"positionId"` // 必填
+}
+
+type PageSetInvestPositionOrderReq struct {
+	PageReq
+	InvestPositionOrderQuery
+}
+
+type InvestPositionOrderItem struct {
+	Id               string  `json:"id"`
+	UserId           string  `json:"userId,optional"`
+	PositionId       string  `json:"positionId,optional"`
+	OrderId          string  `json:"orderId,optional"`
+	FundCode         string  `json:"fundCode,optional"`
+	ProfitDate       string  `json:"profitDate,optional"`
+	ProfitDatetime   string  `json:"profitDatetime,optional"`
+	Profit           float64 `json:"profit,optional"` // profit_amount
+	CumulativeProfit float64 `json:"cumulativeProfit,optional"`
+	Status           int     `json:"status,optional"`
+	CreateTime       string  `json:"createTime,optional"`
+	UpdateTime       string  `json:"updateTime,optional"`
+}
+
+type PageSetInvestPositionOrderResp struct {
+	Rows  []*InvestPositionOrderItem `json:"rows"`
+	Total int64                      `json:"total"`
+}
+
+type InvestPositionProfitBeforeReq struct {
+	Id         string `json:"id"`
+	ProfitDate string `json:"profitDate"` // yyyy-MM-dd
+}
+
+type InvestPositionProfitBeforeResp struct {
+	Profit *float64 `json:"profit"` // 无流水时为 null
+}
+
+type InvestPositionUpdateProfitReq struct {
+	Id         string  `json:"id"`
+	ProfitDate string  `json:"profitDate"` // yyyy-MM-dd
+	Profit     float64 `json:"profit"`
 }
 
 type InvestListQuery struct {

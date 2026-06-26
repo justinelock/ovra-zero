@@ -107,6 +107,9 @@ GET /member/user/list?pageNum=1&pageSize=10
 | 订单管理 | 委托订单 | GET | `/trade/entrust/list` | `trade:entrust:list` |
 | 订单管理 | 成交订单 | GET | `/trade/deal/list` | `trade:deal:list` |
 | 投信管理 | 持仓订单 | GET | `/invest/position/list` | `invest:position:list` |
+| 投信管理 | 收益订单 | GET | `/invest/position/order/list` | `invest:position:list` |
+| 投信管理 | 修改前收益查询 | POST | `/invest/position/profit/before` | `invest:position:list` |
+| 投信管理 | 修改持仓收益 | PUT | `/invest/position/profit` | `invest:position:list` |
 | 投信管理 | 投信列表 | GET | `/invest/list/list` | `invest:list:list` |
 | 产品管理 | 产品配置 | GET | `/product/config/list` | `product:config:list` |
 | 产品管理 | 产品实时数据 | GET | `/product/realtime/list` | `product:realtime:list` |
@@ -167,7 +170,7 @@ GET /member/user/list?pageNum=1&pageSize=10
   "rows": [
     {
       "id": "2069776834893524993",
-      "username": "18691188277",
+      "username": "13800138000",
       "realName": "马小梅",
       "idCard": "610623197011190122",
       "agentLevel": 3,
@@ -378,7 +381,7 @@ GET /member/user/list?pageNum=1&pageSize=10
     {
       "id": "2067908255562674177",
       "userId": "2067908054152196097",
-      "username": "15164459830",
+      "username": "13800138000",
       "mobile": null,
       "realName": "测试吧吧",
       "idCardNo": "220724199803123045",
@@ -802,7 +805,7 @@ GET /member/user/list?pageNum=1&pageSize=10
   "msg": "操作成功",
   "data": {
     "id": "2070046854793998337",
-    "username": "19516713881",
+    "username": "13800138000",
     "agentLevel": 3,
     "walletCount": 0,
     "totalAssets": 0.00,
@@ -1081,8 +1084,8 @@ GET /member/user/list?pageNum=1&pageSize=10
     {
       "id": "2069849388882669569",
       "userId": "2051263591276912641",
-      "username": "15009113390",
-      "realName": "卢琴琴",
+      "username": "13800138000",
+      "realName": "abc",
       "deviceId": "4d2e6539d2b783c3bf1f886344fdca1e",
       "loginTime": "2026-06-25 02:25:25",
       "loginIp": "111.19.76.126",
@@ -1162,7 +1165,7 @@ GET /member/user/list?pageNum=1&pageSize=10
     "userId": "2021488651577335809",
     "username": "mm78928",
     "mobile": null,
-    "realName": "张玉中",
+    "realName": "abc",
     "accountType": "fund",
     "status": "APPROVED",
     "state": "APPROVED",
@@ -1543,7 +1546,7 @@ GET /member/user/list?pageNum=1&pageSize=10
       "id": "2070128205987655681",
       "userId": "2035283111301906434",
       "username": "wm0529",
-      "realName": "王敏",
+      "realName": "abc",
       "orderNo": "W1782392000086884a1e",
       "amount": 108.00,
       "status": "SUCCESS",
@@ -1656,7 +1659,7 @@ GET /member/user/list?pageNum=1&pageSize=10
       "userId": "2067602058431246337",
       "username": "chen258369",
       "mobile": null,
-      "realName": "陈苗",
+      "realName": "abc",
       "orderNo": "D17817909999280d1ca0",
       "amount": 1000.00,
       "status": "SUCCESS",
@@ -1978,21 +1981,150 @@ GET /member/user/list?pageNum=1&pageSize=10
 | 权限 | `invest:position:list` |
 | API 定义 | `desc/system/api/invest/position.api` |
 | 行实体 | `InvestPositionItem` |
+| 数据表 | `fb_fund_position`（JOIN `fb_users`；`fb_fund` 补名称/周期/收益率） |
 
-**查询参数**：`keyword`、`investCode`、`positionStatus`
+**查询参数**
 
-**`rows[]` 字段**：`id`、`userName`、`realName`、`investCode`、`positionAmount`、`buyDate`、`startDate`、`endDate`、`periodDays`、`fixedYieldRate`、`positionStatus`、`endStatus`、`lastProfitDate`、`createTime`、`updateTime`
+| 参数 | 说明 |
+| --- | --- |
+| `pageNum` / `pageSize` | 分页 |
+| `keyword` | 用户名/手机号/真实姓名模糊（对齐 Java `getUserIds`） |
+| `fundCode` | 基金代码 |
+| `status` | `p.status`：`1` 进行中 / `0` 结束 |
+| `params[beginTime]` / `params[endTime]` | `create_time` 区间 |
 
-**响应示例**（待补充）：
+**`rows[]` 字段**：`id`、`userId`、`username`、`mobile`、`realName`、`fundCode`、`fundName`、`amount`、`buyDate`、`startDate`、`endDate`、`period`、`rate`、`profit`、`state`、`status`、`lastProfitDate`、`createTime`、`updateTime`
+
+**响应示例**
 
 ```json
 {
   "code": 200,
   "msg": "操作成功",
-  "total": 0,
-  "rows": []
+  "total": 1,
+  "rows": [
+    {
+      "id": "2067631810789584897",
+      "userId": "2051881499162091522",
+      "username": "13800138000",
+      "mobile": null,
+      "realName": "abc",
+      "fundCode": "FUBON",
+      "fundName": "FUBON",
+      "amount": 1999,
+      "buyDate": "2026-06-18",
+      "startDate": "2026-06-18",
+      "endDate": "2026-07-18",
+      "period": 30,
+      "rate": 0.45,
+      "profit": 29.99,
+      "state": "PENDING",
+      "status": 1,
+      "lastProfitDate": "2026-06-18",
+      "createTime": "2026-06-18 23:33:33",
+      "updateTime": "2026-06-19 00:10:02"
+    }
+  ]
 }
 ```
+
+---
+
+### 4.1.1 收益订单
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `GET` |
+| 路径 | `/invest/position/order/list` |
+| 权限 | `invest:position:list` |
+| API 定义 | `desc/system/api/invest/position.api` |
+| 行实体 | `InvestPositionOrderItem` |
+| 数据表 | `fb_fund_profit_log` |
+
+**说明**：持仓列表操作列「收益订单」抽屉调用；按 `userId` + `positionId` 查询每日收益流水。
+
+**查询参数**
+
+| 参数 | 必填 | 说明 |
+| --- | --- | --- |
+| `userId` | 是 | 用户 ID |
+| `positionId` | 是 | 持仓主键 |
+| `pageNum` / `pageSize` | 否 | 分页 |
+
+**`rows[]` 字段**：`id`、`userId`、`positionId`、`orderId`、`fundCode`、`profitDate`（收益日期）、`profit`（收益金额）、`cumulativeProfit`（累计收益）、`status`（1 有效 / 0 无效）、`profitDatetime`、`createTime`、`updateTime`
+
+**响应示例**
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功",
+  "total": 1,
+  "rows": [
+    {
+      "id": "2069815320183369729",
+      "userId": "9",
+      "positionId": "2066881461329932290",
+      "fundCode": "FUBON",
+      "profitDate": "2026-06-18",
+      "profit": 150,
+      "cumulativeProfit": 150,
+      "status": 1,
+      "profitDatetime": "2026-06-18 00:10:01",
+      "createTime": "2026-06-18 00:10:01",
+      "updateTime": "2026-06-18 00:10:01"
+    }
+  ]
+}
+```
+
+---
+
+### 4.1.2 修改收益
+
+| 项 | 值 |
+| --- | --- |
+| 查询修改前 | `POST /invest/position/profit/before` |
+| 提交修改 | `PUT /invest/position/profit` |
+| 权限 | `invest:position:list` |
+| 数据表 | `fb_fund_profit_log` |
+
+对齐 Java `POST /fubang/fbfundposition/profitBefore`、`PUT /fubang/fbfundposition/updateProfit`。
+
+**查询修改前请求体**
+
+```json
+{
+  "id": "2066881461329932290",
+  "profitDate": "2026-06-18"
+}
+```
+
+**查询修改前响应**：`data.profit` 为当日 `profit_amount`；无流水时为 `null`。
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功",
+  "data": {
+    "profit": 150
+  }
+}
+```
+
+**提交修改请求体**
+
+| 字段 | 说明 |
+| --- | --- |
+| `id` | 持仓 ID |
+| `profitDate` | 收益日期 `yyyy-MM-dd` |
+| `profit` | 修改后收益，必须 > 0 |
+
+**业务规则**
+
+- 管理端提交前须已查询到修改前收益（`profitBefore` 非空）
+- 后端校验该日已有 `fb_fund_profit_log` 记录后才允许覆盖
+- 修改后收益必须大于 0
 
 ---
 

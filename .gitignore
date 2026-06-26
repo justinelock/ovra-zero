@@ -46,6 +46,7 @@ deploy/bin/
 log/
 keystore
 bin/traefik/traefik
+scripts/ngrok
 
 # OS General
 Thumbs.db
