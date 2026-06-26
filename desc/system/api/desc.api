@@ -50,6 +50,7 @@ import "kline/main.api"
 import "app/brand.api"
 import "app/version.api"
 import "app/release_upload.api"
+import "dashboard/dashboard.api"
 
 type HealthResp {
 	Status string `json:"status"`

@@ -9,6 +9,7 @@ import (
 	appbrand "ovra/app/system/internal/handler/app/brand"
 	apprelease "ovra/app/system/internal/handler/app/release"
 	appversion "ovra/app/system/internal/handler/app/version"
+	dashboard "ovra/app/system/internal/handler/dashboard"
 	devencrypt "ovra/app/system/internal/handler/dev/encrypt"
 	devsse "ovra/app/system/internal/handler/dev/sse"
 	fundrecharge "ovra/app/system/internal/handler/fund/recharge"
@@ -1381,5 +1382,19 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			}...,
 		),
 		rest.WithPrefix("/app/release/upload"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Auth, serverCtx.Sign},
+			[]rest.Route{
+				{
+					Method:  http.MethodGet,
+					Path:    "/statistics",
+					Handler: dashboard.StatisticsHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/dashboard"),
 	)
 }

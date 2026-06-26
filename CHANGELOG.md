@@ -6,6 +6,7 @@
 ## [未发布]
 
 ### 新增
+- **分析页仪表盘统计**：`GET /dashboard/statistics?type=0|1|2` 对接实名/钱包/充值/提现四卡数据，对齐 Java `DashboardController.getStatistics`（`dashboard.api`、`fb_dashboard_stats.go`、`analytics/index.vue`、`biz-api.md` 九）
 - **App 品牌资源 / App 版本管理**：`GET /app/brand/active`、`PUT /app/brand`、品牌图上传；`GET /app/version/active`、`PUT /app/version`；`GET /app/release/upload/options`、`PUT /app/release/upload` 对接 `app_branding_config`、`app_release_versions`（`app/*.api`、`app_config.go`、`appBrand/main`、`appVersion/main`、`biz-api.md` 八）
 - **市场新闻 6.1**：`GET /notify/news/list` 对接 `fb_market_news`；新增详情/增改；前端列表、新增/编辑弹窗（`news.api`、`fb_market_news.go`、`notify-news-modal.vue`、`biz-api.md` 6.1）
 - **产品配置 5.1**：`GET /product/config/list` 对接 `fb_fund_product`；新增详情/增删改；前端列表与编辑弹窗（`config.api`、`fb_fund_product.go`、`product-config-modal.vue`、`biz-api.md` 5.1）
@@ -15,6 +16,10 @@
 - **合约订单结算日志**：`GET /trade/contract/detail/{id}` 对接 `fb_crypto_contract_orders_detail`；已结算行操作列「日志」弹窗展示结算步骤（`contract.api`、`fb_contract_order.go`、`contract-settlement-log-modal.vue`、`biz-api.md` 3.1.1.5）
 
 ### 变更
+- **分析页概览卡片**：充值成功金额 `$ 0.00` 绿色加粗；提现成功金额 `-$ 4,600` 红色加粗（`analysis-overview.vue`、`dashboard/analytics/index.vue`）
+- **分析页概览卡片**：`AnalysisOverview` 支持 `compact`，分析页四卡内边距与字号缩小（约默认高度 3/4）（`analysis-overview.vue`、`dashboard/analytics/index.vue`）
+- **分析页工具栏**：今日/本周/本月切换改为 `size="small"`，与「在线用户」Tag 视觉对齐（`dashboard/analytics/index.vue`）
+- **分析页时间维度**：今日/本周/本月切换默认选中「今日」（`type=0`）；右侧增加「在线用户」Tag，复用 `GET /member/user/stats` 的 `totalOnlineUsers`（`dashboard/analytics/index.vue`）
 - **App 品牌/版本页**：Card 标题栏右侧增加「刷新」按钮（与底部刷新行为一致）（`appBrand/main/index.vue`、`appVersion/main/index.vue`）
 - **App 版本管理页**：进入页与「刷新」并行请求 `/app/release/upload/options`、`/app/version/active`；发布域名下拉绑定 `allowedDomains`；表单右对齐布局对齐参考图（`appVersion/main/index.vue`）
 
@@ -29,6 +34,7 @@
 - **App 品牌保存响应**：`PUT /app/brand` 返回含 bump 后 `revision` 的 `AppBrandingItem`；查询 `revision` 空值兜底为 `0`（`brand.api`、`save_logic.go`、`appBrand/main/index.vue`）
 - **App 管理菜单路由冲突**：`App品牌资源` / `App版本管理` 子菜单 path 均为 `main`，前端均解析为 `/app/main` 导致两页相同；改为 `brand` / `version`（`bin/sql/ovra_zero-2.1.sql`、`bin/sql/patch-app-menu-path.sql`）
 - **Traefik 网关 `/app` 路由**：`router-system` 增加 `PathPrefix(/app)`，修复经 `localhost:5666/api/app/*` 访问 App 品牌/版本接口 404（`bin/traefik/dynamic.yaml`）
+- **Traefik 网关 `/dashboard` 路由**：`router-system` 增加 `PathPrefix(/dashboard)`，修复分析页统计接口经网关 404（`bin/traefik/dynamic.yaml`）
 - **投信列表/产品配置写操作响应**：新增/编辑/删除改 `OkJsonCtx` 返回 `{code,msg}`，修复 `httpx.Ok` 无 body 导致 `postWithMsg` 判定失败、无成功提示且弹窗不关闭（`invest/list/*_handler.go`、`product/config/*_handler.go`）
 - **更换上级**：仅更新 `parent_id`，不再走 `UpdateUser` 误触「用户名不能为空」；上级用户名前后端必填（`fb_team.go`、`team-change-parent-modal.vue`）
 - **团队管理弹窗刷新**：关闭代理层级/更换上级弹窗后 `reload` 携带查询区当前筛选（`keyword` 等），不再空参 `query()`（`views/member/team/index.vue`）

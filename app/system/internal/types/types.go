@@ -2343,3 +2343,22 @@ type AppReleaseUploadResult struct {
 	FileName string `json:"fileName,optional"`
 	Kind     string `json:"kind,optional"`
 }
+
+type DashboardStatisticsQuery struct {
+	Type int `form:"type,optional"`
+}
+
+type DashboardStatisticsResp struct {
+	Type                    int64 `json:"type"`
+	PendingUserCount        int64 `json:"pendingUserCount"`
+	ApprovedUserCount       int64 `json:"approvedUserCount"`
+	VerifiedUserCount       int64 `json:"verifiedUserCount"`
+	RejectedUserCount       int64 `json:"rejectedUserCount"`
+	PendingUserWalletCount  int64 `json:"pendingUserWalletCount"`
+	ApprovedUserWalletCount int64 `json:"approvedUserWalletCount"`
+	RejectedUserWalletCount int64 `json:"rejectedUserWalletCount"`
+	DepositCount            int64 `json:"depositCount"`
+	DepositSum              int64 `json:"depositSum"`
+	WithdrawCount           int64 `json:"withdrawCount"`
+	WithdrawSum             int64 `json:"withdrawSum"`
+}

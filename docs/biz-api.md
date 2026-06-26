@@ -135,6 +135,7 @@ GET /member/user/list?pageNum=1&pageSize=10
 | App管理 | App版本保存 | PUT | `/app/version` | `appVersion:main:list` |
 | App管理 | App安装包上传选项 | GET | `/app/release/upload/options` | `appVersion:main:list` |
 | App管理 | App安装包上传 | PUT | `/app/release/upload` | `appVersion:main:list` |
+| 仪表盘 | 分析页统计 | GET | `/dashboard/statistics` | 登录即可（分析页路由） |
 
 ---
 
@@ -2615,6 +2616,62 @@ GET /member/user/list?pageNum=1&pageSize=10
 | 类型 | `multipart/form-data`：`file`、可选 `domain`、`fileName` |
 
 落盘 `{wwwrootBase}/{domain}/download/{fileName}`，对外 URL `https://{domain}/download/{fileName}`。APK 上传成功后回写 `apkFileUrl`、`downloadUrl` 及版本号；IPA 仅回写 `ipaFileUrl`。
+
+---
+
+## 九、仪表盘 / 分析页
+
+对齐 Java `GET /fubang/dashboard/statistics`（`DashboardController.getStatistics`）。
+
+### 9.1 分析页概览统计
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `GET` |
+| 路径 | `/dashboard/statistics` |
+| API 定义 | `desc/system/api/dashboard/dashboard.api` |
+| Java 对照 | `GET /fubang/dashboard/statistics` |
+
+**查询参数**：
+
+| 参数 | 类型 | 默认 | 说明 |
+| --- | --- | --- | --- |
+| `type` | int | `1` | `0` 当天；`1` 本周（周一至今天）；`2` 本月（1 号至今）；非法回退 `1` |
+
+**统计口径**：各业务表 `created_at` 落在时间范围内。
+
+| 字段 | 说明 |
+| --- | --- |
+| `pendingUserCount` / `approvedUserCount` / `verifiedUserCount` / `rejectedUserCount` | `fb_identity_verify` 按 `status` 计数 |
+| `pendingUserWalletCount` / `approvedUserWalletCount` / `rejectedUserWalletCount` | `fb_account_application` 按 `status` 对 `user_id` 去重计数 |
+| `depositCount` | `fb_deposits` 中 `status=PENDING` 条数 |
+| `depositSum` | `status=SUCCESS` 且 `payment_status=SUCCESS` 金额之和（四舍五入取整） |
+| `withdrawCount` | `fb_withdraws` 中 `status=PENDING` 条数 |
+| `withdrawSum` | 同充值成功金额口径 |
+| `type` | 回显请求的时间维度 |
+
+**响应示例**：
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功",
+  "data": {
+    "type": 0,
+    "pendingUserCount": 0,
+    "approvedUserCount": 0,
+    "verifiedUserCount": 4,
+    "rejectedUserCount": 0,
+    "pendingUserWalletCount": 0,
+    "approvedUserWalletCount": 5,
+    "rejectedUserWalletCount": 0,
+    "depositCount": 0,
+    "depositSum": 4000,
+    "withdrawCount": 0,
+    "withdrawSum": 4600
+  }
+}
+```
 
 ---
 
