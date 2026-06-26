@@ -1088,6 +1088,31 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Path:    "/list",
 					Handler: tradecontract.PageSetHandler(serverCtx),
 				},
+				{
+					Method:  http.MethodPut,
+					Path:    "/win/:id",
+					Handler: tradecontract.WinHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPut,
+					Path:    "/lose/:id",
+					Handler: tradecontract.LoseHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPut,
+					Path:    "/direction/:id/:direction",
+					Handler: tradecontract.DirectionHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPut,
+					Path:    "/control/batch-current-page/directional",
+					Handler: tradecontract.BatchCurrentPageDirectionalHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/detail/:id",
+					Handler: tradecontract.SettlementDetailHandler(serverCtx),
+				},
 			}...,
 		),
 		rest.WithPrefix("/trade/contract"),

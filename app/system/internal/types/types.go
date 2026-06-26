@@ -1733,10 +1733,13 @@ type FundRechargeRejectReq struct {
 }
 
 type TradeContractQuery struct {
-	Keyword   string `form:"keyword,optional"`
-	Status    string `form:"status,optional"`
-	Symbol    string `form:"symbol,optional"`
-	Direction string `form:"direction,optional"`
+	Keyword       string `form:"keyword,optional"`       // username/mobile/real_name/id_card 模糊 → user_id
+	Status        string `form:"status,optional"`        // o.status：1持仓 2取消 3已结算
+	ControlResult string `form:"controlResult,optional"` // control_result：1赢 2输
+	Type          string `form:"type,optional"`          // Java 列表未使用，保留兼容
+	Username      string `form:"username,optional"`
+	Mobile        string `form:"mobile,optional"`
+	RealName      string `form:"realName,optional"`
 }
 
 type PageSetTradeContractReq struct {
@@ -1745,28 +1748,71 @@ type PageSetTradeContractReq struct {
 }
 
 type TradeContractItem struct {
-	Id            string `json:"id"`
-	UserName      string `json:"userName"`
-	RealName      string `json:"realName"`
-	BalanceU      string `json:"balanceU"`
-	Symbol        string `json:"symbol"`
-	Direction     string `json:"direction"`
-	TradeAmount   string `json:"tradeAmount"`
-	ActualProfit  string `json:"actualProfit"`
-	Status        string `json:"status"`
-	DurationSec   string `json:"durationSec"`
-	OpenPrice     string `json:"openPrice"`
-	ClosePrice    string `json:"closePrice"`
-	OrderControl  string `json:"orderControl"`
-	ControlResult string `json:"controlResult"`
-	GlobalControl string `json:"globalControl"`
-	OpenTime      string `json:"openTime"`
-	SettleTime    string `json:"settleTime"`
+	Id                         string  `json:"id"`
+	UserId                     string  `json:"userId"`
+	Username                   string  `json:"username,optional"`
+	Mobile                     string  `json:"mobile,optional"`
+	RealName                   string  `json:"realName,optional"`
+	Account                    string  `json:"account,optional"`
+	CoinType                   string  `json:"coinType,optional"`
+	Market                     string  `json:"market,optional"`
+	Direction                  int     `json:"direction,optional"`
+	TradePair                  string  `json:"tradePair,optional"`
+	PairName                   string  `json:"pairName,optional"`
+	ProductName                string  `json:"productName,optional"`
+	Amount                     float64 `json:"amount,optional"`
+	ProfitRatio                float64 `json:"profitRatio,optional"`
+	Seconds                    int     `json:"seconds,optional"`
+	OpeningPrice               float64 `json:"openingPrice,optional"`
+	ClosingPrice               float64 `json:"closingPrice,optional"`
+	OpeningTime                string  `json:"openingTime,optional"`
+	ClosingTime                string  `json:"closingTime,optional"`
+	Balance                    float64 `json:"balance,optional"`
+	WalletBalanceAfterSettle   float64 `json:"walletBalanceAfterSettle,optional"`
+	ExpectedProfit             float64 `json:"expectedProfit,optional"`
+	ActualProfit               float64 `json:"actualProfit,optional"`
+	Status                     int     `json:"status,optional"`
+	ControlType                int     `json:"controlType,optional"`
+	ControlResult              int     `json:"controlResult,optional"`
+	Remark                     string  `json:"remark,optional"`
+	CreateTime                 string  `json:"createTime,optional"`
+	UpdateTime                 string  `json:"updateTime,optional"`
+	Version                    int     `json:"version,optional"`
+	UserControl                int     `json:"userControl,optional"`
+	GlobalControlStateSnapshot string  `json:"globalControlStateSnapshot,optional"`
+	GlobalControlApplied       int     `json:"globalControlApplied,optional"`
+	HasBoughtFund              int     `json:"hasBoughtFund,optional"`
 }
 
 type PageSetTradeContractResp struct {
 	Rows  []*TradeContractItem `json:"rows"`
 	Total int64                `json:"total"`
+}
+
+type TradeContractDirectionReq struct {
+	Id        string `path:"id"`
+	Direction int    `path:"direction"`
+}
+
+type TradeContractBatchDirectionalReq struct {
+	PageNum      int64  `json:"pageNum,optional"`
+	PageSize     int64  `json:"pageSize,optional"`
+	Keyword      string `json:"keyword,optional"`
+	Status       string `json:"status,optional"`
+	BeginTime    string `json:"beginTime,optional"`
+	EndTime      string `json:"endTime,optional"`
+	ControlState string `json:"controlState"`
+}
+
+type TradeContractBatchDirectionalResp struct {
+	AffectedCount int `json:"affectedCount"`
+}
+
+type TradeContractSettlementDetailResp struct {
+	Id      string `json:"id"`
+	OrderId string `json:"orderId"`
+	UserId  string `json:"userId"`
+	Detail  string `json:"detail"`
 }
 
 type TradeEntrustQuery struct {

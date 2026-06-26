@@ -5,7 +5,11 @@
 
 ## [未发布]
 
+### 新增
+- **合约订单结算日志**：`GET /trade/contract/detail/{id}` 对接 `fb_crypto_contract_orders_detail`；已结算行操作列「日志」弹窗展示结算步骤（`contract.api`、`fb_contract_order.go`、`contract-settlement-log-modal.vue`、`biz-api.md` 3.1.1.5）
+
 ### 维护
+- **前端开发**：Vite `allowedHosts` 放行 ngrok 域名，支持隧道访问本地 dev（`apps/web-antd/vite.config.ts`）
 - **biz-api.md**：补齐团队管理 1.6.1～1.6.4（详情/下级团队/更换上级/代理层级）请求响应与错误文案；总览表增加报表流水；团队列表补注册时间筛选参数
 
 ### 修复
@@ -14,6 +18,13 @@
 - **团队管理写操作响应**：`PUT /member/team/changeParent`、`PUT /member/team/agentLevel` 改 `OkJsonCtx` 返回 `data`（`{userId,parentId}` / `{userId,agentLevel}`），修复 `httpx.Ok` 无 body 导致弹窗提交后不关闭（`team/*_handler.go`、`*-modal.vue`）
 
 ### 变更
+- **合约订单结算日志弹窗**：改用语义化分组 `Descriptions` 展示，对齐本项目详情弹窗样式（`contract-settlement-log-modal.vue`）
+- **合约订单操作**：赢/输/改方向/本页批量控单接口改用 `putWithMsg`，成功提示操作结果，失败沿用全局错误提示（`api/biz/trade/contract/index.ts`）
+- **表格操作列**：`ActionButton` / `TableActionSpace` 统一收紧按钮间距（水平内边距与项间距均为 4px）（`components/global/button.ts`、`table-action-space.vue`）
+- **合约订单操作 UI**：本页批量控单 Popconfirm 文案支持折行；交易方向改为弹窗单选「买入做多/卖出做空」；操作列拆分赢/输与交易方向显示条件（持仓中且未控单才显示赢/输，持仓中即可改方向）（`contract-direction-modal.vue`、`data.tsx`、`index.vue`）
+- **合约订单筛选**：控单结果增加「自然」(3)，后端按 `control_type` 空/3 筛选；导出按钮移至查询按钮后（`fb_contract_order.go`、`views/biz/trade/contract/`）
+- **合约订单 3.1.1**：新增赢/输/改方向与本页四态批量控单接口；前端操作列与本页批量按钮 Popconfirm（`contract.api`、`fb_contract_order.go`、`views/biz/trade/contract/`、`biz-api.md` 3.1.1）
+- **合约订单 3.1**：`GET /trade/contract/list` 对接 `fb_crypto_contract_orders`（对齐 Java `getPageData`/`getRecords`）；前端列表字段与筛选改 `status`/`controlResult`（`contract.api`、`fb_contract_order.go`、`views/biz/trade/contract/`、`biz-api.md` 3.1）
 - **充值管理 2.4**：`GET /fund/recharge/list` 对接 `fb_deposits`（对齐 Java `selectPageWithUser`）；批准先入账款再改订单 SUCCESS，拒绝置 CANCELLED；前端批准 Popconfirm + 拒绝理由弹窗（`recharge.api`、`fb_deposit.go`、`views/biz/fund/recharge/`、`biz-api.md` 2.4～2.4.2）
 - **提现管理 2.3**：`GET /fund/withdraw/list` 对接 `fb_withdraws`（对齐 Java `selectPageWithUser`）；新增批准/拒绝接口与前端 Popconfirm、拒绝理由弹窗（`withdraw.api`、`fb_withdraw.go`、`views/biz/fund/withdraw/`、`biz-api.md` 2.3～2.3.2）
 - **账户流水 2.2**：`GET /fund/statement/list` 对接 `fb_account_flow_records`（对齐 Java `selectPageWithUser`）；新增 `GET /detail/{id}` 与详情弹窗（`statement.api`、`fb_report.go`、`views/biz/fund/statement/`、`biz-api.md` 2.2～2.2.1）

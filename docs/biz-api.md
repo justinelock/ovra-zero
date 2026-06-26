@@ -1720,22 +1720,196 @@ GET /member/user/list?pageNum=1&pageSize=10
 | 路径 | `/trade/contract/list` |
 | 权限 | `trade:contract:list` |
 | API 定义 | `desc/system/api/trade/contract.api` |
+| Java 对照 | `GET /fubang/fbcontractorders/page` |
 | 行实体 | `TradeContractItem` |
 
-**查询参数**：`keyword`、`status`、`symbol`、`direction`
+**查询参数**（对齐 Java `getWrapper`）：
 
-**`rows[]` 字段**：`id`、`userName`、`realName`、`balanceU`、`symbol`、`direction`、`tradeAmount`、`actualProfit`、`status`、`durationSec`、`openPrice`、`closePrice`、`orderControl`、`controlResult`、`globalControl`、`openTime`、`settleTime`
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `keyword` | string | 用户名/手机/姓名/身份证模糊 → `user_id` |
+| `status` | string | `o.status`：1 持仓中 / 2 已取消 / 3 已结算 |
+| `controlResult` | string | `1`/`2`：`control_result`；`3`：自然（`control_type IS NULL OR = 3`） |
+| `type` | string | Java 列表未使用，保留兼容 |
+| `params[beginTime]` / `params[endTime]` | string | 创建时间；同时传时 `o.create_time BETWEEN` |
 
-**响应示例**（待补充）：
+**查询逻辑**：`fb_crypto_contract_orders`，`ORDER BY create_time DESC`。
+
+**列表组装**（对齐 Java `getRecords`）：
+
+- 批量查用户 `username` / `mobile` / `realName`
+- `balance`：已结算且有 `walletBalanceAfterSettle` 用快照，否则汇总当前 USD 钱包余额
+- `productName`：优先 `pairName`，旧单按 `coinType` 匹配 `fb_fund_product.name`
+- `hasBoughtFund`：是否存在 `fb_fund_position` 进行中持仓（`state=PENDING` 且 `status=1`）
+
+**`rows[]` 字段**：
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| `id` | string | 订单主键 |
+| `userId` | string | 用户 ID |
+| `username` | string | 用户名 |
+| `mobile` | string | 手机号 |
+| `realName` | string | 真实姓名 |
+| `account` | string | 用户账号 |
+| `coinType` | string | 币种 |
+| `market` | string | 市场 |
+| `direction` | int | 1 买入做多 / 2 卖出做空 |
+| `tradePair` | string | 交易对 |
+| `pairName` | string | 交易对展示名 |
+| `productName` | string | 列表展示用交易对文案 |
+| `amount` | float64 | 交易金额 |
+| `profitRatio` | float64 | 收益比例 |
+| `seconds` | int | 合约时长(秒) |
+| `openingPrice` / `closingPrice` | float64 | 开/平仓价格 |
+| `openingTime` / `closingTime` | string | 开/平仓时间 |
+| `balance` | float64 | 列表展示余额 |
+| `walletBalanceAfterSettle` | float64 | 结算后余额快照 |
+| `expectedProfit` / `actualProfit` | float64 | 预期/实际收益 |
+| `status` | int | 1 持仓 / 2 取消 / 3 结算 |
+| `controlType` | int | 1 必赢 / 2 必输 / 3 自然 |
+| `controlResult` | int | 1 赢 / 2 输 |
+| `remark` | string | 备注 |
+| `createTime` / `updateTime` | string | 创建/更新时间 |
+| `version` | int | 版本号 |
+| `userControl` | int | 用户控单 |
+| `globalControlStateSnapshot` | string | 当日全局控盘快照 |
+| `globalControlApplied` | int | 全局控盘是否生效 |
+| `hasBoughtFund` | int | 是否持有进行中投信 |
+
+**响应示例**：
 
 ```json
 {
   "code": 200,
   "msg": "操作成功",
   "total": 0,
-  "rows": []
+  "rows": [
+    {
+      "id": "2069151242346364929",
+      "userId": "653",
+      "username": "09612345678",
+      "mobile": null,
+      "realName": "杨阳洋",
+      "account": "09612345678",
+      "coinType": "ADA",
+      "market": "FOREX_US",
+      "direction": 2,
+      "tradePair": "ADA/USDT",
+      "pairName": "ADA/美元",
+      "productName": "ADA/美元",
+      "amount": 20.00,
+      "profitRatio": 85.00,
+      "seconds": 30,
+      "openingPrice": 0.15920000,
+      "closingPrice": 0.15930000,
+      "openingTime": "2026-06-23 04:11:14",
+      "closingTime": "2026-06-23 04:11:43",
+      "balance": 7631.84000000,
+      "walletBalanceAfterSettle": 7631.84000000,
+      "expectedProfit": 17.00,
+      "actualProfit": -20.00,
+      "status": 3,
+      "controlType": null,
+      "controlResult": 2,
+      "remark": null,
+      "createTime": "2026-06-23 04:11:14",
+      "updateTime": "2026-06-23 04:11:44",
+      "version": 1,
+      "userControl": 3,
+      "globalControlStateSnapshot": "RANDOM",
+      "globalControlApplied": 1,
+      "hasBoughtFund": 1
+    }
+  ]
 }
 ```
+
+### 3.1.1 合约订单-操作
+
+权限均为 `trade:contract:list`。`control_type`：`1` 必赢、`2` 必输。
+
+#### 3.1.1.1 控单-赢
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `PUT` |
+| 路径 | `/trade/contract/win/{id}` |
+| Java 对照 | `PUT /fubang/fbcontractorders/win/{id}` |
+
+**说明**：仅当 `control_type IS NULL` 时写入 `1`（必赢）。
+
+#### 3.1.1.2 控单-输
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `PUT` |
+| 路径 | `/trade/contract/lose/{id}` |
+| Java 对照 | `PUT /fubang/fbcontractorders/lose/{id}` |
+
+**说明**：仅当 `control_type IS NULL` 时写入 `2`（必输）。
+
+#### 3.1.1.3 修改交易方向
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `PUT` |
+| 路径 | `/trade/contract/direction/{id}/{direction}` |
+| Java 对照 | `PUT /fubang/fbcontractorders/direction/{id}/{direction}` |
+
+**路径参数**：`direction` 为 `1`（买入做多）或 `2`（卖出做空）。
+
+#### 3.1.1.4 本页四态批量控单
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `PUT` |
+| 路径 | `/trade/contract/control/batch-current-page/directional` |
+| Java 对照 | `PUT /fubang/fbcontractorders/control/batch-current-page/directional` |
+
+**请求体**：
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| `pageNum` | int64 | 当前页码 |
+| `pageSize` | int64 | 每页条数 |
+| `keyword` | string | 与列表一致 |
+| `status` | string | 与列表一致 |
+| `beginTime` / `endTime` | string | 创建时间范围（与列表 `params[beginTime]`/`params[endTime]` 对应） |
+| `controlState` | string | `LONG_WIN` / `LONG_LOSE` / `SHORT_WIN` / `SHORT_LOSE` |
+
+**说明**：对当前页内 `status=1` 且 `control_type IS NULL` 的订单，按方向写入必赢/必输；不修改今日全局配置。`controlState=RANDOM` 拒绝。
+
+**响应**：`{ "affectedCount": 3 }`；无符合条件订单时返回「当前页没有可控制的进行中订单」。
+
+**controlState 语义**（对齐 `ContractGlobalControlState.resolveResult`）：
+
+| 值 | 做多(direction=1) | 做空(direction=2) |
+| --- | --- | --- |
+| `LONG_WIN` | 必赢(1) | 必输(2) |
+| `LONG_LOSE` | 必输(2) | 必赢(1) |
+| `SHORT_WIN` | 必输(2) | 必赢(1) |
+| `SHORT_LOSE` | 必赢(1) | 必输(2) |
+
+#### 3.1.1.5 结算日志
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `GET` |
+| 路径 | `/trade/contract/detail/{id}` |
+| 权限 | `trade:contract:list` |
+| Java 对照 | `GET /fubang/fbcontractordersdetail/{orderId}` |
+
+**说明**：`id` 为合约订单主键；从 `fb_crypto_contract_orders_detail` 按 `order_id` 查询，`detail` 为 `remark` 字段 JSON（对齐 Java `ContractSettlementLogDTO`）。
+
+**响应**：
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| `id` | string | 明细表主键 |
+| `orderId` | string | 合约订单 id |
+| `userId` | string | 用户 id |
+| `detail` | string | 结算步骤 JSON 字符串 |
 
 ---
 
