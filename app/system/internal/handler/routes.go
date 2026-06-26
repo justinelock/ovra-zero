@@ -6,6 +6,9 @@ package handler
 import (
 	"net/http"
 
+	appbrand "ovra/app/system/internal/handler/app/brand"
+	apprelease "ovra/app/system/internal/handler/app/release"
+	appversion "ovra/app/system/internal/handler/app/version"
 	devencrypt "ovra/app/system/internal/handler/dev/encrypt"
 	devsse "ovra/app/system/internal/handler/dev/sse"
 	fundrecharge "ovra/app/system/internal/handler/fund/recharge"
@@ -1280,6 +1283,21 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Path:    "/list",
 					Handler: notifynews.PageSetHandler(serverCtx),
 				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/:id",
+					Handler: notifynews.InfoHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/",
+					Handler: notifynews.AddHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPut,
+					Path:    "/",
+					Handler: notifynews.UpdateHandler(serverCtx),
+				},
 			}...,
 		),
 		rest.WithPrefix("/notify/news"),
@@ -1311,5 +1329,57 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			}...,
 		),
 		rest.WithPrefix("/kline/main"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Auth, serverCtx.Sign},
+			[]rest.Route{
+				{
+					Method:  http.MethodGet,
+					Path:    "/active",
+					Handler: appbrand.ActiveHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPut,
+					Path:    "/",
+					Handler: appbrand.SaveHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/app/brand"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Auth, serverCtx.Sign},
+			[]rest.Route{
+				{
+					Method:  http.MethodGet,
+					Path:    "/active",
+					Handler: appversion.ActiveHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPut,
+					Path:    "/",
+					Handler: appversion.UpdateHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/app/version"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Auth, serverCtx.Sign},
+			[]rest.Route{
+				{
+					Method:  http.MethodGet,
+					Path:    "/options",
+					Handler: apprelease.OptionsHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/app/release/upload"),
 	)
 }

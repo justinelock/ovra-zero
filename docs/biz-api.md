@@ -123,8 +123,18 @@ GET /member/user/list?pageNum=1&pageSize=10
 | 产品管理 | 产品实时数据 | GET | `/product/realtime/list` | `product:realtime:list` |
 | 产品管理 | 产品历史数据 | GET | `/product/history/list` | `product:history:list` |
 | 通知管理 | 市场新闻 | GET | `/notify/news/list` | `notify:news:list` |
+| 通知管理 | 市场新闻详情 | GET | `/notify/news/{id}` | `notify:news:list` |
+| 通知管理 | 市场新闻新增 | POST | `/notify/news` | `notify:news:list` |
+| 通知管理 | 市场新闻修改 | PUT | `/notify/news` | `notify:news:list` |
 | 通知管理 | 通知发布 | GET | `/notify/publish/list` | `notify:publish:list` |
 | K线管理 | K线管理 | GET | `/kline/main/list` | `kline:main:list` |
+| App管理 | App品牌资源 | GET | `/app/brand/active` | `appBrand:main:list` |
+| App管理 | App品牌资源保存 | PUT | `/app/brand` | `appBrand:main:list` |
+| App管理 | App品牌图片上传 | POST | `/app/brand/upload/image` | `appBrand:main:list` |
+| App管理 | App版本管理 | GET | `/app/version/active` | `appVersion:main:list` |
+| App管理 | App版本保存 | PUT | `/app/version` | `appVersion:main:list` |
+| App管理 | App安装包上传选项 | GET | `/app/release/upload/options` | `appVersion:main:list` |
+| App管理 | App安装包上传 | PUT | `/app/release/upload` | `appVersion:main:list` |
 
 ---
 
@@ -2390,6 +2400,10 @@ GET /member/user/list?pageNum=1&pageSize=10
 
 ### 6.1 市场新闻
 
+对接表 `fb_market_news`（对齐 Java `FbMarketNewsController`）。
+
+#### 6.1.1 分页列表
+
 | 项 | 值 |
 | --- | --- |
 | 方法 | `GET` |
@@ -2398,20 +2412,65 @@ GET /member/user/list?pageNum=1&pageSize=10
 | API 定义 | `desc/system/api/notify/news.api` |
 | 行实体 | `NotifyNewsItem` |
 
-**查询参数**：`keyword`、`source`
+**查询参数**：`pageNum`、`pageSize`、`keyword`（title/summary 模糊）、`source`、`category`、`orderField`、`order`、`params[beginTime]`、`params[endTime]`
 
-**`rows[]` 字段**：`id`、`title`、`summary`、`content`、`source`、`link`、`image`、`viewCount`、`publishTime`
+**默认排序**：`COALESCE(publish_time, created_at) DESC`（对齐 Java `getWrapper`）
 
-**响应示例**（待补充）：
+**`rows[]` 字段**：`id`、`title`、`summary`、`content`、`source`、`category`、`url`、`imageUrl`、`viewCount`、`publishTime`、`createdAt`、`updatedAt`
+
+**响应示例**：
 
 ```json
 {
   "code": 200,
   "msg": "操作成功",
   "total": 0,
-  "rows": []
+  "rows": [
+    {
+      "id": "2069145305225207810",
+      "title": "金属期市：美伊达成协议的希望提振工业金属价格",
+      "summary": null,
+      "content": null,
+      "source": "Reuters",
+      "category": "LME:AH1!,COMEX:ZNC1!,MCX:LEAD1!,MYX:FTIN1!,MCX:NICKEL1!,TVC:GOLD,BIST:XAGUSD1!,NYMEX:PL1!,BIST:XPDUSD1!,LME:CA1!",
+      "url": "https://cn.tradingview.com/news/reuters.com,2026:newsml_L6S42U0XW:0/",
+      "imageUrl": null,
+      "viewCount": 0,
+      "publishTime": "2026-06-23 00:11:07",
+      "createdAt": "2026-06-23 03:47:38",
+      "updatedAt": "2026-06-23 03:47:38"
+    }
+  ]
 }
 ```
+
+#### 6.1.2 详情
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `GET` |
+| 路径 | `/notify/news/{id}` |
+| 权限 | `notify:news:list` |
+
+#### 6.1.3 新增
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `POST` |
+| 路径 | `/notify/news` |
+| 权限 | `notify:news:list` |
+| 请求体 | `NotifyNewsSaveReq` |
+
+#### 6.1.4 修改
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `PUT` |
+| 路径 | `/notify/news` |
+| 权限 | `notify:news:list` |
+| 请求体 | `NotifyNewsSaveReq`（`id` 必填） |
+
+**`NotifyNewsSaveReq` 主要字段**：`title` 必填；`summary`、`content`、`source`、`category`、`url`、`imageUrl`、`viewCount`、`publishTime` 可选。
 
 ---
 
@@ -2468,6 +2527,94 @@ GET /member/user/list?pageNum=1&pageSize=10
   "rows": []
 }
 ```
+
+---
+
+## 八、App 管理
+
+### 8.1 App 品牌资源
+
+对接表 `app_branding_config`（对齐 Java `AppBrandingConfigController`）。
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `GET` |
+| 路径 | `/app/brand/active` |
+| 权限 | `appBrand:main:list` |
+| API 定义 | `desc/system/api/app/brand.api` |
+
+**响应字段**：`id`、`revision`、`splashUrl`、`splashEnabled`、`homeBannerUrl`、`homeBannerEnabled`、`profilePosterUrl`、`profilePosterEnabled`、`updatedAt`、`updatedBy`
+
+#### 8.1.1 保存
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `PUT` |
+| 路径 | `/app/brand` |
+| 请求体 | `AppBrandingSaveReq` |
+
+保存时自动 bump `revision`（`yyyyMMddHHmmss`），响应返回最新 `AppBrandingItem`（含新 revision）；启用远程图时对应 URL 必填。
+
+#### 8.1.2 品牌图片上传
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `POST` |
+| 路径 | `/app/brand/upload/image?kind=splash\|home_banner\|profile_poster` |
+| 类型 | `multipart/form-data`，字段 `file` |
+
+**响应**：`{ url, src }`，入库路径形如 `/uploads/branding/...`
+
+---
+
+### 8.2 App 版本管理
+
+对接表 `app_release_versions`（对齐 Java `AppReleaseVersionController`）。
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `GET` |
+| 路径 | `/app/version/active` |
+| 权限 | `appVersion:main:list` |
+| API 定义 | `desc/system/api/app/version.api` |
+
+**响应字段**：`id`、`version`、`description`、`downloadUrl`、`apkFileUrl`、`iosUrl`、`ipaFileUrl`、`isForce`、`isHotUpdate`、`updatedAt`
+
+#### 8.2.1 保存
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `PUT` |
+| 路径 | `/app/version` |
+| 请求体 | `AppReleaseVersionSaveReq` |
+
+`version`、`description`、`downloadUrl` 必填。
+
+---
+
+### 8.3 App 安装包上传
+
+对齐 Java `AppReleaseUploadController`；配置项 `AppReleaseUpload`（`wwwrootBase`、`subPath`、`defaultDomain`、`allowedDomains`）。
+
+#### 8.3.1 上传选项
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `GET` |
+| 路径 | `/app/release/upload/options` |
+| 权限 | `appVersion:main:list` |
+
+**响应**：`defaultDomain`、`allowedDomains`、`urlPattern`、`wwwrootBase`
+
+#### 8.3.2 上传安装包
+
+| 项 | 值 |
+| --- | --- |
+| 方法 | `PUT` |
+| 路径 | `/app/release/upload` |
+| 类型 | `multipart/form-data`：`file`、可选 `domain`、`fileName` |
+
+落盘 `{wwwrootBase}/{domain}/download/{fileName}`，对外 URL `https://{domain}/download/{fileName}`。APK 上传成功后回写 `apkFileUrl`、`downloadUrl` 及版本号；IPA 仅回写 `ipaFileUrl`。
 
 ---
 

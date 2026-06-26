@@ -9,9 +9,9 @@ http:
       middlewares:
         - cors-header
 
-    # System 子路径（含业务 API：/member、/fund、/trade 等均在 system 服务）
+    # System 子路径（含业务 API：/member、/fund、/trade、/app 等均在 system 服务）
     router-system:
-      rule: "(PathPrefix(`/system`) || PathPrefix(`/monitor`) || PathPrefix(`/resource`) || PathPrefix(`/member`) || PathPrefix(`/fund`) || PathPrefix(`/trade`) || PathPrefix(`/invest`) || PathPrefix(`/product`) || PathPrefix(`/notify`) || PathPrefix(`/kline`))"
+      rule: "(PathPrefix(`/system`) || PathPrefix(`/monitor`) || PathPrefix(`/resource`) || PathPrefix(`/member`) || PathPrefix(`/fund`) || PathPrefix(`/trade`) || PathPrefix(`/invest`) || PathPrefix(`/product`) || PathPrefix(`/notify`) || PathPrefix(`/kline`) || PathPrefix(`/app`))"
       entryPoints:
         - websecure
       service: service-system

@@ -2173,8 +2173,11 @@ type PageSetProductHistoryResp struct {
 }
 
 type NotifyNewsQuery struct {
-	Keyword string `form:"keyword,optional"`
-	Source  string `form:"source,optional"`
+	Keyword    string `form:"keyword,optional"` // title/summary 模糊
+	Source     string `form:"source,optional"`
+	Category   string `form:"category,optional"`
+	OrderField string `form:"orderField,optional"` // publish_time/created_at
+	Order      string `form:"order,optional"`      // asc/desc
 }
 
 type PageSetNotifyNewsReq struct {
@@ -2184,19 +2187,35 @@ type PageSetNotifyNewsReq struct {
 
 type NotifyNewsItem struct {
 	Id          string `json:"id"`
-	Title       string `json:"title"`
-	Summary     string `json:"summary"`
-	Content     string `json:"content"`
-	Source      string `json:"source"`
-	Link        string `json:"link"`
-	Image       string `json:"image"`
-	ViewCount   string `json:"viewCount"`
-	PublishTime string `json:"publishTime"`
+	Title       string `json:"title,optional"`
+	Summary     string `json:"summary,optional"`
+	Content     string `json:"content,optional"`
+	Source      string `json:"source,optional"`
+	Category    string `json:"category,optional"`
+	Url         string `json:"url,optional"`
+	ImageUrl    string `json:"imageUrl,optional"`
+	ViewCount   int    `json:"viewCount,optional"`
+	PublishTime string `json:"publishTime,optional"`
+	CreatedAt   string `json:"createdAt,optional"`
+	UpdatedAt   string `json:"updatedAt,optional"`
 }
 
 type PageSetNotifyNewsResp struct {
 	Rows  []*NotifyNewsItem `json:"rows"`
 	Total int64             `json:"total"`
+}
+
+type NotifyNewsSaveReq struct {
+	Id          string `json:"id,optional"`
+	Title       string `json:"title"`
+	Summary     string `json:"summary,optional"`
+	Content     string `json:"content,optional"`
+	Source      string `json:"source,optional"`
+	Category    string `json:"category,optional"`
+	Url         string `json:"url,optional"`
+	ImageUrl    string `json:"imageUrl,optional"`
+	ViewCount   int    `json:"viewCount,optional"`
+	PublishTime string `json:"publishTime,optional"`
 }
 
 type NotifyPublishQuery struct {
@@ -2255,4 +2274,72 @@ type KlineMainItem struct {
 type PageSetKlineMainResp struct {
 	Rows  []*KlineMainItem `json:"rows"`
 	Total int64            `json:"total"`
+}
+
+type AppBrandingItem struct {
+	Id                   string `json:"id,optional"`
+	Revision             string `json:"revision,optional"`
+	SplashUrl            string `json:"splashUrl,optional"`
+	SplashEnabled        bool   `json:"splashEnabled,optional"`
+	HomeBannerUrl        string `json:"homeBannerUrl,optional"`
+	HomeBannerEnabled    bool   `json:"homeBannerEnabled,optional"`
+	ProfilePosterUrl     string `json:"profilePosterUrl,optional"`
+	ProfilePosterEnabled bool   `json:"profilePosterEnabled,optional"`
+	UpdatedAt            string `json:"updatedAt,optional"`
+	UpdatedBy            string `json:"updatedBy,optional"`
+}
+
+type AppBrandingSaveReq struct {
+	Id                   string `json:"id,optional"`
+	SplashUrl            string `json:"splashUrl,optional"`
+	SplashEnabled        bool   `json:"splashEnabled,optional"`
+	HomeBannerUrl        string `json:"homeBannerUrl,optional"`
+	HomeBannerEnabled    bool   `json:"homeBannerEnabled,optional"`
+	ProfilePosterUrl     string `json:"profilePosterUrl,optional"`
+	ProfilePosterEnabled bool   `json:"profilePosterEnabled,optional"`
+}
+
+type AppBrandingUploadResp struct {
+	Url string `json:"url"`
+	Src string `json:"src"`
+}
+
+type AppReleaseVersionItem struct {
+	Id          string `json:"id,optional"`
+	Version     string `json:"version,optional"`
+	Description string `json:"description,optional"`
+	DownloadUrl string `json:"downloadUrl,optional"`
+	ApkFileUrl  string `json:"apkFileUrl,optional"`
+	IosUrl      string `json:"iosUrl,optional"`
+	IpaFileUrl  string `json:"ipaFileUrl,optional"`
+	IsForce     bool   `json:"isForce,optional"`
+	IsHotUpdate bool   `json:"isHotUpdate,optional"`
+	UpdatedAt   string `json:"updatedAt,optional"`
+}
+
+type AppReleaseVersionSaveReq struct {
+	Id          string `json:"id,optional"`
+	Version     string `json:"version"`
+	Description string `json:"description"`
+	DownloadUrl string `json:"downloadUrl"`
+	ApkFileUrl  string `json:"apkFileUrl,optional"`
+	IosUrl      string `json:"iosUrl,optional"`
+	IpaFileUrl  string `json:"ipaFileUrl,optional"`
+	IsForce     bool   `json:"isForce,optional"`
+	IsHotUpdate bool   `json:"isHotUpdate,optional"`
+}
+
+type AppReleaseUploadOptions struct {
+	DefaultDomain  string   `json:"defaultDomain,optional"`
+	AllowedDomains []string `json:"allowedDomains,optional"`
+	UrlPattern     string   `json:"urlPattern,optional"`
+	WwwrootBase    string   `json:"wwwrootBase,optional"`
+}
+
+type AppReleaseUploadResult struct {
+	Url      string `json:"url"`
+	Path     string `json:"path,optional"`
+	Domain   string `json:"domain,optional"`
+	FileName string `json:"fileName,optional"`
+	Kind     string `json:"kind,optional"`
 }

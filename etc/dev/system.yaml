@@ -15,6 +15,16 @@ RpcConf:
 FileUpload:
   Path: ./uploads
 
+# App 安装包落盘：dev 用项目内 www/wwwroot；生产可改为 /www/wwwroot
+AppReleaseUpload:
+  WwwrootBase: ./www/wwwroot
+  SubPath: download
+  UrlScheme: https
+  DefaultDomain: app.fubonplus.com
+  AllowedDomains:
+    - app.fubonplus.com
+    - app.fubang.vip
+
 Tenant:
   IgnoreTables:
     - sys_tenant

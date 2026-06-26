@@ -25,6 +25,7 @@ type Dal struct {
 	FbMemberDal      *FbMemberDal
 	FbUserRedisDal   *FbUserRedisDal
 	FbUserWalletDal  *FbUserWalletDal
+	AppDal           *AppDal
 }
 
 func NewDal(db *gorm.DB, query *query.Query, c config.Config, rds *redis.Redis) *Dal {
@@ -45,5 +46,6 @@ func NewDal(db *gorm.DB, query *query.Query, c config.Config, rds *redis.Redis) 
 		FbMemberDal:     NewFbMemberDal(db),
 		FbUserRedisDal:  NewFbUserRedisDal(rds),
 		FbUserWalletDal: NewFbUserWalletDal(db),
+		AppDal:          NewAppDal(db),
 	}
 }

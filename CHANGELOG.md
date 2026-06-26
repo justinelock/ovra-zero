@@ -6,11 +6,17 @@
 ## [未发布]
 
 ### 新增
+- **App 品牌资源 / App 版本管理**：`GET /app/brand/active`、`PUT /app/brand`、品牌图上传；`GET /app/version/active`、`PUT /app/version`；`GET /app/release/upload/options`、`PUT /app/release/upload` 对接 `app_branding_config`、`app_release_versions`（`app/*.api`、`app_config.go`、`appBrand/main`、`appVersion/main`、`biz-api.md` 八）
+- **市场新闻 6.1**：`GET /notify/news/list` 对接 `fb_market_news`；新增详情/增改；前端列表、新增/编辑弹窗（`news.api`、`fb_market_news.go`、`notify-news-modal.vue`、`biz-api.md` 6.1）
 - **产品配置 5.1**：`GET /product/config/list` 对接 `fb_fund_product`；新增详情/增删改；前端列表与编辑弹窗（`config.api`、`fb_fund_product.go`、`product-config-modal.vue`、`biz-api.md` 5.1）
 - **投信列表 4.2**：`GET /invest/list/list` 对接 `fb_fund`；新增详情/增删改与海报 base64 落盘；前端列表、编辑弹窗与海报上传（`list.api`、`fb_fund.go`、`invest-fund-modal.vue`、`biz-api.md` 4.2）
 - **投信持仓修改收益**：`POST /invest/position/profit/before` 查询修改前收益；`PUT /invest/position/profit` 覆盖 `fb_fund_profit_log`；操作列「修改收益」弹窗（`position.api`、`fb_fund_position.go`、`position-update-profit-modal.vue`、`biz-api.md` 4.1.2）
 - **投信持仓 4.1 / 4.1.1**：`GET /invest/position/list` 对接 `fb_fund_position`；`GET /invest/position/order/list` 收益订单抽屉（`position.api`、`fb_fund_position.go`、`position-profit-order-drawer.vue`、`biz-api.md` 4.1～4.1.1）
 - **合约订单结算日志**：`GET /trade/contract/detail/{id}` 对接 `fb_crypto_contract_orders_detail`；已结算行操作列「日志」弹窗展示结算步骤（`contract.api`、`fb_contract_order.go`、`contract-settlement-log-modal.vue`、`biz-api.md` 3.1.1.5）
+
+### 变更
+- **App 品牌/版本页**：Card 标题栏右侧增加「刷新」按钮（与底部刷新行为一致）（`appBrand/main/index.vue`、`appVersion/main/index.vue`）
+- **App 版本管理页**：进入页与「刷新」并行请求 `/app/release/upload/options`、`/app/version/active`；发布域名下拉绑定 `allowedDomains`；表单右对齐布局对齐参考图（`appVersion/main/index.vue`）
 
 ### 维护
 - **投信持仓模块**：为 `fb_fund_position.go`、position logic 与前端弹窗/抽屉补全步骤级注释（对齐 `.cursor/rules/code-comments-changelog.mdc`）
@@ -18,12 +24,18 @@
 - **biz-api.md**：补齐团队管理 1.6.1～1.6.4（详情/下级团队/更换上级/代理层级）请求响应与错误文案；总览表增加报表流水；团队列表补注册时间筛选参数
 
 ### 修复
+- **App 版本/品牌页控件不渲染**：`a-input`/`a-select`/`a-switch` 等未从 `antdv-next` 导入（项目仅全局注册 Button），改为显式 `import` 并使用 `Input`/`Select`/`Switch` 等组件（`appVersion/main/index.vue`、`appBrand/main/index.vue`）
+- **App 品牌页表单布局**：标签列固定 140px 右对齐，对齐 Java `label-width`（`appBrand/main/index.vue`）
+- **App 品牌保存响应**：`PUT /app/brand` 返回含 bump 后 `revision` 的 `AppBrandingItem`；查询 `revision` 空值兜底为 `0`（`brand.api`、`save_logic.go`、`appBrand/main/index.vue`）
+- **App 管理菜单路由冲突**：`App品牌资源` / `App版本管理` 子菜单 path 均为 `main`，前端均解析为 `/app/main` 导致两页相同；改为 `brand` / `version`（`bin/sql/ovra_zero-2.1.sql`、`bin/sql/patch-app-menu-path.sql`）
+- **Traefik 网关 `/app` 路由**：`router-system` 增加 `PathPrefix(/app)`，修复经 `localhost:5666/api/app/*` 访问 App 品牌/版本接口 404（`bin/traefik/dynamic.yaml`）
 - **投信列表/产品配置写操作响应**：新增/编辑/删除改 `OkJsonCtx` 返回 `{code,msg}`，修复 `httpx.Ok` 无 body 导致 `postWithMsg` 判定失败、无成功提示且弹窗不关闭（`invest/list/*_handler.go`、`product/config/*_handler.go`）
 - **更换上级**：仅更新 `parent_id`，不再走 `UpdateUser` 误触「用户名不能为空」；上级用户名前后端必填（`fb_team.go`、`team-change-parent-modal.vue`）
 - **团队管理弹窗刷新**：关闭代理层级/更换上级弹窗后 `reload` 携带查询区当前筛选（`keyword` 等），不再空参 `query()`（`views/member/team/index.vue`）
 - **团队管理写操作响应**：`PUT /member/team/changeParent`、`PUT /member/team/agentLevel` 改 `OkJsonCtx` 返回 `data`（`{userId,parentId}` / `{userId,agentLevel}`），修复 `httpx.Ok` 无 body 导致弹窗提交后不关闭（`team/*_handler.go`、`*-modal.vue`）
 
 ### 变更
+- **市场新闻弹窗**：新闻来源改下拉（金色财经/Reuters/Gelonghui，默认金色财经）；新闻分类改下拉（币圈/期货/股票，默认币圈）（`notify-news-form-data.ts`、`notify-news-modal.vue`）
 - **投信收益订单抽屉**：改按 `userId` + `positionId` 查询 `fb_fund_profit_log`，替换原 `fb_fund_order` 数据源（`fb_fund_position.go`、`position-profit-order-drawer.vue`、`biz-api.md` 4.1.1）
 - **合约订单列表**：订单控单列 `controlType` 为 0/空显示「未控单」，3 显示「自然」（`views/biz/trade/contract/data.tsx`）
 - **合约订单列表**：实际收益列正数绿色、负数红色、零为默认色（`views/biz/trade/contract/data.tsx`）
