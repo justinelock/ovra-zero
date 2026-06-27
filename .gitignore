@@ -47,6 +47,6 @@ log/
 keystore
 bin/traefik/traefik
 scripts/ngrok
-
+default.etcd
 # OS General
 Thumbs.db
