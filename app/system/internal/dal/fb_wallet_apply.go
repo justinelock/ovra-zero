@@ -148,7 +148,7 @@ func (d *FbMemberDal) PageWalletApplications(ctx context.Context, f WalletApplyL
 		a.apply_time, a.audit_time, COALESCE(a.audit_user_id, 0) AS audit_user_id,
 		a.remark, a.created_at, a.updated_at,
 		COALESCE(u.username, '') AS username, u.mobile, u.real_name,
-		COALESCE(su.user_name, '') AS audit_user ` + base + ` ORDER BY a.created_at DESC LIMIT ? OFFSET ?`
+		COALESCE(su.username, '') AS audit_user ` + base + ` ORDER BY a.created_at DESC LIMIT ? OFFSET ?`
 	listArgs := append(append([]any{}, args...), f.PageSize, offset)
 	if err = d.db.WithContext(ctx).Raw(listSQL, listArgs...).Scan(&rows).Error; err != nil {
 		return nil, 0, errx.GORMErr(err)

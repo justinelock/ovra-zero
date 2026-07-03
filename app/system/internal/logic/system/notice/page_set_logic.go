@@ -34,7 +34,7 @@ func (l *PageSetLogic) PageSet(req *types.PageSetNoticeReq) (resp *types.PageSet
 	q := l.svcCtx.Dal.Query
 	var result []struct {
 		model.SysNotice
-		CreateByName string `gorm:"column:user_name"`
+		CreateByName string `gorm:"column:username"`
 	}
 	// 1. 组装查询（关联用户表取创建人姓名）
 	do := q.SysNotice.WithContext(l.ctx).

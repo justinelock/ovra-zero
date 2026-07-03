@@ -30,7 +30,7 @@ type UserQuery struct {
 	UserId      string `form:"userId,optional"`
 	TenantId    string `form:"tenantId,optional"`
 	DeptId      string `form:"deptId,optional"`
-	UserName    string `form:"userName,optional"`
+	UserName    string `form:"username,optional"`
 	NickName    string `form:"nickName,optional"`
 	UserType    string `form:"userType,optional"`
 	Email       string `form:"email,optional"`
@@ -111,7 +111,7 @@ type UserBase struct {
 	UserID      string `json:"userId,optional"`
 	TenantID    string `json:"tenantId,optional"`
 	DeptID      string `json:"deptId,optional"`
-	UserName    string `json:"userName"`
+	UserName    string `json:"username"`
 	NickName    string `json:"nickName"`
 	UserType    string `json:"userType,optional"`
 	Email       string `json:"email,optional"`
@@ -453,7 +453,7 @@ type DeptTreeResp struct {
 type AllocatedReq struct {
 	PageReq
 	RoleId      string `form:"roleId"`
-	UserName    string `form:"userName,optional"`
+	UserName    string `form:"username,optional"`
 	PhoneNumber string `form:"phonenumber,optional"`
 }
 
@@ -1012,7 +1012,7 @@ type CommandState struct {
 
 type SseUserInfo struct {
 	UserId   string `json:"userId"`
-	UserName string `json:"userName"`
+	UserName string `json:"username"`
 	NickName string `json:"nickName"`
 	DeptName string `json:"deptName"`
 }

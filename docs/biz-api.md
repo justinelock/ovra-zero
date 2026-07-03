@@ -8,7 +8,7 @@
 
 | 项 | 说明 |
 | --- | --- |
-| 服务 | `system`（本地默认 `http://127.0.0.1:8092`） |
+| 服务 | `system`（本地默认 `http://127.0.0.1:8086`） |
 | 网关 | Traefik 可选 `http://127.0.0.1:28080`，前端 Vite 代理一般为 `/api` → system |
 | 鉴权 | 需登录 Token；中间件：`Auth`、`Sign` |
 | 分页参数 | 所有列表接口继承 `PageReq`：`pageNum`、`pageSize`、`params[beginTime]`、`params[endTime]`（见下节默认值） |
@@ -1171,7 +1171,7 @@ GET /member/user/list?pageNum=1&pageSize=10
 | `accountType` | string | 账户类型 `main` / `fund` / `forex` 等 |
 | `params[beginTime]` / `params[endTime]` | string | 创建时间范围；同时传时 `a.created_at BETWEEN` |
 
-**查询逻辑**：`fb_account_application a LEFT JOIN fb_users u LEFT JOIN sys_user su`（审核人 `su.user_id = CAST(a.audit_user_id AS CHAR)`，`auditUser` 取 `su.user_name`），`ORDER BY a.created_at DESC`。
+**查询逻辑**：`fb_account_application a LEFT JOIN fb_users u LEFT JOIN sys_user su`（审核人 `su.user_id = CAST(a.audit_user_id AS CHAR)`，`auditUser` 取 `su.username`），`ORDER BY a.created_at DESC`。
 
 **`rows[]` 字段**：
 

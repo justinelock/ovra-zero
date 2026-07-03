@@ -18,8 +18,8 @@
 
 ```text
 etc/dev/common.yaml   # 公共配置（数据库、Redis、JWT、加解密等）
-etc/dev/auth.yaml     # auth 服务（HTTP 8091）
-etc/dev/system.yaml   # system 服务（HTTP 8092 + RPC 9092）
+etc/dev/auth.yaml     # auth 服务（HTTP 8085）
+etc/dev/system.yaml   # system 服务（HTTP 8086 + RPC 9092）
 etc/dev/demo.yaml     # demo 服务（HTTP 8099 + RPC 9099）
 ```
 
@@ -37,8 +37,8 @@ etc/{ENV}/demo.yaml
 
 | 模块 | REST 端口 | RPC 端口 | Prometheus |
 | --- | --- | --- | --- |
-| auth | 8091 | - | 4001 |
-| system | 8092 | 9092 | 4002 |
+| auth | 8085 | - | 4001 |
+| system | 8086 | 9092 | 4002 |
 | demo | 8099 | 9099 | 4009 |
 
 Traefik 网关（前端 `/api` 代理目标）：`http://127.0.0.1:28080`
@@ -205,8 +205,8 @@ bin/traefik/dynamic.yaml      # 路由到 auth/system/demo
 先启动后端服务（网关只做转发，本身不跑业务）：
 
 ```sh
-go run app/system/system.go   # 8092
-go run app/auth/auth.go       # 8091
+go run app/system/system.go   # 8086
+go run app/auth/auth.go       # 8085
 # demo 可选：8099
 ```
 
@@ -266,9 +266,9 @@ open http://127.0.0.1:28090
 
 | 网关路径 | 转发到 |
 | --- | --- |
-| `/auth/*` | `http://127.0.0.1:8091` |
-| `/system/*`、`/monitor/*`、`/resource/*` | `http://127.0.0.1:8092` |
-| `/member/*`、`/fund/*`、`/trade/*`、`/invest/*`、`/product/*`、`/notify/*`、`/kline/*` | `http://127.0.0.1:8092` |
+| `/auth/*` | `http://127.0.0.1:8085` |
+| `/system/*`、`/monitor/*`、`/resource/*` | `http://127.0.0.1:8086` |
+| `/member/*`、`/fund/*`、`/trade/*`、`/invest/*`、`/product/*`、`/notify/*`、`/kline/*` | `http://127.0.0.1:8086` |
 | `/demo/*` | `http://127.0.0.1:8099` |
 
 路由规则定义在 `bin/traefik/dynamic.yaml` 的 `router-system`。新增 system 服务上的 API 前缀时，须同步更新该文件并重启 Traefik。
@@ -300,7 +300,7 @@ go run app/auth/auth.go -f etc/dev/auth.yaml
 curl http://127.0.0.1:28080/auth/code
 
 # 直接访问 auth 服务
-curl http://127.0.0.1:8091/auth/code
+curl http://127.0.0.1:8085/auth/code
 ```
 
 ## 六、其他说明
@@ -345,7 +345,7 @@ curl http://127.0.0.1:8091/auth/code
 ### 启动顺序（前端联调）
 
 1. 启动 **etcd**
-2. 启动 **system**（8092）→ **auth**（8091）
+2. 启动 **system**（8086）→ **auth**（8085）
 3. 启动 **Traefik**：`make traefik-run`（28080）
 4. 启动前端：`pnpm dev:antd`（5666）
 
@@ -356,7 +356,7 @@ curl http://127.0.0.1:8091/auth/code
 | 场景 | 方式 |
 | --- | --- |
 | **本地前端开发（本项目默认）** | Vite `/api` → Traefik `28080` → 各服务 |
-| **调试单个服务（curl/Postman）** | 可直连 `8091` / `8092`，与前端代理无关 |
+| **调试单个服务（curl/Postman）** | 可直连 `8085` / `8086`，与前端代理无关 |
 | **k3d / Helm 部署** | Ingress 统一入口，见 `deploy/helm/ovra-zero` |
 
 ### RSA 加解密如何与后端一致

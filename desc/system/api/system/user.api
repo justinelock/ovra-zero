@@ -31,7 +31,7 @@ type (
         UserId string `form:"userId,optional"`
         TenantId string `form:"tenantId,optional"`
         DeptId string `form:"deptId,optional"`
-        UserName string `form:"userName,optional"`
+        UserName string `form:"username,optional"`
         NickName string `form:"nickName,optional"`
         UserType string `form:"userType,optional"`
         Email string `form:"email,optional"`

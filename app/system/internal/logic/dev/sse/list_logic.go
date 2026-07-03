@@ -26,7 +26,7 @@ func NewListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListLogic {
 
 type sseUserRow struct {
 	UserID   string `gorm:"column:user_id"`
-	UserName string `gorm:"column:user_name"`
+	UserName string `gorm:"column:username"`
 	NickName string `gorm:"column:nick_name"`
 	DeptName string `gorm:"column:dept_name"`
 }

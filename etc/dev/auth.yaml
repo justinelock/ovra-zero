@@ -1,6 +1,6 @@
 RestConf:
   Name: auth
-  Port: 8091
+  Port: 8085
   Log:
     ServiceName: auth-api
   Prometheus:

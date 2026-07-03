@@ -55,17 +55,17 @@ services:
     command: /app/app-auth
     configFile: /app/etc/config/auth.yaml
     ports:
-      http: 8091
-    readinessPort: 8091
+      http: 8085
+    readinessPort: 8085
   system:
     enabled: true
     replicas: 1
     command: /app/app-system
     configFile: /app/etc/config/system.yaml
     ports:
-      http: 8092
+      http: 8086
       grpc: 9092
-    readinessPort: 8092
+    readinessPort: 8086
   demo:
     enabled: true
     replicas: 1
@@ -83,16 +83,16 @@ ingress:
   paths:
     - path: /auth
       service: auth
-      port: 8091
+      port: 8085
     - path: /system
       service: system
-      port: 8092
+      port: 8086
     - path: /monitor
       service: system
-      port: 8092
+      port: 8086
     - path: /resource
       service: system
-      port: 8092
+      port: 8086
     - path: /demo
       service: demo
       port: 8099

@@ -35,7 +35,7 @@ service System {
 含义：
 
 - 完整路径：`GET /member/user/list`、`GET /member/user/stats`
-- 服务：**system**（本地默认 `http://127.0.0.1:8092`）
+- 服务：**system**（本地默认 `http://127.0.0.1:8086`）
 - 中间件：**Auth**（Token）、**Sign**（验签）
 - `@handler PageSet` → 生成 `PageSetHandler` + `PageSetLogic` 骨架
 
@@ -119,7 +119,7 @@ MySQL / Redis
 ```text
 views/member/list/index.vue
   → api/member/user/index.ts（路径 /member/user/list）
-  → Vite 代理 `/api` → Traefik `28080` → system:8092
+  → Vite 代理 `/api` → Traefik `28080` → system:8086
 ```
 
 ---
@@ -238,16 +238,16 @@ flowchart LR
 
 ```bash
 # 1. 登录拿 Token（tenantId、clientId 按环境调整，默认管理员 admin/admin123）
-curl -s -X POST 'http://127.0.0.1:8091/auth/login' \
+curl -s -X POST 'http://127.0.0.1:8085/auth/login' \
   -H 'Content-Type: application/json' \
   -d '{"username":"admin","password":"admin123","tenantId":"000000","clientId":"e5cd7e4891bf95d1d19206ce24a7b32e","grantType":"password"}'
 
 # 2. 用户列表
-curl -s 'http://127.0.0.1:8092/member/user/list?pageNum=1&pageSize=10&deleted=0' \
+curl -s 'http://127.0.0.1:8086/member/user/list?pageNum=1&pageSize=10&deleted=0' \
   -H "Authorization: Bearer <access_token>"
 
 # 3. 活跃统计（无查询参数）
-curl -s 'http://127.0.0.1:8092/member/user/stats' \
+curl -s 'http://127.0.0.1:8086/member/user/stats' \
   -H "Authorization: Bearer <access_token>"
 ```
 

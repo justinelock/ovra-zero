@@ -56,7 +56,7 @@ type (
     AllocatedReq {
         PageReq
         RoleId string `form:"roleId"`
-        UserName string `form:"userName,optional"`
+        UserName string `form:"username,optional"`
         PhoneNumber string `form:"phonenumber,optional"`
     }
     AllocatedResp {

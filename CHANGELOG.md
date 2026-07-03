@@ -5,6 +5,9 @@
 
 ## [未发布]
 
+### 变更
+- **系统用户**：`sys_user.user_name` 列重命名为 `username`；用户相关接口请求/响应 JSON 统一为 `username`（`base.api`、`user.api`、`role.api`、前端 `system/user` 等）
+
 ### 新增
 - **实名认证审核**：`PUT /member/kyc/verify` 通过/拒绝待审记录并同步 `fb_users`；前端审核弹窗（证件照+拒绝原因），全量页保留详情、分析页快捷列表仅「审核」（`kyc.api`、`fb_member.go`、`kyc-audit-modal.vue`、`shortcut-kyc-table.vue`）
 - **钱包申请审核**：`PUT /fund/walletApply/verify` 通过时按账户类型开通默认币种钱包；前端审核弹窗（通过/拒绝+审核意见），全量页保留详情/流水/登录、分析页快捷列表仅「审核」（`wallet_apply.api`、`fb_wallet_apply.go`、`wallet-apply-audit-modal.vue`、`shortcut-wallet-table.vue`）

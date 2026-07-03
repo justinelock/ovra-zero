@@ -16,7 +16,7 @@ type SysUser struct {
 	UserID      string                `gorm:"column:user_id;primaryKey;comment:用户ID" json:"user_id"`                         // 用户ID
 	TenantID    string                `gorm:"column:tenant_id;default:000000;comment:租户编号" json:"tenant_id"`                 // 租户编号
 	DeptID      string                `gorm:"column:dept_id;comment:部门ID" json:"dept_id"`                                    // 部门ID
-	UserName    string                `gorm:"column:user_name;not null;comment:用户账号" json:"user_name"`                       // 用户账号
+	UserName    string                `gorm:"column:username;not null;comment:用户账号" json:"username"`                         // 用户账号
 	NickName    string                `gorm:"column:nick_name;not null;comment:用户昵称" json:"nick_name"`                       // 用户昵称
 	UserType    string                `gorm:"column:user_type;default:sys_user;comment:用户类型（sys_user系统用户）" json:"user_type"` // 用户类型（sys_user系统用户）
 	Email       string                `gorm:"column:email;comment:用户邮箱" json:"email"`                                        // 用户邮箱

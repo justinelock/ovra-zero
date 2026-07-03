@@ -30,7 +30,7 @@ func newSysUser(db *gorm.DB, opts ...gen.DOOption) sysUser {
 	_sysUser.UserID = field.NewString(tableName, "user_id")
 	_sysUser.TenantID = field.NewString(tableName, "tenant_id")
 	_sysUser.DeptID = field.NewString(tableName, "dept_id")
-	_sysUser.UserName = field.NewString(tableName, "user_name")
+	_sysUser.UserName = field.NewString(tableName, "username")
 	_sysUser.NickName = field.NewString(tableName, "nick_name")
 	_sysUser.UserType = field.NewString(tableName, "user_type")
 	_sysUser.Email = field.NewString(tableName, "email")
@@ -99,7 +99,7 @@ func (s *sysUser) updateTableName(table string) *sysUser {
 	s.UserID = field.NewString(table, "user_id")
 	s.TenantID = field.NewString(table, "tenant_id")
 	s.DeptID = field.NewString(table, "dept_id")
-	s.UserName = field.NewString(table, "user_name")
+	s.UserName = field.NewString(table, "username")
 	s.NickName = field.NewString(table, "nick_name")
 	s.UserType = field.NewString(table, "user_type")
 	s.Email = field.NewString(table, "email")
@@ -145,7 +145,7 @@ func (s *sysUser) fillFieldMap() {
 	s.fieldMap["user_id"] = s.UserID
 	s.fieldMap["tenant_id"] = s.TenantID
 	s.fieldMap["dept_id"] = s.DeptID
-	s.fieldMap["user_name"] = s.UserName
+	s.fieldMap["username"] = s.UserName
 	s.fieldMap["nick_name"] = s.NickName
 	s.fieldMap["user_type"] = s.UserType
 	s.fieldMap["email"] = s.Email

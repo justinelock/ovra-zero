@@ -296,10 +296,10 @@ ingress:
 
 | Path | Service |
 | --- | --- |
-| `/auth` | `auth:8091` |
-| `/system` | `system:8092` |
-| `/monitor` | `system:8092` |
-| `/resource` | `system:8092` |
+| `/auth` | `auth:8085` |
+| `/system` | `system:8086` |
+| `/monitor` | `system:8086` |
+| `/resource` | `system:8086` |
 | `/demo` | `demo:8099` |
 
 ## 三、安装前准备

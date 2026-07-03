@@ -10,7 +10,7 @@ import "../base.api"
 type (
     SseUserInfo {
         UserId   string `json:"userId"`
-        UserName string `json:"userName"`
+        UserName string `json:"username"`
         NickName string `json:"nickName"`
         DeptName string `json:"deptName"`
     }

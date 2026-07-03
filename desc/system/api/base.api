@@ -26,7 +26,7 @@ type (
         UserID      string `json:"userId,optional"`
         TenantID    string `json:"tenantId,optional"`
         DeptID      string `json:"deptId,optional"`
-        UserName    string `json:"userName"`
+        UserName    string `json:"username"`
         NickName    string `json:"nickName"`
         UserType    string `json:"userType,optional"`
         Email       string `json:"email,optional"`
