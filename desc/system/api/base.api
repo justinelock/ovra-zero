@@ -159,7 +159,7 @@ type (
     TenantBase {
         ID            string `json:"id,optional"`
         TenantID      string `json:"tenantId,optional"`
-        ContactUserName string `json:"contactUserName,optional"`
+        ContactUsername string `json:"contactUsername,optional"`
         ContactPhone  string `json:"contactPhone,optional"`
         CompanyName   string `json:"companyName,optional"`
         LicenseNumber string `json:"licenseNumber,optional"`
@@ -199,7 +199,7 @@ type (
         AuthID          string `json:"authId"`
         Source          string `json:"source"`
         OpenID          string `json:"openId,optional"`
-        UserName        string `json:"userName"`
+        UserName        string `json:"username"`
         NickName        string `json:"nickName,optional"`
         Email           string `json:"email,optional"`
         Avatar          string `json:"avatar,optional"`
@@ -229,7 +229,7 @@ type (
     LogininforBase {
         InfoId string `json:"infoId,optional"`               // 访问ID
         TenantId string `json:"tenantId,optional"`           // 租户编号
-        UserName string `json:"userName,optional"`           // 用户账号
+        UserName string `json:"username,optional"`           // 用户账号
         ClientKey string `json:"clientKey,optional"`         // 客户端
         DeviceType string `json:"deviceType,optional"`       // 设备类型
         Ipaddr string `json:"ipaddr,optional"`               // 登录IP地址

@@ -44,8 +44,8 @@ func (l *PageSetLogic) PageSet(req *types.PageSetTenantReq) (resp *ListResp, err
 	if req.CompanyName != "" {
 		do = do.Where(q.SysTenant.CompanyName.Eq(req.CompanyName))
 	}
-	if req.ContactUserName != "" {
-		do.Where(q.SysTenant.ContactUserName.Eq(fmt.Sprintf("%%%s%%", req.ContactUserName)))
+	if req.ContactUsername != "" {
+		do.Where(q.SysTenant.ContactUsername.Eq(fmt.Sprintf("%%%s%%", req.ContactUsername)))
 	}
 	result, count, err := do.Order(q.SysTenant.CreateTime.Desc()).FindByPage(int(offset), int(req.PageSize))
 	if err != nil {

@@ -20,11 +20,11 @@ type (
         LoginTime string `json:"loginTime,optional"`         // 访问时间
         Os string `json:"os,optional"`                       // 操作系统
         Token string `json:"tokenId,optional"`               // Token
-        UserName string `json:"userName,optional"`           // 用户账号
+        UserName string `json:"username,optional"`           // 用户账号
     }
     OnlineQuery {
-        Ipaddr string `json:"ipaddr,optional"`
-        UserName string `json:"userName,optional"`
+        Ipaddr string `form:"ipaddr,optional"`
+        UserName string `form:"username,optional"`
     }
     PageSetOnlineResp {
         Rows []*OnlineInfo `json:"rows"`

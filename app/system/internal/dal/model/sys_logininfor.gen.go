@@ -14,7 +14,7 @@ const TableNameSysLogininfor = "sys_logininfor"
 type SysLogininfor struct {
 	InfoID        string    `gorm:"column:info_id;primaryKey;comment:访问ID" json:"info_id"`         // 访问ID
 	TenantID      string    `gorm:"column:tenant_id;default:000000;comment:租户编号" json:"tenant_id"` // 租户编号
-	UserName      string    `gorm:"column:user_name;comment:用户账号" json:"user_name"`                // 用户账号
+	UserName      string    `gorm:"column:username;comment:用户账号" json:"username"`                    // 用户账号
 	ClientKey     string    `gorm:"column:client_key;comment:客户端" json:"client_key"`               // 客户端
 	DeviceType    string    `gorm:"column:device_type;comment:设备类型" json:"device_type"`            // 设备类型
 	Ipaddr        string    `gorm:"column:ipaddr;comment:登录IP地址" json:"ipaddr"`                    // 登录IP地址

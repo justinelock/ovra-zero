@@ -19,7 +19,7 @@ type SysSocial struct {
 	AuthID           string                `gorm:"column:auth_id;not null;comment:平台+平台唯一id" json:"auth_id"`                              // 平台+平台唯一id
 	Source           string                `gorm:"column:source;not null;comment:用户来源" json:"source"`                                     // 用户来源
 	OpenID           string                `gorm:"column:open_id;comment:平台编号唯一id" json:"open_id"`                                        // 平台编号唯一id
-	UserName         string                `gorm:"column:user_name;not null;comment:登录账号" json:"user_name"`                               // 登录账号
+	UserName         string                `gorm:"column:username;not null;comment:登录账号" json:"username"`                                 // 登录账号
 	NickName         string                `gorm:"column:nick_name;comment:用户昵称" json:"nick_name"`                                        // 用户昵称
 	Email            string                `gorm:"column:email;comment:用户邮箱" json:"email"`                                                // 用户邮箱
 	Avatar           string                `gorm:"column:avatar;comment:头像地址" json:"avatar"`                                              // 头像地址

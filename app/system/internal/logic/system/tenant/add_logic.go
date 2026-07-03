@@ -52,7 +52,7 @@ func (l *AddLogic) Add(req *types.ModifyTenantReq) error {
 	tenant := &model.SysTenant{
 		ID:              utils.GetID(),
 		TenantID:        tenantID,
-		ContactUserName: req.ContactUserName,
+		ContactUsername: req.ContactUsername,
 		ContactPhone:    req.ContactPhone,
 		CompanyName:     req.CompanyName,
 		LicenseNumber:   req.LicenseNumber,

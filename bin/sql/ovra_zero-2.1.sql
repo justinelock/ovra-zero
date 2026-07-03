@@ -1923,7 +1923,7 @@ DROP TABLE IF EXISTS `sys_logininfor`;
 CREATE TABLE `sys_logininfor` (
   `info_id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '访问ID',
   `tenant_id` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '000000' COMMENT '租户编号',
-  `user_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '用户账号',
+  `username` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '用户账号',
   `client_key` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '客户端',
   `device_type` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '设备类型',
   `ipaddr` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '登录IP地址',
@@ -1942,18 +1942,18 @@ CREATE TABLE `sys_logininfor` (
 -- Records of sys_logininfor
 -- ----------------------------
 BEGIN;
-INSERT INTO `sys_logininfor` (`info_id`, `tenant_id`, `user_name`, `client_key`, `device_type`, `ipaddr`, `login_location`, `browser`, `os`, `status`, `msg`, `login_time`) VALUES ('328083216692940800', '000000', 'admin', 'pc', 'PC', '内网IP', 'Unknown', 'Chrome', 'OSX', '0', '登录成功', '2026-06-24 16:05:34');
-INSERT INTO `sys_logininfor` (`info_id`, `tenant_id`, `user_name`, `client_key`, `device_type`, `ipaddr`, `login_location`, `browser`, `os`, `status`, `msg`, `login_time`) VALUES ('328090841681760256', '000000', 'admin', 'pc', 'PC', '内网IP', 'Unknown', 'Chrome', 'OSX', '0', '登录成功', '2026-06-24 16:35:52');
-INSERT INTO `sys_logininfor` (`info_id`, `tenant_id`, `user_name`, `client_key`, `device_type`, `ipaddr`, `login_location`, `browser`, `os`, `status`, `msg`, `login_time`) VALUES ('328123536411463680', '000000', 'admin', 'pc', 'PC', '内网IP', 'Unknown', 'Chrome', 'OSX', '0', '登录成功', '2026-06-24 18:45:47');
-INSERT INTO `sys_logininfor` (`info_id`, `tenant_id`, `user_name`, `client_key`, `device_type`, `ipaddr`, `login_location`, `browser`, `os`, `status`, `msg`, `login_time`) VALUES ('328126250180677632', '000000', 'admin', 'pc', 'PC', '内网IP', 'Unknown', 'Chrome', 'OSX', '1', 'rpc error: code = Unknown desc = 用户不存在', '2026-06-24 18:56:34');
-INSERT INTO `sys_logininfor` (`info_id`, `tenant_id`, `user_name`, `client_key`, `device_type`, `ipaddr`, `login_location`, `browser`, `os`, `status`, `msg`, `login_time`) VALUES ('328126263879274496', '000000', 'system', 'pc', 'PC', '内网IP', 'Unknown', 'Chrome', 'OSX', '0', '登录成功', '2026-06-24 18:56:38');
-INSERT INTO `sys_logininfor` (`info_id`, `tenant_id`, `user_name`, `client_key`, `device_type`, `ipaddr`, `login_location`, `browser`, `os`, `status`, `msg`, `login_time`) VALUES ('328127402620227584', '000000', 'system', 'pc', 'PC', '内网IP', 'Unknown', 'Chrome', 'OSX', '1', 'rpc error: code = Unknown desc = 密码验证失败', '2026-06-24 19:01:09');
-INSERT INTO `sys_logininfor` (`info_id`, `tenant_id`, `user_name`, `client_key`, `device_type`, `ipaddr`, `login_location`, `browser`, `os`, `status`, `msg`, `login_time`) VALUES ('328127448359112704', '000000', 'system', 'pc', 'PC', '内网IP', 'Unknown', 'Chrome', 'OSX', '0', '登录成功', '2026-06-24 19:01:20');
-INSERT INTO `sys_logininfor` (`info_id`, `tenant_id`, `user_name`, `client_key`, `device_type`, `ipaddr`, `login_location`, `browser`, `os`, `status`, `msg`, `login_time`) VALUES ('328178298070765568', '000000', 'system', 'pc', 'PC', '内网IP', 'Unknown', 'Chrome', 'OSX', '1', 'rpc error: code = Unknown desc = 密码验证失败', '2026-06-24 22:23:24');
-INSERT INTO `sys_logininfor` (`info_id`, `tenant_id`, `user_name`, `client_key`, `device_type`, `ipaddr`, `login_location`, `browser`, `os`, `status`, `msg`, `login_time`) VALUES ('328178375334039552', '000000', 'system', 'pc', 'PC', '内网IP', 'Unknown', 'Chrome', 'OSX', '0', '登录成功', '2026-06-24 22:23:42');
-INSERT INTO `sys_logininfor` (`info_id`, `tenant_id`, `user_name`, `client_key`, `device_type`, `ipaddr`, `login_location`, `browser`, `os`, `status`, `msg`, `login_time`) VALUES ('328187311760084992', '000000', 'system', 'pc', 'PC', '内网IP', 'Unknown', 'Chrome', 'OSX', '0', '登录成功', '2026-06-24 22:59:13');
-INSERT INTO `sys_logininfor` (`info_id`, `tenant_id`, `user_name`, `client_key`, `device_type`, `ipaddr`, `login_location`, `browser`, `os`, `status`, `msg`, `login_time`) VALUES ('328194614127235072', '000000', 'system', 'pc', 'PC', '内网IP', 'Unknown', 'Chrome', 'OSX', '0', '登录成功', '2026-06-24 23:28:14');
-INSERT INTO `sys_logininfor` (`info_id`, `tenant_id`, `user_name`, `client_key`, `device_type`, `ipaddr`, `login_location`, `browser`, `os`, `status`, `msg`, `login_time`) VALUES ('328233008526004224', '000000', 'system', 'pc', 'PC', '内网IP', 'Unknown', 'Chrome', 'OSX', '0', '登录成功', '2026-06-25 02:00:48');
+INSERT INTO `sys_logininfor` (`info_id`, `tenant_id`, `username`, `client_key`, `device_type`, `ipaddr`, `login_location`, `browser`, `os`, `status`, `msg`, `login_time`) VALUES ('328083216692940800', '000000', 'admin', 'pc', 'PC', '内网IP', 'Unknown', 'Chrome', 'OSX', '0', '登录成功', '2026-06-24 16:05:34');
+INSERT INTO `sys_logininfor` (`info_id`, `tenant_id`, `username`, `client_key`, `device_type`, `ipaddr`, `login_location`, `browser`, `os`, `status`, `msg`, `login_time`) VALUES ('328090841681760256', '000000', 'admin', 'pc', 'PC', '内网IP', 'Unknown', 'Chrome', 'OSX', '0', '登录成功', '2026-06-24 16:35:52');
+INSERT INTO `sys_logininfor` (`info_id`, `tenant_id`, `username`, `client_key`, `device_type`, `ipaddr`, `login_location`, `browser`, `os`, `status`, `msg`, `login_time`) VALUES ('328123536411463680', '000000', 'admin', 'pc', 'PC', '内网IP', 'Unknown', 'Chrome', 'OSX', '0', '登录成功', '2026-06-24 18:45:47');
+INSERT INTO `sys_logininfor` (`info_id`, `tenant_id`, `username`, `client_key`, `device_type`, `ipaddr`, `login_location`, `browser`, `os`, `status`, `msg`, `login_time`) VALUES ('328126250180677632', '000000', 'admin', 'pc', 'PC', '内网IP', 'Unknown', 'Chrome', 'OSX', '1', 'rpc error: code = Unknown desc = 用户不存在', '2026-06-24 18:56:34');
+INSERT INTO `sys_logininfor` (`info_id`, `tenant_id`, `username`, `client_key`, `device_type`, `ipaddr`, `login_location`, `browser`, `os`, `status`, `msg`, `login_time`) VALUES ('328126263879274496', '000000', 'system', 'pc', 'PC', '内网IP', 'Unknown', 'Chrome', 'OSX', '0', '登录成功', '2026-06-24 18:56:38');
+INSERT INTO `sys_logininfor` (`info_id`, `tenant_id`, `username`, `client_key`, `device_type`, `ipaddr`, `login_location`, `browser`, `os`, `status`, `msg`, `login_time`) VALUES ('328127402620227584', '000000', 'system', 'pc', 'PC', '内网IP', 'Unknown', 'Chrome', 'OSX', '1', 'rpc error: code = Unknown desc = 密码验证失败', '2026-06-24 19:01:09');
+INSERT INTO `sys_logininfor` (`info_id`, `tenant_id`, `username`, `client_key`, `device_type`, `ipaddr`, `login_location`, `browser`, `os`, `status`, `msg`, `login_time`) VALUES ('328127448359112704', '000000', 'system', 'pc', 'PC', '内网IP', 'Unknown', 'Chrome', 'OSX', '0', '登录成功', '2026-06-24 19:01:20');
+INSERT INTO `sys_logininfor` (`info_id`, `tenant_id`, `username`, `client_key`, `device_type`, `ipaddr`, `login_location`, `browser`, `os`, `status`, `msg`, `login_time`) VALUES ('328178298070765568', '000000', 'system', 'pc', 'PC', '内网IP', 'Unknown', 'Chrome', 'OSX', '1', 'rpc error: code = Unknown desc = 密码验证失败', '2026-06-24 22:23:24');
+INSERT INTO `sys_logininfor` (`info_id`, `tenant_id`, `username`, `client_key`, `device_type`, `ipaddr`, `login_location`, `browser`, `os`, `status`, `msg`, `login_time`) VALUES ('328178375334039552', '000000', 'system', 'pc', 'PC', '内网IP', 'Unknown', 'Chrome', 'OSX', '0', '登录成功', '2026-06-24 22:23:42');
+INSERT INTO `sys_logininfor` (`info_id`, `tenant_id`, `username`, `client_key`, `device_type`, `ipaddr`, `login_location`, `browser`, `os`, `status`, `msg`, `login_time`) VALUES ('328187311760084992', '000000', 'system', 'pc', 'PC', '内网IP', 'Unknown', 'Chrome', 'OSX', '0', '登录成功', '2026-06-24 22:59:13');
+INSERT INTO `sys_logininfor` (`info_id`, `tenant_id`, `username`, `client_key`, `device_type`, `ipaddr`, `login_location`, `browser`, `os`, `status`, `msg`, `login_time`) VALUES ('328194614127235072', '000000', 'system', 'pc', 'PC', '内网IP', 'Unknown', 'Chrome', 'OSX', '0', '登录成功', '2026-06-24 23:28:14');
+INSERT INTO `sys_logininfor` (`info_id`, `tenant_id`, `username`, `client_key`, `device_type`, `ipaddr`, `login_location`, `browser`, `os`, `status`, `msg`, `login_time`) VALUES ('328233008526004224', '000000', 'system', 'pc', 'PC', '内网IP', 'Unknown', 'Chrome', 'OSX', '0', '登录成功', '2026-06-25 02:00:48');
 COMMIT;
 
 -- ----------------------------
@@ -2775,7 +2775,7 @@ CREATE TABLE `sys_social` (
   `auth_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '平台+平台唯一id',
   `source` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '用户来源',
   `open_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '平台编号唯一id',
-  `user_name` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '登录账号',
+  `username` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '登录账号',
   `nick_name` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '用户昵称',
   `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '用户邮箱',
   `avatar` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '头像地址',
@@ -2814,7 +2814,7 @@ DROP TABLE IF EXISTS `sys_tenant`;
 CREATE TABLE `sys_tenant` (
   `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT 'id',
   `tenant_id` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '租户编号',
-  `contact_user_name` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '联系人',
+  `contact_username` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '联系人',
   `contact_phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '联系电话',
   `company_name` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '企业名称',
   `license_number` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '统一社会信用代码',
@@ -2839,9 +2839,9 @@ CREATE TABLE `sys_tenant` (
 -- Records of sys_tenant
 -- ----------------------------
 BEGIN;
-INSERT INTO `sys_tenant` (`id`, `tenant_id`, `contact_user_name`, `contact_phone`, `company_name`, `license_number`, `address`, `intro`, `domain`, `remark`, `package_id`, `expire_time`, `account_count`, `status`, `del_flag`, `create_dept`, `create_by`, `create_time`, `update_by`, `update_time`) VALUES ('1', '000000', '管理组', '15888888888', '集团', NULL, NULL, '多租户通用后台管理管理系统', NULL, NULL, NULL, NULL, -1, '0', '0', 103, 1, '2025-07-18 15:18:26', NULL, NULL);
-INSERT INTO `sys_tenant` (`id`, `tenant_id`, `contact_user_name`, `contact_phone`, `company_name`, `license_number`, `address`, `intro`, `domain`, `remark`, `package_id`, `expire_time`, `account_count`, `status`, `del_flag`, `create_dept`, `create_by`, `create_time`, `update_by`, `update_time`) VALUES ('228333863653347328', '269795', 'fubon', '15313658277', 'Fubon', '', '', '', '', '', '228333672376307712', '2026-09-22 08:00:00', -1, '0', '0', 0, 1, '2025-09-22 09:57:15', 1, '2026-06-24 16:25:17');
-INSERT INTO `sys_tenant` (`id`, `tenant_id`, `contact_user_name`, `contact_phone`, `company_name`, `license_number`, `address`, `intro`, `domain`, `remark`, `package_id`, `expire_time`, `account_count`, `status`, `del_flag`, `create_dept`, `create_by`, `create_time`, `update_by`, `update_time`) VALUES ('230873346168852480', '873624', 'test', '18366667777', 'test', '', '', '', '', '', '228333672376307712', '2025-09-30 18:08:09', -1, '0', '0', 0, 1, '2025-09-29 10:08:15', 1, '2025-09-29 10:08:15');
+INSERT INTO `sys_tenant` (`id`, `tenant_id`, `contact_username`, `contact_phone`, `company_name`, `license_number`, `address`, `intro`, `domain`, `remark`, `package_id`, `expire_time`, `account_count`, `status`, `del_flag`, `create_dept`, `create_by`, `create_time`, `update_by`, `update_time`) VALUES ('1', '000000', '管理组', '15888888888', '集团', NULL, NULL, '多租户通用后台管理管理系统', NULL, NULL, NULL, NULL, -1, '0', '0', 103, 1, '2025-07-18 15:18:26', NULL, NULL);
+INSERT INTO `sys_tenant` (`id`, `tenant_id`, `contact_username`, `contact_phone`, `company_name`, `license_number`, `address`, `intro`, `domain`, `remark`, `package_id`, `expire_time`, `account_count`, `status`, `del_flag`, `create_dept`, `create_by`, `create_time`, `update_by`, `update_time`) VALUES ('228333863653347328', '269795', 'fubon', '15313658277', 'Fubon', '', '', '', '', '', '228333672376307712', '2026-09-22 08:00:00', -1, '0', '0', 0, 1, '2025-09-22 09:57:15', 1, '2026-06-24 16:25:17');
+INSERT INTO `sys_tenant` (`id`, `tenant_id`, `contact_username`, `contact_phone`, `company_name`, `license_number`, `address`, `intro`, `domain`, `remark`, `package_id`, `expire_time`, `account_count`, `status`, `del_flag`, `create_dept`, `create_by`, `create_time`, `update_by`, `update_time`) VALUES ('230873346168852480', '873624', 'test', '18366667777', 'test', '', '', '', '', '', '228333672376307712', '2025-09-30 18:08:09', -1, '0', '0', 0, 1, '2025-09-29 10:08:15', 1, '2025-09-29 10:08:15');
 COMMIT;
 
 -- ----------------------------

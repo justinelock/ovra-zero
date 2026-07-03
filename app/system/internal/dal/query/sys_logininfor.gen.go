@@ -29,7 +29,7 @@ func newSysLogininfor(db *gorm.DB, opts ...gen.DOOption) sysLogininfor {
 	_sysLogininfor.ALL = field.NewAsterisk(tableName)
 	_sysLogininfor.InfoID = field.NewString(tableName, "info_id")
 	_sysLogininfor.TenantID = field.NewString(tableName, "tenant_id")
-	_sysLogininfor.UserName = field.NewString(tableName, "user_name")
+	_sysLogininfor.UserName = field.NewString(tableName, "username")
 	_sysLogininfor.ClientKey = field.NewString(tableName, "client_key")
 	_sysLogininfor.DeviceType = field.NewString(tableName, "device_type")
 	_sysLogininfor.Ipaddr = field.NewString(tableName, "ipaddr")
@@ -80,7 +80,7 @@ func (s *sysLogininfor) updateTableName(table string) *sysLogininfor {
 	s.ALL = field.NewAsterisk(table)
 	s.InfoID = field.NewString(table, "info_id")
 	s.TenantID = field.NewString(table, "tenant_id")
-	s.UserName = field.NewString(table, "user_name")
+	s.UserName = field.NewString(table, "username")
 	s.ClientKey = field.NewString(table, "client_key")
 	s.DeviceType = field.NewString(table, "device_type")
 	s.Ipaddr = field.NewString(table, "ipaddr")
@@ -121,7 +121,7 @@ func (s *sysLogininfor) fillFieldMap() {
 	s.fieldMap = make(map[string]field.Expr, 12)
 	s.fieldMap["info_id"] = s.InfoID
 	s.fieldMap["tenant_id"] = s.TenantID
-	s.fieldMap["user_name"] = s.UserName
+	s.fieldMap["username"] = s.UserName
 	s.fieldMap["client_key"] = s.ClientKey
 	s.fieldMap["device_type"] = s.DeviceType
 	s.fieldMap["ipaddr"] = s.Ipaddr

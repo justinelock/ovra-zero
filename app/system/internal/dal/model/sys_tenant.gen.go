@@ -15,7 +15,7 @@ const TableNameSysTenant = "sys_tenant"
 type SysTenant struct {
 	ID              string                `gorm:"column:id;primaryKey;comment:id" json:"id"`                                // id
 	TenantID        string                `gorm:"column:tenant_id;not null;comment:租户编号" json:"tenant_id"`                  // 租户编号
-	ContactUserName string                `gorm:"column:contact_user_name;comment:联系人" json:"contact_user_name"`            // 联系人
+	ContactUsername string                `gorm:"column:contact_username;comment:联系人" json:"contact_username"`              // 联系人
 	ContactPhone    string                `gorm:"column:contact_phone;comment:联系电话" json:"contact_phone"`                   // 联系电话
 	CompanyName     string                `gorm:"column:company_name;comment:企业名称" json:"company_name"`                     // 企业名称
 	LicenseNumber   string                `gorm:"column:license_number;comment:统一社会信用代码" json:"license_number"`             // 统一社会信用代码

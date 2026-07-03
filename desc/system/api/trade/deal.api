@@ -20,7 +20,7 @@ type (
     TradeDealItem {
         Id         string `json:"id"`
         DealNo     string `json:"dealNo"`
-        UserName   string `json:"userName"`
+        UserName   string `json:"username"`
         MarketCode string `json:"marketCode"`
         StockCode  string `json:"stockCode"`
         DealType   string `json:"dealType"`

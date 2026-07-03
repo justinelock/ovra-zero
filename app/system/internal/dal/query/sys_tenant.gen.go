@@ -29,7 +29,7 @@ func newSysTenant(db *gorm.DB, opts ...gen.DOOption) sysTenant {
 	_sysTenant.ALL = field.NewAsterisk(tableName)
 	_sysTenant.ID = field.NewString(tableName, "id")
 	_sysTenant.TenantID = field.NewString(tableName, "tenant_id")
-	_sysTenant.ContactUserName = field.NewString(tableName, "contact_user_name")
+	_sysTenant.ContactUsername = field.NewString(tableName, "contact_username")
 	_sysTenant.ContactPhone = field.NewString(tableName, "contact_phone")
 	_sysTenant.CompanyName = field.NewString(tableName, "company_name")
 	_sysTenant.LicenseNumber = field.NewString(tableName, "license_number")
@@ -60,7 +60,7 @@ type sysTenant struct {
 	ALL             field.Asterisk
 	ID              field.String // id
 	TenantID        field.String // 租户编号
-	ContactUserName field.String // 联系人
+	ContactUsername field.String // 联系人
 	ContactPhone    field.String // 联系电话
 	CompanyName     field.String // 企业名称
 	LicenseNumber   field.String // 统一社会信用代码
@@ -96,7 +96,7 @@ func (s *sysTenant) updateTableName(table string) *sysTenant {
 	s.ALL = field.NewAsterisk(table)
 	s.ID = field.NewString(table, "id")
 	s.TenantID = field.NewString(table, "tenant_id")
-	s.ContactUserName = field.NewString(table, "contact_user_name")
+	s.ContactUsername = field.NewString(table, "contact_username")
 	s.ContactPhone = field.NewString(table, "contact_phone")
 	s.CompanyName = field.NewString(table, "company_name")
 	s.LicenseNumber = field.NewString(table, "license_number")
@@ -143,7 +143,7 @@ func (s *sysTenant) fillFieldMap() {
 	s.fieldMap = make(map[string]field.Expr, 20)
 	s.fieldMap["id"] = s.ID
 	s.fieldMap["tenant_id"] = s.TenantID
-	s.fieldMap["contact_user_name"] = s.ContactUserName
+	s.fieldMap["contact_username"] = s.ContactUsername
 	s.fieldMap["contact_phone"] = s.ContactPhone
 	s.fieldMap["company_name"] = s.CompanyName
 	s.fieldMap["license_number"] = s.LicenseNumber

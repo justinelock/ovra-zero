@@ -33,7 +33,7 @@ func newSysSocial(db *gorm.DB, opts ...gen.DOOption) sysSocial {
 	_sysSocial.AuthID = field.NewString(tableName, "auth_id")
 	_sysSocial.Source = field.NewString(tableName, "source")
 	_sysSocial.OpenID = field.NewString(tableName, "open_id")
-	_sysSocial.UserName = field.NewString(tableName, "user_name")
+	_sysSocial.UserName = field.NewString(tableName, "username")
 	_sysSocial.NickName = field.NewString(tableName, "nick_name")
 	_sysSocial.Email = field.NewString(tableName, "email")
 	_sysSocial.Avatar = field.NewString(tableName, "avatar")
@@ -118,7 +118,7 @@ func (s *sysSocial) updateTableName(table string) *sysSocial {
 	s.AuthID = field.NewString(table, "auth_id")
 	s.Source = field.NewString(table, "source")
 	s.OpenID = field.NewString(table, "open_id")
-	s.UserName = field.NewString(table, "user_name")
+	s.UserName = field.NewString(table, "username")
 	s.NickName = field.NewString(table, "nick_name")
 	s.Email = field.NewString(table, "email")
 	s.Avatar = field.NewString(table, "avatar")
@@ -174,7 +174,7 @@ func (s *sysSocial) fillFieldMap() {
 	s.fieldMap["auth_id"] = s.AuthID
 	s.fieldMap["source"] = s.Source
 	s.fieldMap["open_id"] = s.OpenID
-	s.fieldMap["user_name"] = s.UserName
+	s.fieldMap["username"] = s.UserName
 	s.fieldMap["nick_name"] = s.NickName
 	s.fieldMap["email"] = s.Email
 	s.fieldMap["avatar"] = s.Avatar

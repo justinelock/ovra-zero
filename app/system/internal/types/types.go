@@ -257,7 +257,7 @@ type NoticeBase struct {
 type TenantBase struct {
 	ID              string `json:"id,optional"`
 	TenantID        string `json:"tenantId,optional"`
-	ContactUserName string `json:"contactUserName,optional"`
+	ContactUsername string `json:"contactUsername,optional"`
 	ContactPhone    string `json:"contactPhone,optional"`
 	CompanyName     string `json:"companyName,optional"`
 	LicenseNumber   string `json:"licenseNumber,optional"`
@@ -300,7 +300,7 @@ type SocialBase struct {
 	AuthID           string `json:"authId"`
 	Source           string `json:"source"`
 	OpenID           string `json:"openId,optional"`
-	UserName         string `json:"userName"`
+	UserName         string `json:"username"`
 	NickName         string `json:"nickName,optional"`
 	Email            string `json:"email,optional"`
 	Avatar           string `json:"avatar,optional"`
@@ -331,7 +331,7 @@ type DeptTree struct {
 type LogininforBase struct {
 	InfoId        string `json:"infoId,optional"`        // 访问ID
 	TenantId      string `json:"tenantId,optional"`      // 租户编号
-	UserName      string `json:"userName,optional"`      // 用户账号
+	UserName      string `json:"username,optional"`      // 用户账号
 	ClientKey     string `json:"clientKey,optional"`     // 客户端
 	DeviceType    string `json:"deviceType,optional"`    // 设备类型
 	Ipaddr        string `json:"ipaddr,optional"`        // 登录IP地址
@@ -676,7 +676,7 @@ type ModifyTenantReq struct {
 type TenantQuery struct {
 	Id              string `form:"id,optional"`              // id
 	TenantId        string `form:"tenantId,optional"`        // 租户编号
-	ContactUserName string `form:"contactUserName,optional"` // 联系人
+	ContactUsername string `form:"contactUsername,optional"` // 联系人
 	ContactPhone    string `form:"contactPhone,optional"`    // 联系电话
 	CompanyName     string `form:"companyName,optional"`     // 企业名称
 	LicenseNumber   string `form:"licenseNumber,optional"`   // 统一社会信用代码
@@ -930,12 +930,12 @@ type OnlineInfo struct {
 	LoginTime     string `json:"loginTime,optional"`     // 访问时间
 	Os            string `json:"os,optional"`            // 操作系统
 	Token         string `json:"tokenId,optional"`       // Token
-	UserName      string `json:"userName,optional"`      // 用户账号
+	UserName      string `json:"username,optional"`      // 用户账号
 }
 
 type OnlineQuery struct {
-	Ipaddr   string `json:"ipaddr,optional"`
-	UserName string `json:"userName,optional"`
+	Ipaddr   string `form:"ipaddr,optional"`
+	UserName string `form:"username,optional"`
 }
 
 type PageSetOnlineResp struct {
@@ -977,7 +977,7 @@ type PageSetOperLogResp struct {
 type LogininforQuery struct {
 	InfoId        string `form:"infoId,optional"`        // 访问ID
 	TenantId      string `form:"tenantId,optional"`      // 租户编号
-	UserName      string `form:"userName,optional"`      // 用户账号
+	UserName      string `form:"username,optional"`      // 用户账号
 	ClientKey     string `form:"clientKey,optional"`     // 客户端
 	DeviceType    string `form:"deviceType,optional"`    // 设备类型
 	Ipaddr        string `form:"ipaddr,optional"`        // 登录IP地址
@@ -1841,7 +1841,7 @@ type PageSetTradeEntrustReq struct {
 type TradeEntrustItem struct {
 	Id              string `json:"id"`
 	OrderNo         string `json:"orderNo"`
-	UserName        string `json:"userName"`
+	UserName        string `json:"username"`
 	MarketCode      string `json:"marketCode"`
 	StockCode       string `json:"stockCode"`
 	OrderType       string `json:"orderType"`
@@ -1878,7 +1878,7 @@ type PageSetTradeDealReq struct {
 type TradeDealItem struct {
 	Id         string `json:"id"`
 	DealNo     string `json:"dealNo"`
-	UserName   string `json:"userName"`
+	UserName   string `json:"username"`
 	MarketCode string `json:"marketCode"`
 	StockCode  string `json:"stockCode"`
 	DealType   string `json:"dealType"`

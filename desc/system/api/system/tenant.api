@@ -20,7 +20,7 @@ type (
     TenantQuery {
         Id string `form:"id,optional"`                           // id
         TenantId string `form:"tenantId,optional"`               // 租户编号
-        ContactUserName string `form:"contactUserName,optional"` // 联系人
+        ContactUsername string `form:"contactUsername,optional"` // 联系人
         ContactPhone string `form:"contactPhone,optional"`       // 联系电话
         CompanyName string `form:"companyName,optional"`         // 企业名称
         LicenseNumber string `form:"licenseNumber,optional"`     // 统一社会信用代码

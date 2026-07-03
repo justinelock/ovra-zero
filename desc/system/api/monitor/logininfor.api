@@ -13,7 +13,7 @@ type (
     LogininforQuery {
         InfoId string `form:"infoId,optional"`               // 访问ID
         TenantId string `form:"tenantId,optional"`           // 租户编号
-        UserName string `form:"userName,optional"`           // 用户账号
+        UserName string `form:"username,optional"`           // 用户账号
         ClientKey string `form:"clientKey,optional"`         // 客户端
         DeviceType string `form:"deviceType,optional"`       // 设备类型
         Ipaddr string `form:"ipaddr,optional"`               // 登录IP地址

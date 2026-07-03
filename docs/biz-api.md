@@ -1991,7 +1991,7 @@ GET /member/user/list?pageNum=1&pageSize=10
 
 **查询参数**：`keyword`、`orderStatus`、`marketCode`
 
-**`rows[]` 字段**：`id`、`orderNo`、`userName`、`marketCode`、`stockCode`、`orderType`、`entrustPrice`、`entrustQty`、`dealQty`、`orderStatus`、`stopLossPrice`、`priceType`、`priceFloatRange`、`validity`、`fee`、`direction`、`limitPrice`、`entrustTime`
+**`rows[]` 字段**：`id`、`orderNo`、`username`、`marketCode`、`stockCode`、`orderType`、`entrustPrice`、`entrustQty`、`dealQty`、`orderStatus`、`stopLossPrice`、`priceType`、`priceFloatRange`、`validity`、`fee`、`direction`、`limitPrice`、`entrustTime`
 
 **响应示例**（待补充）：
 
@@ -2018,7 +2018,7 @@ GET /member/user/list?pageNum=1&pageSize=10
 
 **查询参数**：`keyword`、`marketCode`、`dealType`
 
-**`rows[]` 字段**：`id`、`dealNo`、`userName`、`marketCode`、`stockCode`、`dealType`、`dealPrice`、`dealQty`、`dealAmount`、`fee`、`dealTime`
+**`rows[]` 字段**：`id`、`dealNo`、`username`、`marketCode`、`stockCode`、`dealType`、`dealPrice`、`dealQty`、`dealAmount`、`fee`、`dealTime`
 
 **响应示例**（待补充）：
 
